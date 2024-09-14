@@ -83,6 +83,11 @@ async function forwardRequestPOST(apiURL, body) {
   return { statusCode: res.status, data };
 }
 
+app.head('/', (req, res, next) => {
+    req.method = 'GET';
+    next();
+});
+
 // Handle incoming requests
 app.all('/', async (req, res) => {
   const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown IP';
