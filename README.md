@@ -3,6 +3,8 @@
 ## Overview
 The Steem Load Balancer is a Node.js-based application designed to distribute API requests across a list of predefined Steem API servers. It enhances application availability and reliability by routing requests to the most responsive node. This project is used by the STEEM Load Balancer RPC Node [https://steem.justyy.com](https://steem.justyy.com). A similar service, [https://steem.senior.workers.dev/](https://steem.senior.workers.dev/), is based on CloudFlare but comes with a daily quota of 100,000 requests.
 
+![image](https://github.com/user-attachments/assets/02f6265d-1ad0-40b4-a5e7-a400dab689eb)
+
 ## Motivation
 The primary motivation behind this project is to provide a scalable and reliable Load Balancer Node that can be integrated into applications to improve their availability and performance. Unlike CloudFlare-based solutions, this setup does not have a daily request quota, making it suitable for high-demand applications.
 
@@ -82,6 +84,7 @@ docker build -t $DOCKER_IMAGE .
 ```bash
 docker run --name $DOCKER_IMAGE -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
 ```
+![image](https://github.com/user-attachments/assets/874e8051-2c0f-47f2-8480-e0acc7981200)
 
 ## ./build-and-run.sh
 Use the following utility to build the docker and then start the server.
