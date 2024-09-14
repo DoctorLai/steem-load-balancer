@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 // const fetch = require('node-fetch');
 const fetch = (...args) => import("node-fetch").then(module => module.default(...args));
@@ -22,6 +23,9 @@ const app = express();
 const PORT = 8080;
 
 // app.set('trust proxy', true);
+
+// Enable CORS for all origins
+app.use(cors());
 
 // Configure rate limiting
 const limiter = rateLimit({
@@ -111,7 +115,9 @@ app.all('/', async (req, res) => {
   let data = {};
   try {
     data = JSON.parse(result.data);
-    data["status_code"] = 200;
+    if (method === 'GET') {
+        data["status_code"] = 200;
+    }
   } catch (ex) {
     data = { 
         "status_code": 500,
@@ -119,10 +125,12 @@ app.all('/', async (req, res) => {
     }
   }
 
-  data["__server__"] = chosenNode.server;
-  data["__version__"] = chosenNode.version;
-  data["__servers__"] = config.nodes;
-  data["__ip__"] = ip;
+  if (method === 'GET') {
+    data["__server__"] = chosenNode.server;
+    data["__version__"] = chosenNode.version;
+    data["__servers__"] = config.nodes;
+    data["__ip__"] = ip;
+  }
   res.status(result.statusCode).json(data);
 });
 
