@@ -1,0 +1,26 @@
+{
+  "name": "steem-load-balancer",
+  "version": "1.0.0",
+  "description": "Load Balancer RPC Node for Steem Blockchain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DoctorLai/steem-load-balancer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DoctorLai/steem-load-balancer/issues"
+  },
+  "homepage": "https://github.com/DoctorLai/steem-load-balancer#readme",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "node-fetch": "^3.3.2"
+  }
+}

@@ -1,0 +1,24 @@
+{
+    "nodes": [
+        "https://api.steemit.com",
+        "https://api.steememory.com",
+        "https://api.worldofxpilar.com",
+        "https://steemapi.boylikegirl.club",
+        "https://api.justyy.com",
+        "https://api.campingclub.me",
+        "https://api.dlike.io",
+        "https://api.pennsif.net",
+        "https://api.worldofxpilar.com",
+        "https://api.moecki.online"
+    ],
+    "rateLimit": {
+        "windowMs": 60000,
+        "maxRequests": 60
+    },
+    "version": "2024-09-14",
+    "max_age": 3,
+    "logging": true,
+    "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
+    "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
+  }
+  
