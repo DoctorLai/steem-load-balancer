@@ -13,4 +13,5 @@ docker rm --name $DOCKER_IMAGE
 docker build -t $DOCKER_IMAGE .
 
 # Run the steem load balancer node
-docker run -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
+docker run --rm -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
+
