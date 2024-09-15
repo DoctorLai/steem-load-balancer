@@ -13,7 +13,7 @@
     ],
     "rateLimit": {
         "windowMs": 60000,
-        "maxRequests": 60
+        "maxRequests": 300
     },
     "version": "2024-09-14",
     "max_age": 3,
