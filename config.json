@@ -15,10 +15,10 @@
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2024-09-14",
+    "version": "2024-09-16",
     "max_age": 3,
     "logging": true,
-    "max_payload_size": "10mb",
+    "max_payload_size": "5mb",
     "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
     "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
   }

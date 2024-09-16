@@ -1,12 +1,18 @@
 # Steem Load Balancer
 
 ## Overview
-The Steem Load Balancer is a Node.js-based application designed to distribute API requests across a list of predefined Steem API servers. It enhances application availability and reliability by routing requests to the most responsive node. This project is used by the STEEM Load Balancer RPC Node [https://steem.justyy.com](https://steem.justyy.com). A similar service, [https://steem.senior.workers.dev/](https://steem.senior.workers.dev/), is based on CloudFlare but comes with a daily quota of 100,000 requests.
+The Steem Load Balancer is a Node.js-based application designed to distribute API requests across a list of predefined Steem Blockchain RPC Nodes. It enhances application availability and reliability by routing requests to the most responsive node. 
+
+This project was developed by STEEM's Top Witness, [@justyy](https://steemyy.com), who also established the STEEM Load Balancer RPC Node, [steem.justyy.com](https://steem.justyy.com), using this project as its foundation.
+
+A similar service, [https://steem.senior.workers.dev/](https://steem.senior.workers.dev/), is based on CloudFlare but comes with a daily quota of 100,000 requests.
 
 ![image](https://github.com/user-attachments/assets/02f6265d-1ad0-40b4-a5e7-a400dab689eb)
 
 ## Motivation
 The primary motivation behind this project is to provide a scalable and reliable Load Balancer Node that can be integrated into applications to improve their availability and performance. Unlike CloudFlare-based solutions, this setup does not have a daily request quota, making it suitable for high-demand applications.
+
+Please note that this can be easily configured to work with other Blockchains such as Hive and Blurt.
 
 ## Features
 - Load Balancing: Distributes requests across multiple Steem API servers.
@@ -34,11 +40,12 @@ Configuration File: config.json
     ],
     "rateLimit": {
         "windowMs": 60000,
-        "maxRequests": 60
+        "maxRequests": 300
     },
-    "version": "2024-09-14",
+    "version": "2024-09-16",
     "max_age": 3,
     "logging": true,
+    "max_payload_size": "5mb",
     "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
     "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
 }
