@@ -76,18 +76,27 @@ async function getVersion(server) {
 
 // Forward GET request to the chosen node
 async function forwardRequestGET(apiURL) {
-  const res = await fetch(apiURL, { method: 'GET' });
+  log(`GET: Forwarding to ${apiURL}`);
+  const res = await fetch(apiURL, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    redirect: "follow"
+  });
   const data = await res.text();
+  log(`Status: ${res.status}`);
   return { statusCode: res.status, data };
 }
 
 // Forward POST request to the chosen node
 async function forwardRequestPOST(apiURL, body) {
+  log(`POST: Forwarding to ${apiURL}, body=${body}`);
   const res = await fetch(apiURL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body
+    redirect: "follow",
+    body: body
   });
+  log(`Status: ${res.status}`);
   const data = await res.text();
   return { statusCode: res.status, data };
 }
@@ -114,6 +123,7 @@ app.all('/', async (req, res) => {
     result = await forwardRequestGET(chosenNode.server);
   } else if (method === 'POST') {
     const body = JSON.stringify(req.body);
+    log(`Request Body is ${body}`);
     result = await forwardRequestPOST(chosenNode.server, body);
   } else {
     return res.status(405).json({ error: "Method Not Allowed" });
@@ -135,13 +145,14 @@ app.all('/', async (req, res) => {
   try {
     data = JSON.parse(result.data);
     if (method === 'GET') {
-        data["status_code"] = 200;
+      data["status_code"] = 200;
     }
   } catch (ex) {
     data = { 
-        "status_code": 500,
-        "error": ex
-    }
+      "status_code": 500,
+      "error": ex
+    };
+    res.setHeader('Error', JSON.stringify(ex));
   }
 
   if (method === 'GET') {
