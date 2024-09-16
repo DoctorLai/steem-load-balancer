@@ -28,6 +28,14 @@ const PORT = 8080;
 // Enable CORS for all origins
 app.use(cors());
 
+// Middleware to assume 'Content-Type: application/json' if not provided
+app.use((req, res, next) => {
+  if (!req.headers['content-type']) {
+    req.headers['content-type'] = 'application/json';
+  }
+  next();
+});
+
 // Configure body-parser to accept larger payloads
 log(`Max Payload Size = ${config.max_payload_size}`);
 app.use(bodyParser.json({ limit: config.max_payload_size })); // For JSON payloads
@@ -47,12 +55,17 @@ app.use(limiter);
 // Parse JSON request bodies
 app.use(express.json());
 
+log(`User-agent: ${config.user_agent}`);
+
 // Fetch version from the server
 async function getVersion(server) {
   try {
     const response = await fetch(server, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-cache',
+      mode: 'cors',
+      redirect: "follow",
+      headers: { 'Content-Type': 'application/json', 'User-Agent': config.user_agent },
       body: JSON.stringify({
         id: 0,
         jsonrpc: "2.0",
@@ -79,7 +92,9 @@ async function forwardRequestGET(apiURL) {
   log(`GET: Forwarding to ${apiURL}`);
   const res = await fetch(apiURL, {
     method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-cache',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': config.user_agent },
     redirect: "follow"
   });
   const data = await res.text();
@@ -92,7 +107,9 @@ async function forwardRequestPOST(apiURL, body) {
   log(`POST: Forwarding to ${apiURL}, body=${body}`);
   const res = await fetch(apiURL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    cache: 'no-cache',
+    mode: 'cors',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': config.user_agent },
     redirect: "follow",
     body: body
   });

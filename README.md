@@ -46,6 +46,7 @@ Configuration File: config.json
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
     "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
     "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
 }
