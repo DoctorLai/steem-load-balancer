@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 // const fetch = require('node-fetch');
@@ -26,6 +27,11 @@ const PORT = 8080;
 
 // Enable CORS for all origins
 app.use(cors());
+
+// Configure body-parser to accept larger payloads
+log(`Max Payload Size = ${config.max_payload_size}`);
+app.use(bodyParser.json({ limit: config.max_payload_size })); // For JSON payloads
+app.use(bodyParser.urlencoded({ limit: config.max_payload_size, extended: true })); // For URL-encoded payloads
 
 // Configure rate limiting
 const limiter = rateLimit({

@@ -18,6 +18,7 @@
     "version": "2024-09-14",
     "max_age": 3,
     "logging": true,
+    "max_payload_size": "10mb",
     "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
     "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
   }
