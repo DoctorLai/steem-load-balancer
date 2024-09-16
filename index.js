@@ -62,7 +62,10 @@ async function getVersion(server) {
     console.error(error);
   }
 
-  return { server: "https://api.steemit.com" };
+  return {
+    server: "https://api.steemit.com",
+    version: "",
+  };
 }
 
 // Forward GET request to the chosen node
@@ -109,14 +112,19 @@ app.all('/', async (req, res) => {
   } else {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
-
   res.setHeader("IP", ip);
   res.setHeader("Server", chosenNode.server);
-  res.setHeader("Version", JSON.stringify(chosenNode.version));
-  res.setHeader("ProxyVersion", config.version);
+  if (typeof chosenNode.version !== "undefined") {
+    res.setHeader("Version", JSON.stringify(chosenNode.version));
+  }
+  if (typeof config.version !== "undefined") {
+    res.setHeader("ProxyVersion", config.version);
+  }
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 'max-age=' + config.max_age);  
+  if (typeof config.max_age !== "undefined") {
+    res.setHeader('Cache-Control', 'max-age=' + config.max_age);
+  }
   let data = {};
   try {
     data = JSON.parse(result.data);
@@ -132,7 +140,9 @@ app.all('/', async (req, res) => {
 
   if (method === 'GET') {
     data["__server__"] = chosenNode.server;
-    data["__version__"] = chosenNode.version;
+    if (typeof chosenNode.version !== "undefined") {
+      data["__version__"] = chosenNode.version;
+    }
     data["__servers__"] = config.nodes;
     data["__ip__"] = ip;
   }
@@ -142,8 +152,8 @@ app.all('/', async (req, res) => {
 // Determine if SSL certificates exist
 const sslCertPath = config.sslCertPath;
 const sslKeyPath = config.sslKeyPath;
-console.log(`sslCertPath = ${sslCertPath}`);
-console.log(`sslKeyPath = ${sslKeyPath}`);
+log(`sslCertPath = ${sslCertPath}`);
+log(`sslKeyPath = ${sslKeyPath}`);
 
 if (fs.existsSync(sslCertPath) && fs.existsSync(sslKeyPath)) {
   // SSL certificates are available; create HTTPS server
@@ -170,6 +180,15 @@ if (fs.existsSync(sslCertPath) && fs.existsSync(sslKeyPath)) {
 // Graceful shutdown on Ctrl+C
 process.on('SIGINT', () => {
   console.log("\nGracefully shutting down...");
+  server.close(() => {
+    console.log("Server closed.");
+    process.exit(0); // Exit the process after server is closed
+  });
+});
+
+// Graceful shutdown on SIGTERM
+process.on('SIGTERM', () => {
+  console.log("\nGracefully shutting down on SIGTERM...");
   server.close(() => {
     console.log("Server closed.");
     process.exit(0); // Exit the process after server is closed
