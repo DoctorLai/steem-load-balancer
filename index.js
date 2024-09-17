@@ -183,6 +183,9 @@ app.all('/', async (req, res) => {
   res.status(result.statusCode).json(data);
 });
 
+// Define the server variable to use for shutdown
+let server;
+
 // Determine if SSL certificates exist
 const sslCertPath = config.sslCertPath;
 const sslKeyPath = config.sslKeyPath;
@@ -196,7 +199,7 @@ if (fs.existsSync(sslCertPath) && fs.existsSync(sslKeyPath)) {
     cert: fs.readFileSync(sslCertPath)
   };
 
-  const server = https.createServer(options, app);
+  server = https.createServer(options, app);
 
   server.listen(PORT, () => {
     console.log(`HTTPS server is running on https://localhost:${PORT}`);
@@ -204,7 +207,7 @@ if (fs.existsSync(sslCertPath) && fs.existsSync(sslKeyPath)) {
 
 } else {
   // SSL certificates are not available; create HTTP server
-  const server = http.createServer(app);
+  server = http.createServer(app);
 
   server.listen(PORT, () => {
     console.log(`HTTP server is running on http://localhost:${PORT}`);
