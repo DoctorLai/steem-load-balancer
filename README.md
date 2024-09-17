@@ -3,7 +3,7 @@
 ## Overview
 The Steem Load Balancer is a Node.js-based application designed to distribute API requests across a list of predefined Steem Blockchain RPC Nodes. It enhances application availability and reliability by routing requests to the most responsive node. 
 
-This project was developed by STEEM's Top Witness, [@justyy](https://steemyy.com), who also established the STEEM Load Balancer RPC Node, [steem.justyy.com](https://steem.justyy.com), using this project as its foundation.
+This project was developed by STEEM's Top Witness, [@justyy](https://steemyy.com), who also established Two STEEM Load Balancer RPC Nodes, [steem.justyy.com](https://steem.justyy.com) and [api.steemyy.com](https://api.steemyy.com), using this project as its foundation.
 
 A similar service, [https://steem.senior.workers.dev/](https://steem.senior.workers.dev/), is based on CloudFlare but comes with a daily quota of 100,000 requests.
 
@@ -69,11 +69,6 @@ Clone the Repository:
 ```bash
 git clone https://github.com/doctorlai/steem-load-balancer.git
 cd steem-load-balancer
-```
-
-## Install Dependencies:
-```bash
-npm install
 ```
 
 ## Configure
