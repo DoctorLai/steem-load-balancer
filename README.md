@@ -103,7 +103,7 @@ Use the following utility to build the docker and then start the server.
 ```
 
 ## View the Logs
-``bash
+```bash
 docker logs -f steem-load-balancer
 ```
 
