@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
-const { shuffle, log } = require('./functions');
+const { shuffle, log, compareVersion } = require('./functions');
 
 // Read config from the config.json file
 const configPath = path.join(__dirname, 'config.json');
@@ -59,8 +59,12 @@ app.use(express.json());
 const user_agent = config.user_agent ?? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36";
 // max jussi difference to check for validity
 const max_jussi_number_diff = config.max_jussi_number_diff ?? 100; 
+// min blockchain version
+const min_blockchain_version = config.min_blockchain_version ?? "0.23.0";
 log(`User-agent: ${user_agent}`);
 log(`Max Jussi Number Difference: ${max_jussi_number_diff}`);
+log(`Min Blockchain Version to Forward: ${min_blockchain_version}`);
+
 let current_max_jussi = -1;
 
 // Fetch version from the server
@@ -87,6 +91,12 @@ async function getVersion(server) {
     }
 
     const jsonResponse = await response.json();
+    const blockchain_version = jsonResponse["result"]["blockchain_version"];
+    if (compareVersion(blockchain_version, min_blockchain_version) == -1) {
+        let err_msg = `Server ${server} version = ${blockchain_version}: but min version is ${min_blockchain_version}`;
+        log(err_msg);
+        throw new Error(err_msg);
+    }
     // log(jsonResponse);
 
     // let jussi_number = -1;
@@ -166,7 +176,7 @@ app.all('/', async (req, res) => {
   const promises = shuffledNodes.map(node => getVersion(node));
   let chosenNode = await Promise.any(promises).catch(() => ({ server: "https://api.steemit.com" }));
 
-  log(`Request: ${ip}, ${method}: Chosen Node: ${chosenNode.server}`);
+  log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server}`);
 
   let result;
   if (method === 'GET') {
