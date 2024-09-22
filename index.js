@@ -74,17 +74,20 @@ async function getVersion(server) {
       })
     });
 
-    if (response.ok) {
-      return { server, version: await response.json() };
+    if (!response.ok) {
+      throw new Error(`Server responded with status: ${response.status}`);
     }
-  } catch (error) {
-    console.error(error);
-  }
 
-  return {
-    server: "https://api.steemit.com",
-    version: "",
-  };
+    const jsonResponse = await response.json();
+    if (jsonResponse.jussi_num === 20000000) {
+      throw new Error(`Invalid jussi_number value: ${jsonResponse.jussi_number}`);
+    }
+
+    return { server, version: jsonResponse };
+
+  } catch (error) {
+    throw new Error(`Failed to fetch version from ${server}: ${error.message}`);
+  }
 }
 
 // Forward GET request to the chosen node
@@ -130,7 +133,7 @@ app.all('/', async (req, res) => {
   const shuffledNodes = shuffle(nodes);
 
   // Pick the fastest available node
-  const promises = shuffledNodes.slice(0, 6).map(node => getVersion(node));
+  const promises = shuffledNodes.map(node => getVersion(node));
   let chosenNode = await Promise.any(promises).catch(() => ({ server: "https://api.steemit.com" }));
 
   log(`Request: ${ip}, ${method}: Chosen Node: ${chosenNode.server}`);
