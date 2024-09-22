@@ -102,6 +102,11 @@ Use the following utility to build the docker and then start the server.
 ./build-and-run.sh
 ```
 
+## View the Logs
+``bash
+docker logs -f steem-load-balancer
+```
+
 ## SSL Configuration
 If you have SSL certificates, provide the paths in the config.json file. If SSL is not configured or the certificate files are missing, the server will default to HTTP.
 
@@ -115,6 +120,11 @@ Enable logging by setting "logging": true in config.json. Logs will be printed t
 Port 443 is already taken: Ensure no other process is using port 443. Use sudo lsof -i :443 to check. Change the port in the configuration if needed.
 
 SSL Certificate Issues: Ensure the SSL certificate and key files are in the correct format and paths are correctly specified.
+
+## NODE_ENV
+Setting NODE_ENV to "production" (by default) or "development".
+
+![image](https://github.com/user-attachments/assets/58c343b9-0862-4560-91bd-e2b7cfd276f6)
 
 ## License
 This project is licensed under the [MIT License](./LICENSE).
