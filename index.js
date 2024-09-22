@@ -61,9 +61,12 @@ const user_agent = config.user_agent ?? "Mozilla/5.0 (Windows NT 10.0; Win64; x6
 const max_jussi_number_diff = config.max_jussi_number_diff ?? 100; 
 // min blockchain version
 const min_blockchain_version = config.min_blockchain_version ?? "0.23.0";
+// version
+const proxy_version = config.version ?? "NA";
 log(`User-agent: ${user_agent}`);
 log(`Max Jussi Number Difference: ${max_jussi_number_diff}`);
 log(`Min Blockchain Version to Forward: ${min_blockchain_version}`);
+log(`Version: ${proxy_version}`);
 
 let current_max_jussi = -1;
 
@@ -193,9 +196,7 @@ app.all('/', async (req, res) => {
   if (typeof chosenNode.version !== "undefined") {
     res.setHeader("Version", JSON.stringify(chosenNode.version));
   }
-  if (typeof config.version !== "undefined") {
-    res.setHeader("ProxyVersion", config.version);
-  }
+  res.setHeader("LoadBalancerVersion", proxy_version);
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (method === "GET") {
@@ -203,27 +204,27 @@ app.all('/', async (req, res) => {
       res.setHeader('Cache-Control', 'max-age=' + config.max_age);
     }
   }
-  let data = {};
+  let data = null;
   try {
     data = JSON.parse(result.data);
     if (method === 'GET') {
-      data["status_code"] = 200;
+      data["status_code"] = 200;      
     }
   } catch (ex) {
     data = { 
       "status_code": 500,
-      "error": ex
+      "error": ex,
+      "__load_balancer_version": proxy_version
     };
     res.setHeader('Error', JSON.stringify(ex));
   }
 
   if (method === 'GET') {
     data["__server__"] = chosenNode.server;
-    if (typeof chosenNode.version !== "undefined") {
-      data["__version__"] = chosenNode.version;
-    }
+    data["__version__"] = chosenNode.version;
     data["__servers__"] = config.nodes;
     data["__ip__"] = ip;
+    data["__load_balancer_version"] = proxy_version;
   }
   res.status(result.statusCode).json(data);
 });
