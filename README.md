@@ -21,7 +21,7 @@ Please note that this can be easily configured to work with other Blockchains su
 - SSL Support: Configurable SSL certificates for secure HTTPS communication.
 
 ## Configuration
-The configuration for the Steem Load Balancer is specified in the config.json file. Here's a breakdown of the configuration options:
+The configuration for the Steem Load Balancer is specified in the [config.json](./config.json) file. Here's a breakdown of the configuration options:
 
 Configuration File: config.json
 ```json
@@ -42,10 +42,12 @@ Configuration File: config.json
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2024-09-16",
+    "version": "2024-09-22",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
+    "max_jussi_number_diff": 100,
+    "min_blockchain_version": "0.23.0",
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
     "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
     "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
@@ -58,10 +60,14 @@ Configuration File: config.json
 - windowMs: Time window in milliseconds for the rate limit (e.g., 60000 ms = 1 minute).
 - maxRequests: Maximum number of requests allowed in the time window.
 - version: The version of the Steem Load Balancer.
-- max_age: Cache duration for responses in seconds.
+- max_age: Cache duration for responses in seconds (GET).
 - logging: Boolean value to enable or disable logging.
 - sslCertPath: Path to the SSL certificate file for HTTPS communication.
 - sslKeyPath: Path to the SSL key file for HTTPS communication.
+- user_agent: User Agent String in the Header to forward.
+- min_blockchain_version: Min blockchain version number e.g. 0.23.0 to decide the validity of a node.
+- max_payload_size: Max payload size.
+- max_jussi_number_diff: Not used yet.
 
 ## Installation
 Clone the Repository:

@@ -198,8 +198,10 @@ app.all('/', async (req, res) => {
   }
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
-  if (typeof config.max_age !== "undefined") {
-    res.setHeader('Cache-Control', 'max-age=' + config.max_age);
+  if (method === "GET") {
+    if (typeof config.max_age !== "undefined") {
+      res.setHeader('Cache-Control', 'max-age=' + config.max_age);
+    }
   }
   let data = {};
   try {
