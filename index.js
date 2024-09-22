@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
-const { shuffle, log, compareVersion } = require('./functions');
+const { shuffle, log, compareVersion, limitStringMaxLength } = require('./functions');
 
 // Read config from the config.json file
 const configPath = path.join(__dirname, 'config.json');
@@ -63,10 +63,13 @@ const max_jussi_number_diff = config.max_jussi_number_diff ?? 100;
 const min_blockchain_version = config.min_blockchain_version ?? "0.23.0";
 // version
 const proxy_version = config.version ?? "NA";
+// max body length shown in logging
+const loggging_max_body_len = config.loggging_max_body_len ?? 100;
 log(`User-agent: ${user_agent}`);
 log(`Max Jussi Number Difference: ${max_jussi_number_diff}`);
 log(`Min Blockchain Version to Forward: ${min_blockchain_version}`);
 log(`Version: ${proxy_version}`);
+log(`Max Body Length Logging: ${loggging_max_body_len}`);
 
 let current_max_jussi = -1;
 
@@ -127,7 +130,7 @@ async function getVersion(server) {
     return { server, version: jsonResponse };
 
   } catch (error) {
-    let err_msg = `Server ${server} Failed to fetch version from ${server}: ${error.message}`;
+    let err_msg = `Server ${server} Failed to fetch version from ${server}: ${error.message} / ${jsonResponse}`;
     log(err_msg);
     throw new Error(err_msg);
   }
@@ -150,7 +153,7 @@ async function forwardRequestGET(apiURL) {
 
 // Forward POST request to the chosen node
 async function forwardRequestPOST(apiURL, body) {
-  log(`POST: Forwarding to ${apiURL}, body=${body}`);
+  log(`POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, loggging_max_body_len)}`);
   const res = await fetch(apiURL, {
     method: 'POST',
     cache: 'no-cache',
@@ -186,7 +189,7 @@ app.all('/', async (req, res) => {
     result = await forwardRequestGET(chosenNode.server);
   } else if (method === 'POST') {
     const body = JSON.stringify(req.body);
-    log(`Request Body is ${body}`);
+    log(`Request Body is ${limitStringMaxLength(body, loggging_max_body_len)}`);
     result = await forwardRequestPOST(chosenNode.server, body);
   } else {
     return res.status(405).json({ error: "Method Not Allowed" });

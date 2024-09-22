@@ -41,8 +41,16 @@ function shuffle(array) {
     return 0; // Versions are equal
 }
 
-  module.exports = {
-    shuffle,
-    log,
-    compareVersion
+function limitStringMaxLength(s, len) {
+  if (s.length <= len) {
+    return s;
   }
+  return s.slice(0, len) + "...";
+}
+
+module.exports = {
+  shuffle,
+  log,
+  compareVersion,
+  limitStringMaxLength
+}
