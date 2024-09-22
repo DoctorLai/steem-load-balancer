@@ -128,3 +128,13 @@ Setting NODE_ENV to "production" (by default) or "development".
 
 ## License
 This project is licensed under the [MIT License](./LICENSE).
+
+## Support me
+If you like this and want to support me in continuous development, you can do the following:
+- [Buy me a coffee](https://justyy.com/out/bmc)
+- [Sponsor me](https://github.com/sponsors/DoctorLai)
+- [Vote me as a witness](https://steemyy.com/witness-voting/?witness=justyy&action=approve)
+- [Set me a Witness Proxy if you are too lazy to vote](https://steemyy.com/witness-voting/?witness=justyy&action=proxy)
+
+<a rel="nofollow" href="http://steemyy.com/out/buymecoffee" target="_blank"><img src="https://user-images.githubusercontent.com/1764434/161362754-c45a85d3-5c80-4e10-b05c-62af49291d0b.png" alt="Buy me a Coffee"/></a>
+
