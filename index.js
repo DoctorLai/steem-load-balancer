@@ -55,7 +55,13 @@ app.use(limiter);
 // Parse JSON request bodies
 app.use(express.json());
 
-log(`User-agent: ${config.user_agent}`);
+// user agent sent in the header
+const user_agent = config.user_agent ?? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36";
+// max jussi difference to check for validity
+const max_jussi_number_diff = config.max_jussi_number_diff ?? 100; 
+log(`User-agent: ${user_agent}`);
+log(`Max Jussi Number Difference: ${max_jussi_number_diff}`);
+let current_max_jussi = -1;
 
 // Fetch version from the server
 async function getVersion(server) {
@@ -65,7 +71,7 @@ async function getVersion(server) {
       cache: 'no-cache',
       mode: 'cors',
       redirect: "follow",
-      headers: { 'Content-Type': 'application/json', 'User-Agent': config.user_agent },
+      headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
       body: JSON.stringify({
         id: 0,
         jsonrpc: "2.0",
@@ -75,18 +81,42 @@ async function getVersion(server) {
     });
 
     if (!response.ok) {
-      throw new Error(`Server responded with status: ${response.status}`);
+      let err_msg = `Server ${server} responded with status: ${response.status}`;
+      log(err_msg);
+      throw new Error(err_msg);
     }
 
     const jsonResponse = await response.json();
-    if (jsonResponse.jussi_num === 20000000) {
-      throw new Error(`Invalid jussi_number value: ${jsonResponse.jussi_number}`);
-    }
+    // log(jsonResponse);
+
+    // let jussi_number = -1;
+    // if (typeof jsonResponse.jussi_num === 'number' && Number.isInteger(jsonResponse.jussi_num)) {
+    //   jussi_number = parseInt(jsonResponse.jussi_num);
+    // }
+    // if (jussi_number == -1) {
+    //   let err_msg = `Server ${server} Invalid jussi_number value (not a number): ${jsonResponse.jussi_num}`;
+    //   log(err_msg);
+    //   throw new Error(err_msg);
+    // }
+
+    // if (jussi_number === 20000000) {
+    //   let err_msg = `Server ${server} Invalid jussi_number value (20000000): ${jsonResponse.jussi_num}`;
+    //   throw new Error(err_msg);
+    // }
+    // if (current_max_jussi <= jussi_number + max_jussi_number_diff) {
+    //   current_max_jussi = jussi_number;
+    // } else {
+    //   let err_msg = `Server ${server} Invalid jussi_number value (less than ${current_max_jussi}): ${jsonResponse.jussi_num}`;
+    //   log(err_msg);
+    //   throw new Error(err_msg);
+    // }
 
     return { server, version: jsonResponse };
 
   } catch (error) {
-    throw new Error(`Failed to fetch version from ${server}: ${error.message}`);
+    let err_msg = `Server ${server} Failed to fetch version from ${server}: ${error.message}`;
+    log(err_msg);
+    throw new Error(err_msg);
   }
 }
 
@@ -97,7 +127,7 @@ async function forwardRequestGET(apiURL) {
     method: 'GET',
     cache: 'no-cache',
     mode: 'cors',
-    headers: { 'Content-Type': 'application/json', 'User-Agent': config.user_agent },
+    headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
     redirect: "follow"
   });
   const data = await res.text();
@@ -112,7 +142,7 @@ async function forwardRequestPOST(apiURL, body) {
     method: 'POST',
     cache: 'no-cache',
     mode: 'cors',
-    headers: { 'Content-Type': 'application/json', 'User-Agent': config.user_agent },
+    headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
     redirect: "follow",
     body: body
   });

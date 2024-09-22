@@ -16,5 +16,8 @@ COPY . .
 # Expose port
 EXPOSE 8080
 
+# production
+ENV NODE_ENV=production
+
 # Entry
 CMD ["node", "index.js"]
