@@ -250,7 +250,11 @@ app.all('/', async (req, res) => {
     data["__ip__"] = ip;
     data["__load_balancer_version"] = proxy_version;
   }
-  res.status(result.statusCode).json(data);
+  if (result.statusCode && typeof result.statusCode !== "undefined") {
+    res.status(result.statusCode).json(data);
+  } else {
+    res.status(500).json(data);
+  }
 });
 
 // Define the server variable to use for shutdown
