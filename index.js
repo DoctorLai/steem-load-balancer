@@ -65,11 +65,14 @@ const min_blockchain_version = config.min_blockchain_version ?? "0.23.0";
 const proxy_version = config.version ?? "NA";
 // max body length shown in logging
 const loggging_max_body_len = config.loggging_max_body_len ?? 100;
+// retry count for GET and POST forward
+const retry_count = config.retry_count ?? 3;
 log(`User-agent: ${user_agent}`);
 log(`Max Jussi Number Difference: ${max_jussi_number_diff}`);
 log(`Min Blockchain Version to Forward: ${min_blockchain_version}`);
 log(`Version: ${proxy_version}`);
 log(`Max Body Length Logging: ${loggging_max_body_len}`);
+log(`Retry for GET and POST forward: ${retry_count}`);
 
 let current_max_jussi = -1;
 
@@ -138,33 +141,53 @@ async function getVersion(server) {
 
 // Forward GET request to the chosen node
 async function forwardRequestGET(apiURL) {
-  log(`GET: Forwarding to ${apiURL}`);
-  const res = await fetch(apiURL, {
-    method: 'GET',
-    cache: 'no-cache',
-    mode: 'cors',
-    headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
-    redirect: "follow"
-  });
-  const data = await res.text();
-  log(`Status: ${res.status}`);
-  return { statusCode: res.status, data };
+  for (let i = 0; i < retry_count; ++ i) {
+    try {
+      log(`GET: Forwarding to ${apiURL}`);
+      const res = await fetch(apiURL, {
+        method: 'GET',
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
+        redirect: "follow"
+      });
+      const data = await res.text();
+      log(`Status: ${res.status}`);
+      return { statusCode: res.status, data };
+    } catch (error) {
+      if (i < retry_count - 1) {
+        log(`Retrying ${url}, attempt ${i + 1}`);
+        continue;
+      }
+      throw error;
+    }
+  }
 }
 
 // Forward POST request to the chosen node
 async function forwardRequestPOST(apiURL, body) {
-  log(`POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, loggging_max_body_len)}`);
-  const res = await fetch(apiURL, {
-    method: 'POST',
-    cache: 'no-cache',
-    mode: 'cors',
-    headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
-    redirect: "follow",
-    body: body
-  });
-  log(`Status: ${res.status}`);
-  const data = await res.text();
-  return { statusCode: res.status, data };
+  for (let i = 0; i < retry_count; ++ i) {
+    try {
+      log(`POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, loggging_max_body_len)}`);
+      const res = await fetch(apiURL, {
+        method: 'POST',
+        cache: 'no-cache',
+        mode: 'cors',
+        headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
+        redirect: "follow",
+        body: body
+      });
+      log(`Status: ${res.status}`);
+      const data = await res.text();
+      return { statusCode: res.status, data };
+    } catch (error) {
+      if (i < retry_count - 1) {
+        log(`Retrying ${url}, attempt ${i + 1}`);
+        continue;
+      }
+      throw error;
+    }
+  }
 }
 
 app.head('/', (req, res, next) => {
@@ -183,17 +206,6 @@ app.all('/', async (req, res) => {
   let chosenNode = await Promise.any(promises).catch(() => ({ server: "https://api.steemit.com" }));
 
   log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server}`);
-
-  let result;
-  if (method === 'GET') {
-    result = await forwardRequestGET(chosenNode.server);
-  } else if (method === 'POST') {
-    const body = JSON.stringify(req.body);
-    log(`Request Body is ${limitStringMaxLength(body, loggging_max_body_len)}`);
-    result = await forwardRequestPOST(chosenNode.server, body);
-  } else {
-    return res.status(405).json({ error: "Method Not Allowed" });
-  }
   res.setHeader("IP", ip);
   res.setHeader("Server", chosenNode.server);
   if (typeof chosenNode.version !== "undefined") {
@@ -208,7 +220,17 @@ app.all('/', async (req, res) => {
     }
   }
   let data = null;
+  let result;
   try {
+    if (method === 'GET') {
+      result = await forwardRequestGET(chosenNode.server);
+    } else if (method === 'POST') {
+      const body = JSON.stringify(req.body);
+      log(`Request Body is ${limitStringMaxLength(body, loggging_max_body_len)}`);
+      result = await forwardRequestPOST(chosenNode.server, body);
+    } else {
+      return res.status(405).json({ error: "Method Not Allowed" });
+    }
     data = JSON.parse(result.data);
     if (method === 'GET') {
       data["status_code"] = 200;      
@@ -221,7 +243,6 @@ app.all('/', async (req, res) => {
     };
     res.setHeader('Error', JSON.stringify(ex));
   }
-
   if (method === 'GET') {
     data["__server__"] = chosenNode.server;
     data["__version__"] = chosenNode.version;
