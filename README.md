@@ -48,6 +48,8 @@ Configuration File: config.json
     "max_payload_size": "5mb",
     "max_jussi_number_diff": 100,
     "min_blockchain_version": "0.23.0",
+    "loggging_max_body_len": 100,
+    "retry_count": 3,
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
     "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
     "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
@@ -68,6 +70,8 @@ Configuration File: config.json
 - min_blockchain_version: Min blockchain version number e.g. 0.23.0 to decide the validity of a node.
 - max_payload_size: Max payload size.
 - max_jussi_number_diff: Not used yet.
+- loggging_max_body_len: truncate the request.body in log.
+- retry_count: Retry count for GET and POST forward requests.
 
 ## Installation
 Clone the Repository:
