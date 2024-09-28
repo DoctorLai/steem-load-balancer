@@ -219,7 +219,7 @@ app.all('/', async (req, res) => {
       res.setHeader('Cache-Control', 'max-age=' + config.max_age);
     }
   }
-  let data = null;
+  let data = {};
   let result;
   try {
     if (method === 'GET') {
@@ -250,11 +250,15 @@ app.all('/', async (req, res) => {
     data["__ip__"] = ip;
     data["__load_balancer_version"] = proxy_version;
   }
-  if (result.statusCode && typeof result.statusCode !== "undefined") {
-    res.status(result.statusCode).json(data);
-  } else {
+  if (!result || (typeof result == "undefined")) {
     res.status(500).json(data);
+    return;
   }
+  if (!result.statusCode || (typeof result.statusCode !== "undefined")) {
+    res.status(500).json(data);
+    return;
+  }
+  res.status(result.statusCode).json(data);
 });
 
 // Define the server variable to use for shutdown
