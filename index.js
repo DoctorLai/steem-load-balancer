@@ -250,11 +250,11 @@ app.all('/', async (req, res) => {
     data["__ip__"] = ip;
     data["__load_balancer_version"] = proxy_version;
   }
-  if (!result || (typeof result == "undefined")) {
+  if (!result || (typeof result === "undefined")) {
     res.status(500).json(data);
     return;
   }
-  if (!result.statusCode || (typeof result.statusCode !== "undefined")) {
+  if (!result.statusCode || (typeof result.statusCode === "undefined")) {
     res.status(500).json(data);
     return;
   }
