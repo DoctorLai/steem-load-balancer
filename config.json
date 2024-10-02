@@ -1,21 +1,24 @@
 {
     "nodes": [
-        "https://api.steemit.com",
-        "https://api.steememory.com",
-        "https://api.worldofxpilar.com",
-        "https://steemapi.boylikegirl.club",
-        "https://api.justyy.com",
         "https://api.campingclub.me",
-        "https://api.dlike.io",
         "https://api.pennsif.net",
+        "https://steemapi.boylikegirl.club",
+        "https://api.wherein.io",
+        "https://api.steemit.com",
         "https://api.worldofxpilar.com",
-        "https://api.moecki.online"
+        "https://api.moecki.online",
+        "https://api.justyy.com",
+        "https://api.dlike.io",
+        "https://api.steememory.com",
+        "https://api.steem-fanbase.com",
+        "https://rpc.amarbangla.net",
+        "https://api.steemitdev.com"
     ],
     "rateLimit": {
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2024-09-22",
+    "version": "2024-10-02",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
