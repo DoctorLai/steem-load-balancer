@@ -73,7 +73,7 @@ log(`Min Blockchain Version to Forward: ${min_blockchain_version}`);
 log(`Version: ${proxy_version}`);
 log(`Max Body Length Logging: ${loggging_max_body_len}`);
 log(`Retry for GET and POST forward: ${retry_count}`);
-
+log(`Nodes: ${config.nodes}`);
 let current_max_jussi = -1;
 
 // Fetch version from the server
