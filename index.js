@@ -78,6 +78,7 @@ let current_max_jussi = -1;
 
 // counters
 let access_counters = new Map();
+let error_counters = new Map();
 let total_counter = 0;
 let startTime = new Date();
 
@@ -208,8 +209,24 @@ function calculatePercentage(accessCounters, totalCounter) {
   for (let [url, count] of accessCounters) {
     let percentage = (count / total_counter) * 100;
     percentageDict[url] = {
-      "percent": percentage.toFixed(2),
+      "percent": parseFloat(percentage.toFixed(2)),
       "count": count
+    }
+  }
+
+  return percentageDict;
+}
+
+function calculateErrorPercentage(error_counters, access_counters) {
+  const percentageDict = {};
+
+  for (let [url, count] of error_counters) {
+    let percentage = (count / access_counters.get(url)) * 100;
+    percentageDict[url] = {
+      "errRate": parseFloat(percentage.toFixed(2)),
+      "total": access_counters.get(url),
+      "errorCount": count,
+      "succRate": parseFloat((100 - percentage).toFixed(2))
     }
   }
 
@@ -268,16 +285,18 @@ app.all('/', async (req, res) => {
     data = { 
       "status_code": 500,
       "error": ex,
-      "__load_balancer_version": proxy_version
+      "__load_balancer_version__": proxy_version
     };
     res.setHeader('Error', JSON.stringify(ex));
+    // set error counters - this is after max-retry
+    error_counters.set(chosenNode.server, (error_counters.get(chosenNode.server) ?? 0) + 1);
   }
   if (method === 'GET') {
     data["__server__"] = chosenNode.server;
     data["__version__"] = chosenNode.version;
     data["__servers__"] = config.nodes;
     data["__ip__"] = ip;
-    data["__load_balancer_version"] = proxy_version;
+    data["__load_balancer_version__"] = proxy_version;
     data["__stats__"] = {
       "total": total_counter,
       "uptime": {
@@ -290,7 +309,8 @@ app.all('/', async (req, res) => {
         "month": diff.months,
         "year": diff.years
       },
-      "access_counters": calculatePercentage(access_counters)
+      "access_counters": calculatePercentage(access_counters, total_counter),
+      "error_counters": calculateErrorPercentage(error_counters, access_counters)
     }
   }
   if (!result || (typeof result === "undefined")) {
