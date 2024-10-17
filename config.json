@@ -17,7 +17,7 @@
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2024-10-02",
+    "version": "2024-10-17",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",

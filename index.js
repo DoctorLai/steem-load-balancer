@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
-const { shuffle, log, compareVersion, limitStringMaxLength } = require('./functions');
+const { shuffle, log, compareVersion, limitStringMaxLength, secondsToTimeDict } = require('./functions');
 
 // Read config from the config.json file
 const configPath = path.join(__dirname, 'config.json');
@@ -75,6 +75,13 @@ log(`Max Body Length Logging: ${loggging_max_body_len}`);
 log(`Retry for GET and POST forward: ${retry_count}`);
 log(`Nodes: ${config.nodes}`);
 let current_max_jussi = -1;
+
+// counters
+let access_counters = new Map();
+let total_counter = 0;
+let startTime = new Date();
+
+log(`Current Time: ${startTime.toISOString()}`);
 
 // Fetch version from the server
 async function getVersion(server) {
@@ -195,6 +202,20 @@ app.head('/', (req, res, next) => {
     next();
 });
 
+function calculatePercentage(accessCounters, totalCounter) {
+  const percentageDict = {};
+
+  for (let [url, count] of accessCounters) {
+    let percentage = (count / total_counter) * 100;
+    percentageDict[url] = {
+      "percent": percentage.toFixed(2),
+      "count": count
+    }
+  }
+
+  return percentageDict;
+}
+
 // Handle incoming requests
 app.all('/', async (req, res) => {
   const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown IP';
@@ -221,6 +242,14 @@ app.all('/', async (req, res) => {
   }
   let data = {};
   let result;
+
+  // update stats
+  total_counter ++;
+  access_counters.set(chosenNode.server, (access_counters.get(chosenNode.server) ?? 0) + 1);
+  let currentDate = new Date();
+  let differenceInSeconds = Math.floor((currentDate - startTime) / 1000);
+  const diff = secondsToTimeDict(differenceInSeconds)
+
   try {
     if (method === 'GET') {
       result = await forwardRequestGET(chosenNode.server);
@@ -249,6 +278,20 @@ app.all('/', async (req, res) => {
     data["__servers__"] = config.nodes;
     data["__ip__"] = ip;
     data["__load_balancer_version"] = proxy_version;
+    data["__stats__"] = {
+      "total": total_counter,
+      "uptime": {
+        "startTime": startTime,
+        "currentTime": currentDate,
+        "seconds": diff.seconds,
+        "minutes": diff.minutes,
+        "hours": diff.hours,
+        "days": diff.days,
+        "month": diff.months,
+        "year": diff.years
+      },
+      "access_counters": calculatePercentage(access_counters)
+    }
   }
   if (!result || (typeof result === "undefined")) {
     res.status(500).json(data);
