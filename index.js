@@ -301,7 +301,8 @@ app.all('/', async (req, res) => {
     data["__load_balancer_version__"] = proxy_version;
     data["__stats__"] = {
       "total": total_counter,
-      "rps": parseFloat((total_counter / diff.seconds).toFixed(2)),
+      "rps": parseFloat((total_counter / differenceInSeconds).toFixed(2)),
+      "seconds": differenceInSeconds,
       "uptime": {
         "startTime": startTime,
         "currentTime": currentDate,
