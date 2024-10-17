@@ -8,7 +8,7 @@ RETRY_COUNT=20
 HOST_PORT=443
 
 # stop existing deployment (remove container by name)
-docker stop $DOCKER_IMAGE || true
+docker kill $DOCKER_IMAGE || true
 docker rm $DOCKER_IMAGE || true
 
 # Build the Docker image

@@ -8,7 +8,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
-const { shuffle, log, compareVersion, limitStringMaxLength, secondsToTimeDict } = require('./functions');
+const { shuffle, log, compareVersion, limitStringMaxLength, secondsToTimeDict, sleep } = require('./functions');
 
 // Read config from the config.json file
 const configPath = path.join(__dirname, 'config.json');
@@ -165,6 +165,7 @@ async function forwardRequestGET(apiURL) {
     } catch (error) {
       if (i < retry_count - 1) {
         log(`Retrying ${url}, attempt ${i + 1}`);
+        await sleep(100);
         continue;
       }
       throw error;
@@ -191,6 +192,7 @@ async function forwardRequestPOST(apiURL, body) {
     } catch (error) {
       if (i < retry_count - 1) {
         log(`Retrying ${url}, attempt ${i + 1}`);
+        await sleep(100);
         continue;
       }
       throw error;
@@ -299,6 +301,7 @@ app.all('/', async (req, res) => {
     data["__load_balancer_version__"] = proxy_version;
     data["__stats__"] = {
       "total": total_counter,
+      "rps": parseFloat((total_counter / diff.seconds).toFixed(2)),
       "uptime": {
         "startTime": startTime,
         "currentTime": currentDate,
