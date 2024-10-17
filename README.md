@@ -16,40 +16,42 @@ Please note that this can be easily configured to work with other Blockchains su
 
 ## Features
 - Load Balancing: Distributes requests across multiple Steem API servers.
-- Rate Limiting: Protects against abuse by limiting the number of requests.
+- Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 300 requests per 60 second window. This can be set in the `config.json`.
 - Logging: Provides detailed logs for debugging and monitoring.
 - SSL Support: Configurable SSL certificates for secure HTTPS communication.
 
 ## Configuration
 The configuration for the Steem Load Balancer is specified in the [config.json](./config.json) file. Here's a breakdown of the configuration options:
 
-Configuration File: config.json
+Configuration File: `config.json`
 ```json
 {
     "nodes": [
-        "https://api.steemit.com",
-        "https://api.steememory.com",
-        "https://api.worldofxpilar.com",
-        "https://steemapi.boylikegirl.club",
-        "https://api.justyy.com",
         "https://api.campingclub.me",
-        "https://api.dlike.io",
         "https://api.pennsif.net",
+        "https://steemapi.boylikegirl.club",
+        "https://api.wherein.io",
+        "https://api.steemit.com",
         "https://api.worldofxpilar.com",
-        "https://api.moecki.online"
+        "https://api.moecki.online",
+        "https://api.justyy.com",
+        "https://api.dlike.io",
+        "https://api.steememory.com",
+        "https://rpc.amarbangla.net",
+        "https://api.steemitdev.com"
     ],
     "rateLimit": {
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2024-09-22",
+    "version": "2024-10-17",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
     "max_jussi_number_diff": 100,
     "min_blockchain_version": "0.23.0",
     "loggging_max_body_len": 100,
-    "retry_count": 3,
+    "retry_count": 5,
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
     "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
     "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
@@ -71,7 +73,7 @@ Configuration File: config.json
 - max_payload_size: Max payload size.
 - max_jussi_number_diff: Not used yet.
 - loggging_max_body_len: truncate the request.body in log.
-- retry_count: Retry count for GET and POST forward requests.
+- retry_count: Retry count for GET and POST forward requests. There is a 100ms between retries.
 
 ## Installation
 Clone the Repository:
@@ -119,6 +121,11 @@ The rate limiting configuration prevents abuse by restricting the number of requ
 
 ## Logging
 Enable logging by setting "logging": true in config.json. Logs will be printed to the console and can help with debugging and monitoring.
+
+## Statistics
+On the GET requests, the response JSON will show some additional data including statistics:
+
+![image](https://github.com/user-attachments/assets/2b12ba90-d608-4275-90fa-000a0a5a5618)
 
 ## Troubleshooting
 Port 443 is already taken: Ensure no other process is using port 443. Use sudo lsof -i :443 to check. Change the port in the configuration if needed.
