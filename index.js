@@ -302,6 +302,7 @@ app.all('/', async (req, res) => {
     data["__stats__"] = {
       "total": total_counter,
       "rps": parseFloat((total_counter / differenceInSeconds).toFixed(2)),
+      "seconds": differenceInSeconds,
       "uptime": {
         "startTime": startTime,
         "currentTime": currentDate,
