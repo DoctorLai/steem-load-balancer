@@ -77,10 +77,15 @@ function secondsToTimeDict(seconds) {
   return timeDict;
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 module.exports = {
   shuffle,
   log,
   compareVersion,
   limitStringMaxLength,
-  secondsToTimeDict
+  secondsToTimeDict,
+  sleep
 }
