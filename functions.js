@@ -48,9 +48,39 @@ function limitStringMaxLength(s, len) {
   return s.slice(0, len) + "...";
 }
 
+function secondsToTimeDict(seconds) {
+  const timeDict = {};
+
+  // Define time unit conversions
+  const SECONDS_IN_MINUTE = 60;
+  const SECONDS_IN_HOUR = 3600;
+  const SECONDS_IN_DAY = 86400;
+  const SECONDS_IN_MONTH = 2592000; // 30 days
+  const SECONDS_IN_YEAR = 31536000; // 365 days
+
+  // Calculate each time unit
+  timeDict.years = Math.floor(seconds / SECONDS_IN_YEAR);
+  seconds %= SECONDS_IN_YEAR;
+
+  timeDict.months = Math.floor(seconds / SECONDS_IN_MONTH);
+  seconds %= SECONDS_IN_MONTH;
+
+  timeDict.days = Math.floor(seconds / SECONDS_IN_DAY);
+  seconds %= SECONDS_IN_DAY;
+
+  timeDict.hours = Math.floor(seconds / SECONDS_IN_HOUR);
+  seconds %= SECONDS_IN_HOUR;
+
+  timeDict.minutes = Math.floor(seconds / SECONDS_IN_MINUTE);
+  timeDict.seconds = seconds % SECONDS_IN_MINUTE;
+
+  return timeDict;
+}
+
 module.exports = {
   shuffle,
   log,
   compareVersion,
-  limitStringMaxLength
+  limitStringMaxLength,
+  secondsToTimeDict
 }
