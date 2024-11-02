@@ -10,6 +10,9 @@ const https = require('https');
 const http = require('http');
 const { shuffle, log, compareVersion, limitStringMaxLength, secondsToTimeDict, sleep } = require('./functions');
 
+// Initialize queues to store request timestamps
+let requestTimestamps = [];
+
 // Read config from the config.json file
 const configPath = path.join(__dirname, 'config.json');
 let config = JSON.parse(fs.readFileSync(configPath));
@@ -30,11 +33,36 @@ app.use(cors());
 
 // Middleware to assume 'Content-Type: application/json' if not provided
 app.use((req, res, next) => {
+  const now = Date.now();
+  requestTimestamps.push(now);
+  // Remove timestamps older than 15 minutes (900000 milliseconds)
+  const cutoffTime = now - 15 * 60 * 1000;
+  requestTimestamps = requestTimestamps.filter(timestamp => timestamp > cutoffTime);
+
   if (!req.headers['content-type']) {
     req.headers['content-type'] = 'application/json';
   }
   next();
 });
+
+// Function to calculate RPS for 1, 5, and 15 minutes
+function calculateRPS() {
+  const now = Date.now();
+
+  const intervals = {
+    '1min': now - 1 * 60 * 1000,
+    '5min': now - 5 * 60 * 1000,
+    '15min': now - 15 * 60 * 1000,
+  };
+
+  const rps = {};
+  for (const [key, intervalStart] of Object.entries(intervals)) {
+    const requestsInInterval = requestTimestamps.filter(timestamp => timestamp > intervalStart).length;
+    rps[key] = parseFloat((requestsInInterval / (parseInt(key) * 60)).toFixed(2)); // requests per second
+  }
+
+  return rps;
+}
 
 // Configure body-parser to accept larger payloads
 log(`Max Payload Size = ${config.max_payload_size}`);
@@ -223,12 +251,23 @@ function calculateErrorPercentage(error_counters, access_counters) {
   const percentageDict = {};
 
   for (let [url, count] of error_counters) {
-    let percentage = (count / access_counters.get(url)) * 100;
-    percentageDict[url] = {
-      "errRate": parseFloat(percentage.toFixed(2)),
-      "total": access_counters.get(url),
-      "errorCount": count,
-      "succRate": parseFloat((100 - percentage).toFixed(2))
+    const totalRequests = access_counters.get(url) || 0;
+    if (totalRequests > 0) {
+      let percentage = (count / totalRequests) * 100;
+      percentageDict[url] = {
+        "errRate": parseFloat(percentage.toFixed(3)),
+        "total": totalRequests,
+        "errorCount": count,
+        "succRate": parseFloat((100 - percentage).toFixed(3))
+      }
+    } else {
+      // If there are no requests, set rates to zero
+      percentageDict[url] = {
+        "errRate": 0,
+        "total": 0,
+        "errorCount": 0,
+        "succRate": 100
+      };
     }
   }
 
@@ -299,9 +338,16 @@ app.all('/', async (req, res) => {
     data["__servers__"] = config.nodes;
     data["__ip__"] = ip;
     data["__load_balancer_version__"] = proxy_version;
+    // Calculate and include RPS stats
+    const rpsStats = calculateRPS();
     data["__stats__"] = {
       "total": total_counter,
       "rps": parseFloat((total_counter / differenceInSeconds).toFixed(2)),
+      "rps_stats": {
+        "1min": rpsStats['1min'],
+        "5min": rpsStats['5min'],
+        "15min": rpsStats['15min']
+      },
       "seconds": differenceInSeconds,
       "uptime": {
         "startTime": startTime,
