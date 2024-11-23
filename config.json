@@ -1,13 +1,12 @@
 {
     "nodes": [
+        "https://api.justyy.com",
+        "https://api2.justyy.com",
         "https://api.campingclub.me",
         "https://api.pennsif.net",
-        "https://steemapi.boylikegirl.club",
         "https://api.wherein.io",
         "https://api.steemit.com",
-        "https://api.worldofxpilar.com",
         "https://api.moecki.online",
-        "https://api.justyy.com",
         "https://api.dlike.io",
         "https://api.steememory.com",
         "https://rpc.amarbangla.net",
@@ -17,7 +16,7 @@
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2024-10-17",
+    "version": "2024-11-23",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
