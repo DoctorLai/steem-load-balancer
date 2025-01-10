@@ -9,14 +9,18 @@
         "https://api.moecki.online",
         "https://api.dlike.io",
         "https://api.steememory.com",
+        "https://api.steem-fanbase.com",
         "https://rpc.amarbangla.net",
-        "https://api.steemitdev.com"
+        "https://api.steemitdev.com",
+        "https://steemapi.boylikegirl.club",
+        "https://api.botsteem.com",
+        "https://api.steemzzang.com"
     ],
     "rateLimit": {
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2024-11-23",
+    "version": "2025-01-10",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
@@ -25,6 +29,6 @@
     "loggging_max_body_len": 100,
     "retry_count": 5,
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-    "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
-    "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
+    "sslCertPath": "${SSL_CERT_PATH}",
+    "sslKeyPath": "${SSL_KEY_PATH}"
 }

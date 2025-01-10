@@ -15,7 +15,8 @@ let requestTimestamps = [];
 
 // Read config from the config.json file
 const configPath = path.join(__dirname, 'config.json');
-let config = JSON.parse(fs.readFileSync(configPath));
+// replace env variables in the config file e.g. ${ENV}
+let config = JSON.parse(fs.readFileSync(configPath, 'utf8').replace(/\$\{(.+?)\}/g, (_, name) => process.env[name]));
 
 // Extract configuration values
 const nodes = config.nodes;

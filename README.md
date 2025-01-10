@@ -27,24 +27,27 @@ Configuration File: `config.json`
 ```json
 {
     "nodes": [
+        "https://api.justyy.com",
+        "https://api2.justyy.com",
         "https://api.campingclub.me",
         "https://api.pennsif.net",
-        "https://steemapi.boylikegirl.club",
         "https://api.wherein.io",
         "https://api.steemit.com",
-        "https://api.worldofxpilar.com",
         "https://api.moecki.online",
-        "https://api.justyy.com",
         "https://api.dlike.io",
         "https://api.steememory.com",
+        "https://api.steem-fanbase.com",
         "https://rpc.amarbangla.net",
-        "https://api.steemitdev.com"
+        "https://api.steemitdev.com",
+        "https://steemapi.boylikegirl.club",
+        "https://api.botsteem.com",
+        "https://api.steemzzang.com"
     ],
     "rateLimit": {
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2024-10-17",
+    "version": "2025-01-10",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
@@ -53,8 +56,8 @@ Configuration File: `config.json`
     "loggging_max_body_len": 100,
     "retry_count": 5,
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-    "sslCertPath": "/root/.acme.sh/steem.justyy.com_ecc/fullchain.cer",
-    "sslKeyPath": "/root/.acme.sh/steem.justyy.com_ecc/steem.justyy.com.key"
+    "sslCertPath": "${SSL_CERT_PATH}",
+    "sslKeyPath": "${SSL_KEY_PATH}"
 }
 ```
 
@@ -148,4 +151,3 @@ If you like this and want to support me in continuous development, you can do th
 - [Set me a Witness Proxy if you are too lazy to vote](https://steemyy.com/witness-voting/?witness=justyy&action=proxy)
 
 <a rel="nofollow" href="http://steemyy.com/out/buymecoffee" target="_blank"><img src="https://user-images.githubusercontent.com/1764434/161362754-c45a85d3-5c80-4e10-b05c-62af49291d0b.png" alt="Buy me a Coffee"/></a>
-
