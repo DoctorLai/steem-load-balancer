@@ -113,6 +113,27 @@ let startTime = new Date();
 
 log(`Current Time: ${startTime.toISOString()}`);
 
+// Send a GET to fetch the jussi_number
+async function getJussiNumber(server) {
+  try {
+    const response = await fetch(server, {
+      method: 'GET',
+      cache: 'no-cache',
+      mode: 'cors',
+      redirect: "follow",
+      headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
+    });
+    const json = await response.json();
+    const jussi_number = json["jussi_num"];
+    return jussi_number;
+  }
+  catch (error) {
+    let err_msg = `Server ${server} Failed to fetch jussi_number from ${server}: ${error.message}`;
+    log(err_msg);
+    throw new Error(err_msg);
+  }
+}
+
 // Fetch version from the server
 async function getVersion(server) {
   try {
@@ -143,32 +164,42 @@ async function getVersion(server) {
         log(err_msg);
         throw new Error(err_msg);
     }
+
     // log(jsonResponse);
-
-    // let jussi_number = -1;
-    // if (typeof jsonResponse.jussi_num === 'number' && Number.isInteger(jsonResponse.jussi_num)) {
-    //   jussi_number = parseInt(jsonResponse.jussi_num);
+    // {
+    //   id: 0,
+    //   jsonrpc: '2.0',
+    //   result: {
+    //     blockchain_version: '0.23.1',
+    //     steem_revision: '46c7d93db350e8b031a81626e727c92b27d7348b',
+    //     fc_revision: '46c7d93db350e8b031a81626e727c92b27d7348b'
+    //   }
     // }
+
+    let jussi_number = await getJussiNumber(server);
+    log(`Server ${server} jussi_number: ${jussi_number}`);
+    if (typeof jussi_number === 'number' && Number.isInteger(jussi_number)) {
+      jussi_number = parseInt(jussi_number);
+    }
     // if (jussi_number == -1) {
-    //   let err_msg = `Server ${server} Invalid jussi_number value (not a number): ${jsonResponse.jussi_num}`;
+    //   let err_msg = `Server ${server} Invalid jussi_number value (not a number): ${jussi_number}`;
     //   log(err_msg);
     //   throw new Error(err_msg);
     // }
 
-    // if (jussi_number === 20000000) {
-    //   let err_msg = `Server ${server} Invalid jussi_number value (20000000): ${jsonResponse.jussi_num}`;
-    //   throw new Error(err_msg);
-    // }
-    // if (current_max_jussi <= jussi_number + max_jussi_number_diff) {
-    //   current_max_jussi = jussi_number;
-    // } else {
-    //   let err_msg = `Server ${server} Invalid jussi_number value (less than ${current_max_jussi}): ${jsonResponse.jussi_num}`;
-    //   log(err_msg);
-    //   throw new Error(err_msg);
-    // }
+    if (jussi_number === 20000000) {
+      let err_msg = `Server ${server} Invalid jussi_number value (20000000): ${jussi_number}`;
+      throw new Error(err_msg);
+    }
+    if (current_max_jussi <= jussi_number + max_jussi_number_diff) {
+      current_max_jussi = jussi_number;
+    } else {
+      let err_msg = `Server ${server} Invalid jussi_number value (less than ${current_max_jussi}): ${jussi_number}`;
+      log(err_msg);
+      throw new Error(err_msg);
+    }
 
     return { server, version: jsonResponse };
-
   } catch (error) {
     let err_msg = `Server ${server} Failed to fetch version from ${server}: ${error.message} / ${jsonResponse}`;
     log(err_msg);
@@ -286,6 +317,7 @@ app.all('/', async (req, res) => {
   let chosenNode = await Promise.any(promises).catch(() => ({ server: "https://api.steemit.com" }));
 
   log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server}`);
+  log(`Current Max Jussi: ${current_max_jussi}`);
   res.setHeader("IP", ip);
   res.setHeader("Server", chosenNode.server);
   if (typeof chosenNode.version !== "undefined") {
