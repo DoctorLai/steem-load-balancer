@@ -176,8 +176,9 @@ async function getVersion(server) {
     //   }
     // }
 
-    let jussi_number = await getJussiNumber(server);
+    let jussi_number = await getJussiNumber(server);    
     log(`Server ${server} jussi_number: ${jussi_number}`);
+    current_max_jussi = Math.max(current_max_jussi, jussi_number);
     if (typeof jussi_number === 'number' && Number.isInteger(jussi_number)) {
       jussi_number = parseInt(jussi_number);
     }
