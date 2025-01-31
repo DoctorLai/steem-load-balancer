@@ -1,3 +1,4 @@
+const { Mutex } = require('async-mutex');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -9,6 +10,9 @@ const path = require('path');
 const https = require('https');
 const http = require('http');
 const { shuffle, log, compareVersion, limitStringMaxLength, secondsToTimeDict, sleep } = require('./functions');
+
+// Create a mutex to update the jussi_number
+const mutex = new Mutex();
 
 // Initialize queues to store request timestamps
 let requestTimestamps = [];
@@ -113,31 +117,11 @@ let startTime = new Date();
 
 log(`Current Time: ${startTime.toISOString()}`);
 
-// Send a GET to fetch the jussi_number
-async function getJussiNumber(server) {
-  try {
-    const response = await fetch(server, {
-      method: 'GET',
-      cache: 'no-cache',
-      mode: 'cors',
-      redirect: "follow",
-      headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
-    });
-    const json = await response.json();
-    const jussi_number = json["jussi_num"];
-    return jussi_number;
-  }
-  catch (error) {
-    let err_msg = `Server ${server} Failed to fetch jussi_number from ${server}: ${error.message}`;
-    log(err_msg);
-    throw new Error(err_msg);
-  }
-}
-
 // Fetch version from the server
-async function getVersion(server) {
+// Fetch version from the server
+async function getServerData(server) {
   try {
-    const response = await fetch(server, {
+    const versionPromise = fetch(server, {
       method: 'POST',
       cache: 'no-cache',
       mode: 'cors',
@@ -151,19 +135,13 @@ async function getVersion(server) {
       })
     });
 
-    if (!response.ok) {
-      let err_msg = `Server ${server} responded with status: ${response.status}`;
-      log(err_msg);
-      throw new Error(err_msg);
-    }
-
-    const jsonResponse = await response.json();
-    const blockchain_version = jsonResponse["result"]["blockchain_version"];
-    if (compareVersion(blockchain_version, min_blockchain_version) == -1) {
-        let err_msg = `Server ${server} version = ${blockchain_version}: but min version is ${min_blockchain_version}`;
-        log(err_msg);
-        throw new Error(err_msg);
-    }
+    const jussiPromise = fetch(server, {
+      method: 'GET',
+      cache: 'no-cache',
+      mode: 'cors',
+      redirect: "follow",
+      headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
+    });
 
     // log(jsonResponse);
     // {
@@ -176,33 +154,69 @@ async function getVersion(server) {
     //   }
     // }
 
-    let jussi_number = await getJussiNumber(server);    
+    // Wait for both fetches to complete
+    const [versionResponse, jussiResponse] = await Promise.all([versionPromise, jussiPromise]);
+
+    if (!versionResponse.ok) {
+      let err_msg = `Server ${server} (version) responded with status: ${versionResponse.status}`;
+      log(err_msg);
+      throw new Error(err_msg);
+    }
+
+    if (!jussiResponse.ok) {
+      let err_msg = `Server ${server} (jussi_number) responded with status: ${jussiResponse.status}`;
+      log(err_msg);
+      throw new Error(err_msg);
+    }
+
+    const jsonResponse = await versionResponse.json();
+    if ((!jsonResponse) || (typeof jsonResponse === 'undefined') || (typeof jsonResponse["result"] === 'undefined')) {
+      let err_msg = `Server ${server} Invalid version response: ${jsonResponse}`;
+      log(err_msg);
+      throw new Error(err_msg);
+    }
+    const blockchain_version = jsonResponse["result"]["blockchain_version"];
+    if (compareVersion(blockchain_version, min_blockchain_version) == -1) {
+      let err_msg = `Server ${server} version = ${blockchain_version}: but min version is ${min_blockchain_version}`;
+      log(err_msg);
+      throw new Error(err_msg);
+    }
+
+    let jussi_number = await jussiResponse.json();
+    if (jussi_number["status"] !== "OK") {
+      let err_msg = `Server ${server} Invalid jussi_number response: ${jussi_number}`;
+      log(err_msg);
+      throw new Error(err_msg);
+    }
+    if (typeof jussi_number === 'string') {
+      jussi_number = JSON.parse(jussi_number);
+    }
+    jussi_number = jussi_number["jussi_num"];
+
     log(`Server ${server} jussi_number: ${jussi_number}`);
-    current_max_jussi = Math.max(current_max_jussi, jussi_number);
     if (typeof jussi_number === 'number' && Number.isInteger(jussi_number)) {
       jussi_number = parseInt(jussi_number);
     }
-    // if (jussi_number == -1) {
-    //   let err_msg = `Server ${server} Invalid jussi_number value (not a number): ${jussi_number}`;
-    //   log(err_msg);
-    //   throw new Error(err_msg);
-    // }
 
     if (jussi_number === 20000000) {
       let err_msg = `Server ${server} Invalid jussi_number value (20000000): ${jussi_number}`;
       throw new Error(err_msg);
     }
-    if (current_max_jussi <= jussi_number + max_jussi_number_diff) {
-      current_max_jussi = jussi_number;
-    } else {
+
+    await mutex.runExclusive(() => {
+      current_max_jussi = Math.max(current_max_jussi, jussi_number);
+    });
+
+    if (current_max_jussi > jussi_number + max_jussi_number_diff) {
       let err_msg = `Server ${server} Invalid jussi_number value (less than ${current_max_jussi}): ${jussi_number}`;
       log(err_msg);
       throw new Error(err_msg);
     }
 
-    return { server, version: jsonResponse };
+    log(`Tested OK: Server ${server} version=${blockchain_version}, jussi_number=${jussi_number}`);
+    return { server, version: jsonResponse, jussi_number };
   } catch (error) {
-    let err_msg = `Server ${server} Failed to fetch version from ${server}: ${error.message} / ${jsonResponse}`;
+    let err_msg = `Server ${server} Failed to fetch version from ${server}: ${error.message}`;
     log(err_msg);
     throw new Error(err_msg);
   }
@@ -314,10 +328,10 @@ app.all('/', async (req, res) => {
   const shuffledNodes = shuffle(nodes);
 
   // Pick the fastest available node
-  const promises = shuffledNodes.map(node => getVersion(node));
+  const promises = shuffledNodes.map(node => getServerData(node));
   let chosenNode = await Promise.any(promises).catch(() => ({ server: "https://api.steemit.com" }));
 
-  log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server}`);
+  log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server} - jussi_number: ${chosenNode.jussi_number}`);
   log(`Current Max Jussi: ${current_max_jussi}`);
   res.setHeader("IP", ip);
   res.setHeader("Server", chosenNode.server);
