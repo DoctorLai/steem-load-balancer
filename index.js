@@ -126,7 +126,6 @@ let startTime = new Date();
 log(`Current Time: ${startTime.toISOString()}`);
 
 // Fetch version from the server
-// Fetch version from the server
 async function getServerData(server) {
   try {
     const versionPromise = fetch(server, {
