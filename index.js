@@ -218,7 +218,7 @@ async function getServerData(server) {
     });
 
     if (current_max_jussi > jussi_number + max_jussi_number_diff) {
-      let err_msg = `Server ${server} Invalid jussi_number value (less than ${current_max_jussi}): ${jussi_number}`;
+      let err_msg = `Server ${server} is too far behind: jussi_number ${jussi_number} vs latest ${current_max_jussi}`
       log(err_msg);
       throw new Error(err_msg);
     }
