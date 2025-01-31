@@ -27,27 +27,25 @@ Configuration File: `config.json`
 ```json
 {
     "nodes": [
-        "https://api.justyy.com",
         "https://api2.justyy.com",
-        "https://api.campingclub.me",
-        "https://api.pennsif.net",
-        "https://api.wherein.io",
-        "https://api.steemit.com",
-        "https://api.moecki.online",
-        "https://api.dlike.io",
-        "https://api.steememory.com",
-        "https://api.steem-fanbase.com",
+        "https://api.justyy.com",
         "https://rpc.amarbangla.net",
-        "https://api.steemitdev.com",
-        "https://steemapi.boylikegirl.club",
+        "https://api.steemit.com",
         "https://api.botsteem.com",
-        "https://api.steemzzang.com"
+        "https://api.pennsif.net",
+        "https://api.steemitdev.com",
+        "https://api.dlike.io",
+        "https://api.campingclub.me",
+        "https://api.wherein.io",
+        "https://api.moecki.online",
+        "https://api.steememory.com",
+        "https://steemapi.boylikegirl.club"
     ],
     "rateLimit": {
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2025-01-10",
+    "version": "2025-01-31",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
@@ -57,7 +55,8 @@ Configuration File: `config.json`
     "retry_count": 5,
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
     "sslCertPath": "${SSL_CERT_PATH}",
-    "sslKeyPath": "${SSL_KEY_PATH}"
+    "sslKeyPath": "${SSL_KEY_PATH}",
+    "rejectUnauthorized": false
 }
 ```
 
@@ -77,6 +76,7 @@ Configuration File: `config.json`
 - max_jussi_number_diff: Not used yet.
 - loggging_max_body_len: truncate the request.body in log.
 - retry_count: Retry count for GET and POST forward requests. There is a 100ms between retries.
+- rejectUnauthorized: Should we ignore SSL errors? Default false
 
 ## Installation
 Clone the Repository:

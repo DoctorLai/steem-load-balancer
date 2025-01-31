@@ -22,6 +22,14 @@ const configPath = path.join(__dirname, 'config.json');
 // replace env variables in the config file e.g. ${ENV}
 let config = JSON.parse(fs.readFileSync(configPath, 'utf8').replace(/\$\{(.+?)\}/g, (_, name) => process.env[name]));
 
+const rejectUnauthorized = config.rejectUnauthorized ?? false;
+
+const agent = new https.Agent({
+  rejectUnauthorized: rejectUnauthorized
+});
+
+log(`Reject Unauthorized: ${rejectUnauthorized}`);
+
 // Extract configuration values
 const nodes = config.nodes;
 const rateLimitConfig = config.rateLimit;
@@ -132,7 +140,8 @@ async function getServerData(server) {
         jsonrpc: "2.0",
         method: "call",
         params: ["login_api", "get_version", []]
-      })
+      }),
+      agent,
     });
 
     const jussiPromise = fetch(server, {
@@ -141,6 +150,7 @@ async function getServerData(server) {
       mode: 'cors',
       redirect: "follow",
       headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
+      agent,
     });
 
     // log(jsonResponse);
@@ -171,7 +181,7 @@ async function getServerData(server) {
 
     const jsonResponse = await versionResponse.json();
     if ((!jsonResponse) || (typeof jsonResponse === 'undefined') || (typeof jsonResponse["result"] === 'undefined')) {
-      let err_msg = `Server ${server} Invalid version response: ${jsonResponse}`;
+      let err_msg = `Server ${server} Invalid version response: ${JSON.stringify(jsonResponse)}`;
       log(err_msg);
       throw new Error(err_msg);
     }
@@ -232,7 +242,8 @@ async function forwardRequestGET(apiURL) {
         cache: 'no-cache',
         mode: 'cors',
         headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
-        redirect: "follow"
+        redirect: "follow",
+        agent,
       });
       const data = await res.text();
       log(`Status: ${res.status}`);
@@ -259,7 +270,8 @@ async function forwardRequestPOST(apiURL, body) {
         mode: 'cors',
         headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
         redirect: "follow",
-        body: body
+        body: body,
+        agent,
       });
       log(`Status: ${res.status}`);
       const data = await res.text();
