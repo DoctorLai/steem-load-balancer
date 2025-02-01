@@ -1,3 +1,4 @@
+const { Mutex } = require('async-mutex');
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -20,6 +21,14 @@ let total_counter = 0;
 let not_chosen_counters = new Map();
 let jussi_behind_counters = new Map();
 let current_max_jussi = -1;
+
+// Mutexes to Update the counters
+const mutexJussiNumber = new Mutex();
+const mutexAccessCounter = new Mutex();
+const mutexErrorCounter = new Mutex();
+const mutexTotalCounter = new Mutex();
+const mutexNotChosenCounter = new Mutex();
+const mutexJussiBehindCounter = new Mutex();
 
 // Initialize queues to store request timestamps
 let requestTimestamps = [];
@@ -167,14 +176,18 @@ async function getServerData(server) {
     if (!versionResponse.ok) {
       let err_msg = `Server ${server} (version) responded with status: ${versionResponse.status}`;
       log(err_msg);
-      not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
     if (!jussiResponse.ok) {
       let err_msg = `Server ${server} (jussi_number) responded with status: ${jussiResponse.status}`;
       log(err_msg);
-      not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
@@ -183,14 +196,18 @@ async function getServerData(server) {
     if (isObjectEmptyOrNullOrUndefined(jsonResponse) || isObjectEmptyOrNullOrUndefined(jsonResponse["result"])) {
       let err_msg = `Server ${server} Invalid version response: ${JSON.stringify(jsonResponse)}`;
       log(err_msg);
-      not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
     const blockchain_version = jsonResponse["result"]["blockchain_version"];
     if (compareVersion(blockchain_version, min_blockchain_version) == -1) {
       let err_msg = `Server ${server} version = ${blockchain_version}: but min version is ${min_blockchain_version}`;
       log(err_msg);
-      not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
@@ -198,13 +215,17 @@ async function getServerData(server) {
     if (isObjectEmptyOrNullOrUndefined(jussi)) {
       let err_msg = `Server ${server} Invalid jussi response: ${JSON.stringify(jussi)}`;
       log(err_msg);
-      not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
     if (jussi["status"] !== "OK") {
       let err_msg = `Server ${server} Jussi Status != "OK": ${JSON.stringify(jussi)}`;
       log(err_msg);
-      not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
     let jussi_number = jussi["jussi_num"];
@@ -216,16 +237,22 @@ async function getServerData(server) {
 
     if (jussi_number === 20000000) {
       let err_msg = `Server ${server} Invalid jussi_number value (20000000): ${jussi_number}`;
-      jussi_behind_counters.set(server, (jussi_behind_counters.get(server) ?? 0) + 1);
+      await mutexJussiBehindCounter.runExclusive(() => {
+        jussi_behind_counters.set(server, (jussi_behind_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
-    current_max_jussi = Math.max(current_max_jussi, jussi_number);
+    await mutexJussiNumber.runExclusive(() => {
+      current_max_jussi = Math.max(current_max_jussi, jussi_number);
+    });
 
     if (current_max_jussi > jussi_number + max_jussi_number_diff) {
       let err_msg = `Server ${server} is too far behind: jussi_number ${jussi_number} vs latest ${current_max_jussi}`
       log(err_msg);
-      jussi_behind_counters.set(server, (jussi_behind_counters.get(server) ?? 0) + 1);
+      await mutexJussiBehindCounter.runExclusive(() => {
+        jussi_behind_counters.set(server, (jussi_behind_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
@@ -368,8 +395,12 @@ app.all('/', async (req, res) => {
   let result;
 
   // update stats
-  total_counter ++;
-  access_counters.set(chosenNode.server, (access_counters.get(chosenNode.server) ?? 0) + 1);
+  await mutexTotalCounter.runExclusive(() => {
+    total_counter ++;
+  });
+  await mutexAccessCounter.runExclusive(() => {
+    access_counters.set(chosenNode.server, (access_counters.get(chosenNode.server) ?? 0) + 1);
+  });
   let currentDate = new Date();
   let differenceInSeconds = Math.floor((currentDate - startTime) / 1000);
   const diff = secondsToTimeDict(differenceInSeconds)
@@ -396,7 +427,9 @@ app.all('/', async (req, res) => {
     };
     res.setHeader('Error', JSON.stringify(ex));
     // set error counters - this is after max-retry
-    error_counters.set(chosenNode.server, (error_counters.get(chosenNode.server) ?? 0) + 1);
+    await mutexErrorCounter.runExclusive(() => {
+      error_counters.set(chosenNode.server, (error_counters.get(chosenNode.server) ?? 0) + 1);
+    });
   }
   if (method === 'GET') {
     data["__server__"] = chosenNode.server;
