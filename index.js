@@ -447,6 +447,10 @@ app.all('/', async (req, res) => {
         "5min": rpsStats['5min'],
         "15min": rpsStats['15min']
       },
+      "rate_limit": {
+        "windowMs": rateLimitConfig.windowMs,
+        "maxRequests": rateLimitConfig.maxRequests
+      },
       "seconds": differenceInSeconds,
       "uptime": {
         "startTime": startTime,
