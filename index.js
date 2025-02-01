@@ -9,10 +9,26 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
-const { shuffle, log, compareVersion, limitStringMaxLength, secondsToTimeDict, sleep } = require('./functions');
+const { shuffle, log, compareVersion, limitStringMaxLength, secondsToTimeDict, sleep, isObjectEmptyOrNullOrUndefined } = require('./functions');
 
-// Create a mutex to update the jussi_number
-const mutex = new Mutex();
+let startTime = new Date();
+log(`Current Time: ${startTime.toISOString()}`);
+
+// counters to keep track of the requests
+let access_counters = new Map();
+let error_counters = new Map();
+let total_counter = 0;
+let not_chosen_counters = new Map();
+let jussi_behind_counters = new Map();
+let current_max_jussi = -1;
+
+// Mutexes to Update the counters
+const mutexJussiNumber = new Mutex();
+const mutexAccessCounter = new Mutex();
+const mutexErrorCounter = new Mutex();
+const mutexTotalCounter = new Mutex();
+const mutexNotChosenCounter = new Mutex();
+const mutexJussiBehindCounter = new Mutex();
 
 // Initialize queues to store request timestamps
 let requestTimestamps = [];
@@ -115,15 +131,6 @@ log(`Version: ${proxy_version}`);
 log(`Max Body Length Logging: ${loggging_max_body_len}`);
 log(`Retry for GET and POST forward: ${retry_count}`);
 log(`Nodes: ${config.nodes}`);
-let current_max_jussi = -1;
-
-// counters
-let access_counters = new Map();
-let error_counters = new Map();
-let total_counter = 0;
-let startTime = new Date();
-
-log(`Current Time: ${startTime.toISOString()}`);
 
 // Fetch version from the server
 async function getServerData(server) {
@@ -169,38 +176,59 @@ async function getServerData(server) {
     if (!versionResponse.ok) {
       let err_msg = `Server ${server} (version) responded with status: ${versionResponse.status}`;
       log(err_msg);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
     if (!jussiResponse.ok) {
       let err_msg = `Server ${server} (jussi_number) responded with status: ${jussiResponse.status}`;
       log(err_msg);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
     const jsonResponse = await versionResponse.json();
-    if ((!jsonResponse) || (typeof jsonResponse === 'undefined') || (typeof jsonResponse["result"] === 'undefined')) {
+
+    if (isObjectEmptyOrNullOrUndefined(jsonResponse) || isObjectEmptyOrNullOrUndefined(jsonResponse["result"])) {
       let err_msg = `Server ${server} Invalid version response: ${JSON.stringify(jsonResponse)}`;
       log(err_msg);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
     const blockchain_version = jsonResponse["result"]["blockchain_version"];
     if (compareVersion(blockchain_version, min_blockchain_version) == -1) {
       let err_msg = `Server ${server} version = ${blockchain_version}: but min version is ${min_blockchain_version}`;
       log(err_msg);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
-    let jussi_number = await jussiResponse.json();
-    if (jussi_number["status"] !== "OK") {
-      let err_msg = `Server ${server} Invalid jussi_number response: ${jussi_number}`;
+    const jussi = await jussiResponse.json();
+    if (isObjectEmptyOrNullOrUndefined(jussi)) {
+      let err_msg = `Server ${server} Invalid jussi response: ${JSON.stringify(jussi)}`;
       log(err_msg);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
-    if (typeof jussi_number === 'string') {
-      jussi_number = JSON.parse(jussi_number);
+    if (jussi["status"] !== "OK") {
+      let err_msg = `Server ${server} Jussi Status != "OK": ${JSON.stringify(jussi)}`;
+      log(err_msg);
+      await mutexNotChosenCounter.runExclusive(() => {
+        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+      });
+      throw new Error(err_msg);
     }
-    jussi_number = jussi_number["jussi_num"];
+    let jussi_number = jussi["jussi_num"];
 
     log(`Server ${server} jussi_number: ${jussi_number}`);
     if (typeof jussi_number === 'number' && Number.isInteger(jussi_number)) {
@@ -209,16 +237,22 @@ async function getServerData(server) {
 
     if (jussi_number === 20000000) {
       let err_msg = `Server ${server} Invalid jussi_number value (20000000): ${jussi_number}`;
+      await mutexJussiBehindCounter.runExclusive(() => {
+        jussi_behind_counters.set(server, (jussi_behind_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
-    await mutex.runExclusive(() => {
+    await mutexJussiNumber.runExclusive(() => {
       current_max_jussi = Math.max(current_max_jussi, jussi_number);
     });
 
     if (current_max_jussi > jussi_number + max_jussi_number_diff) {
       let err_msg = `Server ${server} is too far behind: jussi_number ${jussi_number} vs latest ${current_max_jussi}`
       log(err_msg);
+      await mutexJussiBehindCounter.runExclusive(() => {
+        jussi_behind_counters.set(server, (jussi_behind_counters.get(server) ?? 0) + 1);
+      });
       throw new Error(err_msg);
     }
 
@@ -361,8 +395,12 @@ app.all('/', async (req, res) => {
   let result;
 
   // update stats
-  total_counter ++;
-  access_counters.set(chosenNode.server, (access_counters.get(chosenNode.server) ?? 0) + 1);
+  await mutexTotalCounter.runExclusive(() => {
+    total_counter ++;
+  });
+  await mutexAccessCounter.runExclusive(() => {
+    access_counters.set(chosenNode.server, (access_counters.get(chosenNode.server) ?? 0) + 1);
+  });
   let currentDate = new Date();
   let differenceInSeconds = Math.floor((currentDate - startTime) / 1000);
   const diff = secondsToTimeDict(differenceInSeconds)
@@ -389,7 +427,9 @@ app.all('/', async (req, res) => {
     };
     res.setHeader('Error', JSON.stringify(ex));
     // set error counters - this is after max-retry
-    error_counters.set(chosenNode.server, (error_counters.get(chosenNode.server) ?? 0) + 1);
+    await mutexErrorCounter.runExclusive(() => {
+      error_counters.set(chosenNode.server, (error_counters.get(chosenNode.server) ?? 0) + 1);
+    });
   }
   if (method === 'GET') {
     data["__server__"] = chosenNode.server;
@@ -419,14 +459,16 @@ app.all('/', async (req, res) => {
         "year": diff.years
       },
       "access_counters": calculatePercentage(access_counters, total_counter),
-      "error_counters": calculateErrorPercentage(error_counters, access_counters)
+      "error_counters": calculateErrorPercentage(error_counters, access_counters),
+      "not_chosen_counters": Object.fromEntries(not_chosen_counters),
+      "jussi_behind_counters": Object.fromEntries(jussi_behind_counters)
     }
   }
-  if (!result || (typeof result === "undefined")) {
+  if (isObjectEmptyOrNullOrUndefined(result)) {
     res.status(500).json(data);
     return;
   }
-  if (!result.statusCode || (typeof result.statusCode === "undefined")) {
+  if (isObjectEmptyOrNullOrUndefined(result.statusCode)) {
     res.status(500).json(data);
     return;
   }

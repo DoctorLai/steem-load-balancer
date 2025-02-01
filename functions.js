@@ -81,11 +81,23 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+function isObjectEmptyOrNullOrUndefined(obj) {
+  // console.log(isObjectEmptyOrNullOrUndefined(null)); // true
+  // console.log(isObjectEmptyOrNullOrUndefined(undefined)); // true
+  // console.log(isObjectEmptyOrNullOrUndefined({})); // true (empty object)
+  // console.log(isObjectEmptyOrNullOrUndefined([])); // false (an array is not considered empty)
+  // console.log(isObjectEmptyOrNullOrUndefined({ a: 1 })); // false (not empty)
+  // console.log(isObjectEmptyOrNullOrUndefined(0)); // false (not an object)
+  // console.log(isObjectEmptyOrNullOrUndefined("")); // false (not an object)
+  return (obj == null) || (typeof obj === "object" && Object.keys(obj).length === 0);
+}
+
 module.exports = {
   shuffle,
   log,
   compareVersion,
   limitStringMaxLength,
   secondsToTimeDict,
-  sleep
+  sleep,
+  isObjectEmptyOrNullOrUndefined,
 }
