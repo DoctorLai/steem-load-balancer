@@ -12,8 +12,7 @@
         "https://api.wherein.io",
         "https://api.moecki.online",
         "https://api.steememory.com",
-        "https://steemapi.boylikegirl.club",
-        "https://api.steemzzang.com"
+        "https://steemapi.boylikegirl.club"
     ],
     "rateLimit": {
         "windowMs": 60000,
