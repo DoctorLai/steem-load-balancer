@@ -16,9 +16,9 @@
     ],
     "rateLimit": {
         "windowMs": 60000,
-        "maxRequests": 300
+        "maxRequests": 600
     },
-    "version": "2025-01-10",
+    "version": "2025-02-01",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
