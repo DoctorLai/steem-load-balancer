@@ -1,3 +1,6 @@
+const { AbortController } = require('abort-controller');
+// const fetch = require('node-fetch');
+const fetch = (...args) => import("node-fetch").then(module => module.default(...args));
 
 // Shuffle function
 function shuffle(array) {
@@ -92,6 +95,23 @@ function isObjectEmptyOrNullOrUndefined(obj) {
   return (obj == null) || (typeof obj === "object" && Object.keys(obj).length === 0);
 }
 
+async function fetchWithTimeout(url, options = {}, timeout = 3000) {
+  const controller = new AbortController();
+  const signal = controller.signal;
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, { ...options, signal });
+    clearTimeout(timeoutId); // Clear timeout if request completes successfully
+    return response;
+  } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Fetch request to ${url} timed out after ${timeout} ms`);
+    }
+    throw error;
+  }
+}
+
 module.exports = {
   shuffle,
   log,
@@ -100,4 +120,5 @@ module.exports = {
   secondsToTimeDict,
   sleep,
   isObjectEmptyOrNullOrUndefined,
+  fetchWithTimeout
 }

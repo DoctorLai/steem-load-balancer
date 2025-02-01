@@ -9,6 +9,7 @@ WORKDIR /app
 # Copy package.json and install dependencies
 COPY package*.json ./
 RUN npm install
+RUN npm install abort-controller
 
 # Copy the rest of the application
 COPY . .

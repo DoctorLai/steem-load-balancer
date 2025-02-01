@@ -70,7 +70,8 @@ Configuration File: [config.json](./config.json)
     "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
     "sslCertPath": "${SSL_CERT_PATH}",
     "sslKeyPath": "${SSL_KEY_PATH}",
-    "rejectUnauthorized": false
+    "rejectUnauthorized": false,
+    "timeout": 3000
 }
 ```
 
@@ -91,6 +92,7 @@ Configuration File: [config.json](./config.json)
 - loggging_max_body_len: truncate the request.body in log.
 - retry_count: Retry count for GET and POST forward requests. There is a 100ms between retries.
 - rejectUnauthorized: Should we ignore SSL errors? Default false
+- timeout: Max timeout (milliseconds) for fetch to time out.
 
 ## Installation
 Clone the Repository:
