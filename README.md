@@ -116,7 +116,7 @@ docker build -t $DOCKER_IMAGE .
 ```bash
 docker run --name $DOCKER_IMAGE -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
 ```
-![image](https://github.com/user-attachments/assets/874e8051-2c0f-47f2-8480-e0acc7981200)
+![image](https://github.com/user-attachments/assets/ff6da76b-4506-4452-b742-04eeff7596b5)
 
 ## ./build-and-run.sh
 Use the following utility to build the docker and then start the server.
