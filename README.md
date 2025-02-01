@@ -15,15 +15,28 @@ The primary motivation behind this project is to provide a scalable and reliable
 Please note that this can be easily configured to work with other Blockchains such as Hive and Blurt.
 
 ## Features
-- Load Balancing: Distributes requests across multiple Steem API servers.
-- Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 300 requests per 60 second window. This can be set in the `config.json`.
+- Load Balancing: Distributes requests across multiple Steem API servers. The `jussi_num` and `status` are checked before a node is chosen (See below).
+- Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 300 requests per 60 second window. This can be set in the [config.json](./config.json).
 - Logging: Provides detailed logs for debugging and monitoring.
-- SSL Support: Configurable SSL certificates for secure HTTPS communication.
+- SSL Support: Configurable SSL certificates for secure HTTPS communication. Reject or Ignore the SSL certificates when forwarding the requests via the field `rejectUnauthorized` in [config.json](./config.json)
+
+### A Healthy Node
+A Steem RPC node should return the following to indicate the healthy state. The `jussi_num` needs to catch up with the latest block height. If the `jussi_num` is far behind, e.g. the `max_jussi_number_diff` in [config.json](./config.json), then the node will not be considered. Currently, it is set to 100.
+
+```json
+{
+  "status": "OK",
+  "datetime": "2025-02-01T11:06:30.781448",
+  "source_commit": "ae6c6c77601436e496a8816ece2cbc6e26fbe3c2",
+  "docker_tag": "latest",
+  "jussi_num": 92629431
+}
+```
 
 ## Configuration
 The configuration for the Steem Load Balancer is specified in the [config.json](./config.json) file. Here's a breakdown of the configuration options:
 
-Configuration File: `config.json`
+Configuration File: [config.json](./config.json)
 ```json
 {
     "nodes": [
@@ -39,13 +52,14 @@ Configuration File: `config.json`
         "https://api.wherein.io",
         "https://api.moecki.online",
         "https://api.steememory.com",
-        "https://steemapi.boylikegirl.club"
+        "https://steemapi.boylikegirl.club",
+        "https://api.steemzzang.com"
     ],
     "rateLimit": {
         "windowMs": 60000,
         "maxRequests": 300
     },
-    "version": "2025-01-31",
+    "version": "2025-02-01",
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
@@ -73,7 +87,7 @@ Configuration File: `config.json`
 - user_agent: User Agent String in the Header to forward.
 - min_blockchain_version: Min blockchain version number e.g. 0.23.0 to decide the validity of a node.
 - max_payload_size: Max payload size.
-- max_jussi_number_diff: Not used yet.
+- max_jussi_number_diff: The maximum difference of block difference is allowed.
 - loggging_max_body_len: truncate the request.body in log.
 - retry_count: Retry count for GET and POST forward requests. There is a 100ms between retries.
 - rejectUnauthorized: Should we ignore SSL errors? Default false
@@ -87,7 +101,7 @@ cd steem-load-balancer
 ```
 
 ## Configure
-Update the config.json file with your desired nodes, rate limits, and SSL paths.
+Update the [config.json](./config.json) file with your desired nodes, rate limits, and SSL paths.
 
 ## Build the Docker Image
 ```bash
@@ -117,16 +131,16 @@ docker logs -f steem-load-balancer
 ```
 
 ## SSL Configuration
-If you have SSL certificates, provide the paths in the config.json file. If SSL is not configured or the certificate files are missing, the server will default to HTTP.
+If you have SSL certificates, provide the paths in the [config.json](./config.json) file. If SSL is not configured or the certificate files are missing, the server will default to HTTP.
 
 ## Rate Limiting
-The rate limiting configuration prevents abuse by restricting the number of requests a user can make within a given time window. Adjust the rateLimit settings in config.json as needed.
+The rate limiting configuration prevents abuse by restricting the number of requests a user can make within a given time window. Adjust the rateLimit settings in [config.json](./config.json) as needed.
 
 ## Logging
-Enable logging by setting "logging": true in config.json. Logs will be printed to the console and can help with debugging and monitoring.
+Enable logging by setting "logging": true in [config.json](./config.json). Logs will be printed to the console and can help with debugging and monitoring.
 
 ## Statistics
-On the GET requests, the response JSON will show some additional data including statistics:
+On the GET requests, the response JSON will show some additional data including statistics (including Uptime, Access Counters, Error Counters, Not Chosen Counters and Jussi Behind Counters):
 
 ![image](https://github.com/user-attachments/assets/2b12ba90-d608-4275-90fa-000a0a5a5618)
 
