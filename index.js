@@ -393,8 +393,15 @@ app.all('/', async (req, res) => {
 
   // Pick the fastest available node
   const promises = shuffledNodes.map(node => getServerData(node));
-  let chosenNode = await Promise.any(promises).catch(() => ({ server: "https://api.steemit.com" }));
-
+  let chosenNode = await Promise.any(promises);
+  if (isObjectEmptyOrNullOrUndefined(chosenNode) ||
+      isObjectEmptyOrNullOrUndefined(chosenNode.server) ||
+      isObjectEmptyOrNullOrUndefined(chosenNode.version) ||
+      isObjectEmptyOrNullOrUndefined(chosenNode.jussi_number)
+    ) {
+    res.status(500).json({ error: "No nodes available" });
+    return;
+  }
   log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server} - jussi_number: ${chosenNode.jussi_number}`);
   log(`Current Max Jussi: ${current_max_jussi}`);
   res.setHeader("IP", ip);
