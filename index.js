@@ -393,7 +393,10 @@ app.all('/', async (req, res) => {
 
   // Pick the fastest available node
   const promises = shuffledNodes.map(node => getServerData(node));
-  let chosenNode = await Promise.any(promises);
+  let chosenNode = await Promise.any(promises).catch((error) => {
+    log(`Error: ${error.message}`);
+    return null;
+  });
   if (isObjectEmptyOrNullOrUndefined(chosenNode) ||
       isObjectEmptyOrNullOrUndefined(chosenNode.server) ||
       isObjectEmptyOrNullOrUndefined(chosenNode.version) ||
