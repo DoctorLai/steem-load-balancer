@@ -22,7 +22,7 @@
     "max_age": 3,
     "logging": true,
     "max_payload_size": "5mb",
-    "max_jussi_number_diff": 100,
+    "max_jussi_number_diff": 500,
     "min_blockchain_version": "0.23.0",
     "loggging_max_body_len": 100,
     "retry_count": 5,
