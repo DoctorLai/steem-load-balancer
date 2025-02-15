@@ -10,6 +10,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 RUN npm install abort-controller
+RUN npm install node-fetch
 
 # Copy the rest of the application
 COPY . .

@@ -30,5 +30,5 @@
     "sslCertPath": "${SSL_CERT_PATH}",
     "sslKeyPath": "${SSL_KEY_PATH}",
     "rejectUnauthorized": false,
-    "timeout": 2000
+    "timeout": 5000
 }

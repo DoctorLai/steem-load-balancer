@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/DoctorLai/steem-load-balancer#readme",
   "dependencies": {
+    "abort-controller": "^3.0.0",
     "async-mutex": "^0.5.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
