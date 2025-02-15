@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const fs = require('fs');
+const yaml = require('js-yaml');
 const path = require('path');
 const https = require('https');
 const http = require('http');
@@ -17,6 +18,9 @@ const {
   isObjectEmptyOrNullOrUndefined,
   fetchWithTimeout
 } = require('./functions');
+
+// p-limit library to limit the number of concurrent requests
+const pLimit = (...args) => import("p-limit").then(module => module.default(...args));
 
 let startTime = new Date();
 log(`Current Time: ${startTime.toISOString()}`);
@@ -42,10 +46,16 @@ const mutexTimedOutCounter = new Mutex();
 // Initialize queues to store request timestamps
 let requestTimestamps = [];
 
-// Read config from the config.json file
-const configPath = path.join(__dirname, 'config.json');
-// replace env variables in the config file e.g. ${ENV}
-let config = JSON.parse(fs.readFileSync(configPath, 'utf8').replace(/\$\{(.+?)\}/g, (_, name) => process.env[name]));
+// Read the YAML config file
+const configPath = path.join(__dirname, 'config.yaml');
+
+// Load the YAML file content
+let config = yaml.load(fs.readFileSync(configPath, 'utf8'));
+
+// Replace environment variables in the loaded config
+config = JSON.parse(JSON.stringify(config).replace(/\$\{(.+?)\}/g, (_, name) => process.env[name]));
+
+log(`PLimit: ${config.plimit}`);
 
 const rejectUnauthorized = config.rejectUnauthorized ?? false;
 
@@ -391,8 +401,8 @@ app.all('/', async (req, res) => {
   const method = req.method.toUpperCase();
   const shuffledNodes = shuffle(nodes);
 
-  // Pick the fastest available node
-  const promises = shuffledNodes.map(node => getServerData(node));
+  const plimit = await pLimit(config.plimit);
+  const promises = shuffledNodes.map(node => plimit(() => getServerData(node)));
   let chosenNode = await Promise.any(promises).catch((error) => {
     log(`Error: ${error.message}`);
     return null;
@@ -402,8 +412,9 @@ app.all('/', async (req, res) => {
       isObjectEmptyOrNullOrUndefined(chosenNode.version) ||
       isObjectEmptyOrNullOrUndefined(chosenNode.jussi_number)
     ) {
-    res.status(500).json({ error: "No nodes available" });
-    return;
+      // return 500
+      res.status(500).json({ error: "No valid node found" });
+      return;
   }
   log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server} - jussi_number: ${chosenNode.jussi_number}`);
   log(`Current Max Jussi: ${current_max_jussi}`);

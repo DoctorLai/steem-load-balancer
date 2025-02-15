@@ -11,6 +11,9 @@ COPY package*.json ./
 RUN npm install
 RUN npm install abort-controller
 RUN npm install node-fetch
+RUN npm install async-mutex
+RUN npm install p-limit
+RUN npm install js-yaml
 
 # Copy the rest of the application
 COPY . .

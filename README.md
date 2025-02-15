@@ -16,12 +16,12 @@ Please note that this can be easily configured to work with other Blockchains su
 
 ## Features
 - Load Balancing: Distributes requests across multiple Steem API servers. The `jussi_num` and `status` are checked before a node is chosen (See below).
-- Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 300 requests per 60 second window. This can be set in the [config.json](./config.json).
+- Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 300 requests per 60 second window. This can be set in the [config.yaml](./config.yaml).
 - Logging: Provides detailed logs for debugging and monitoring.
-- SSL Support: Configurable SSL certificates for secure HTTPS communication. Reject or Ignore the SSL certificates when forwarding the requests via the field `rejectUnauthorized` in [config.json](./config.json)
+- SSL Support: Configurable SSL certificates for secure HTTPS communication. Reject or Ignore the SSL certificates when forwarding the requests via the field `rejectUnauthorized` in [config.yaml](./config.yaml)
 
 ### A Healthy Node
-A Steem RPC node should return the following to indicate the healthy state. The `jussi_num` needs to catch up with the latest block height. If the `jussi_num` is far behind, e.g. the `max_jussi_number_diff` in [config.json](./config.json), then the node will not be considered. Currently, it is set to 100.
+A Steem RPC node should return the following to indicate the healthy state. The `jussi_num` needs to catch up with the latest block height. If the `jussi_num` is far behind, e.g. the `max_jussi_number_diff` in [config.yaml](./config.yaml), then the node will not be considered. Currently, it is set to 100.
 
 ```json
 {
@@ -34,45 +34,41 @@ A Steem RPC node should return the following to indicate the healthy state. The 
 ```
 
 ## Configuration
-The configuration for the Steem Load Balancer is specified in the [config.json](./config.json) file. Here's a breakdown of the configuration options:
+The configuration for the Steem Load Balancer is specified in the [config.yaml](./config.yaml) file. Here's a breakdown of the configuration options:
 
-Configuration File: [config.json](./config.json)
-```json
-{
-    "nodes": [
-        "https://api2.justyy.com",
-        "https://api.justyy.com",
-        "https://rpc.amarbangla.net",
-        "https://api.steemit.com",
-        "https://api.botsteem.com",
-        "https://api.pennsif.net",
-        "https://api.steemitdev.com",
-        "https://api.dlike.io",
-        "https://api.campingclub.me",
-        "https://api.wherein.io",
-        "https://api.moecki.online",
-        "https://api.steememory.com",
-        "https://steemapi.boylikegirl.club",
-        "https://api.steemzzang.com"
-    ],
-    "rateLimit": {
-        "windowMs": 60000,
-        "maxRequests": 300
-    },
-    "version": "2025-02-01",
-    "max_age": 3,
-    "logging": true,
-    "max_payload_size": "5mb",
-    "max_jussi_number_diff": 100,
-    "min_blockchain_version": "0.23.0",
-    "loggging_max_body_len": 100,
-    "retry_count": 5,
-    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
-    "sslCertPath": "${SSL_CERT_PATH}",
-    "sslKeyPath": "${SSL_KEY_PATH}",
-    "rejectUnauthorized": false,
-    "timeout": 3000
-}
+Configuration File: [config.yaml](./config.yaml)
+```yaml
+nodes:
+  - "https://api2.justyy.com"
+  - "https://api.justyy.com"
+  - "https://api.steemit.com"
+  - "https://api.steemitdev.com"
+  - "https://api.pennsif.net"
+  - "https://api.moecki.online"
+  # - "https://rpc.amarbangla.net"
+  # - "https://api.botsteem.com"
+  # - "https://api.dlike.io"
+  # - "https://api.campingclub.me"
+  # - "https://api.wherein.io"
+  # - "https://api.steememory.com"
+  # - "https://steemapi.boylikegirl.club"
+rateLimit:
+  windowMs: 60000
+  maxRequests: 600
+version: "2025-02-15"
+max_age: 3
+logging: true
+max_payload_size: "5mb"
+max_jussi_number_diff: 500
+min_blockchain_version: "0.23.0"
+loggging_max_body_len: 100
+retry_count: 5
+user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+sslCertPath: "${SSL_CERT_PATH}"
+sslKeyPath: "${SSL_KEY_PATH}"
+rejectUnauthorized: false
+timeout: 3000
+plimit: 5
 ```
 
 ### Configuration Options
@@ -93,6 +89,7 @@ Configuration File: [config.json](./config.json)
 - retry_count: Retry count for GET and POST forward requests. There is a 100ms between retries.
 - rejectUnauthorized: Should we ignore SSL errors? Default false
 - timeout: Max timeout (milliseconds) for fetch to time out.
+- plimit: Max concurrent requests to poke the servers. Reduce this if the server is laggy.
 
 ## Installation
 Clone the Repository:
@@ -103,7 +100,7 @@ cd steem-load-balancer
 ```
 
 ## Configure
-Update the [config.json](./config.json) file with your desired nodes, rate limits, and SSL paths.
+Update the [config.yaml](./config.yaml) file with your desired nodes, rate limits, and SSL paths.
 
 ## Build the Docker Image
 ```bash
@@ -133,13 +130,13 @@ docker logs -f steem-load-balancer
 ```
 
 ## SSL Configuration
-If you have SSL certificates, provide the paths in the [config.json](./config.json) file. If SSL is not configured or the certificate files are missing, the server will default to HTTP.
+If you have SSL certificates, provide the paths in the [config.yaml](./config.yaml) file. If SSL is not configured or the certificate files are missing, the server will default to HTTP.
 
 ## Rate Limiting
-The rate limiting configuration prevents abuse by restricting the number of requests a user can make within a given time window. Adjust the rateLimit settings in [config.json](./config.json) as needed.
+The rate limiting configuration prevents abuse by restricting the number of requests a user can make within a given time window. Adjust the rateLimit settings in [config.yaml](./config.yaml) as needed.
 
 ## Logging
-Enable logging by setting "logging": true in [config.json](./config.json). Logs will be printed to the console and can help with debugging and monitoring.
+Enable logging by setting "logging": true in [config.yaml](./config.yaml). Logs will be printed to the console and can help with debugging and monitoring.
 
 ## Statistics
 On the GET requests, the response JSON will show some additional data including statistics (including Uptime, Access Counters, Error Counters, Not Chosen Counters and Jussi Behind Counters):
