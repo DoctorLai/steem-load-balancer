@@ -14,6 +14,8 @@ RUN npm install node-fetch
 RUN npm install async-mutex
 RUN npm install p-limit
 RUN npm install js-yaml
+RUN npm install compression
+RUN npm install helmet
 
 # Copy the rest of the application
 COPY . .

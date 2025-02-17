@@ -8,6 +8,8 @@ const yaml = require('js-yaml');
 const path = require('path');
 const https = require('https');
 const http = require('http');
+const compression = require('compression');
+const helmet = require('helmet');
 const {
   shuffle,
   log,
@@ -81,6 +83,12 @@ const PORT = 8080;
 
 // Enable CORS for all origins
 app.use(cors());
+
+// Reduces bandwidth usage and speeds up responses.
+app.use(compression());
+
+// Protects against common vulnerabilities like XSS and clickjacking.
+app.use(helmet());
 
 // Middleware to assume 'Content-Type: application/json' if not provided
 app.use((req, res, next) => {
