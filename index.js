@@ -91,7 +91,7 @@ app.use(compression());
 app.use(helmet());
 
 // Middleware to assume 'Content-Type: application/json' if not provided
-app.use((req, res, next) => {
+app.use((req, _, next) => {
   const now = Date.now();
   requestTimestamps.push(now);
   // Remove timestamps older than 15 minutes (900000 milliseconds)
@@ -151,14 +151,14 @@ const min_blockchain_version = config.min_blockchain_version ?? "0.23.0";
 // version
 const proxy_version = config.version ?? "NA";
 // max body length shown in logging
-const loggging_max_body_len = config.loggging_max_body_len ?? 100;
+const logging_max_body_len = config.logging_max_body_len ?? 100;
 // retry count for GET and POST forward
 const retry_count = config.retry_count ?? 3;
 log(`User-agent: ${user_agent}`);
 log(`Max Jussi Number Difference: ${max_jussi_number_diff}`);
 log(`Min Blockchain Version to Forward: ${min_blockchain_version}`);
 log(`Version: ${proxy_version}`);
-log(`Max Body Length Logging: ${loggging_max_body_len}`);
+log(`Max Body Length Logging: ${logging_max_body_len}`);
 log(`Retry for GET and POST forward: ${retry_count}`);
 log(`Nodes: ${config.nodes}`);
 
@@ -231,6 +231,7 @@ async function getServerData(server) {
       });
       throw new Error(err_msg);
     }
+
     const blockchain_version = jsonResponse["result"]["blockchain_version"];
     if (compareVersion(blockchain_version, min_blockchain_version) == -1) {
       let err_msg = `Server ${server} version = ${blockchain_version}: but min version is ${min_blockchain_version}`;
@@ -289,10 +290,10 @@ async function getServerData(server) {
     log(`Tested OK: Server ${server} version=${blockchain_version}, jussi_number=${jussi_number}`);
     return { server, version: jsonResponse, jussi_number };
   } catch (error) {
-    let err_msg = `Server ${server} Failed to fetch version from ${server}: ${error.message}`;
+    let err_msg = `${error.name}: Server ${server} Failed to fetch version from ${server}: ${error.message}`;
     log(err_msg);
     if (error.name === 'AbortError') {
-      err_msg = `Server ${server} Fetch request to ${server} timed out after ${timeout} ms`;
+      err_msg = `Fetch request to ${server} timed out after ${timeout} ms`;
       log(err_msg);
       await mutexTimedOutCounter.runExclusive(() => {
         timed_out_counters.set(server, (timed_out_counters.get(server) ?? 0) + 1);
@@ -333,7 +334,7 @@ async function forwardRequestGET(apiURL) {
 async function forwardRequestPOST(apiURL, body) {
   for (let i = 0; i < retry_count; ++i) {
     try {
-      log(`POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, loggging_max_body_len)}`);
+      log(`POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, logging_max_body_len)}`);
       const res = await fetchWithTimeout(apiURL, {
         method: 'POST',
         cache: 'no-cache',
@@ -458,7 +459,7 @@ app.all('/', async (req, res) => {
       result = await forwardRequestGET(chosenNode.server);
     } else if (method === 'POST') {
       const body = JSON.stringify(req.body);
-      log(`Request Body is ${limitStringMaxLength(body, loggging_max_body_len)}`);
+      log(`Request Body is ${limitStringMaxLength(body, logging_max_body_len)}`);
       result = await forwardRequestPOST(chosenNode.server, body);
     } else {
       return res.status(405).json({ error: "Method Not Allowed" });

@@ -45,29 +45,29 @@ nodes:
   - "https://api.steemitdev.com"
   - "https://api.pennsif.net"
   - "https://api.moecki.online"
+  - "https://api.botsteem.com"
   # - "https://rpc.amarbangla.net"
-  # - "https://api.botsteem.com"
   # - "https://api.dlike.io"
   # - "https://api.campingclub.me"
   # - "https://api.wherein.io"
   # - "https://api.steememory.com"
   # - "https://steemapi.boylikegirl.club"
 rateLimit:
-  windowMs: 60000
+  windowMs: 30000
   maxRequests: 600
-version: "2025-02-15"
+version: "2025-03-07"
 max_age: 3
 logging: true
 max_payload_size: "5mb"
 max_jussi_number_diff: 500
 min_blockchain_version: "0.23.0"
-loggging_max_body_len: 100
-retry_count: 5
+logging_max_body_len: 100
+retry_count: 3
 user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
 sslCertPath: "${SSL_CERT_PATH}"
 sslKeyPath: "${SSL_KEY_PATH}"
 rejectUnauthorized: false
-timeout: 3000
+timeout: 2500
 plimit: 5
 ```
 
@@ -85,7 +85,7 @@ plimit: 5
 - min_blockchain_version: Min blockchain version number e.g. 0.23.0 to decide the validity of a node.
 - max_payload_size: Max payload size.
 - max_jussi_number_diff: The maximum difference of block difference is allowed.
-- loggging_max_body_len: truncate the request.body in log.
+- logging_max_body_len: truncate the request.body in log.
 - retry_count: Retry count for GET and POST forward requests. There is a 100ms between retries.
 - rejectUnauthorized: Should we ignore SSL errors? Default false
 - timeout: Max timeout (milliseconds) for fetch to time out.
