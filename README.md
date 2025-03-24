@@ -1,7 +1,6 @@
 # Steem Load Balancer
 [![Node.js CI](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml)
-[![Node.js CI](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main&event=issues)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml)
-[![Node.js CI](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main&event=pull_request)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml)
+
 ## Overview
 The Steem Load Balancer is a Node.js-based application designed to distribute API requests across a list of predefined Steem Blockchain RPC Nodes. It enhances application availability and reliability by routing requests to the most responsive node. 
 
