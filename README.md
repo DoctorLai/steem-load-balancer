@@ -136,6 +136,9 @@ source ./setup-env.sh
 ./tests/integration-tests.sh
 ```
 
+## Tools
+Tools are placed at [./tools](./tools/) directory.
+
 ## View the Logs
 ```bash
 docker logs -f steem-load-balancer

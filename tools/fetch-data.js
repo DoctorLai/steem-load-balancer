@@ -1,3 +1,13 @@
+/*
+ * This script fetches data from the API server and outputs it as CSV to the console.
+ * The API server URL is provided as a command-line argument.
+ * 
+ * Usage:
+ * node fetch-data.js <API_SERVER>
+ * 
+ * Example:
+ * node fetch-data.js api.steemyy.com
+ */
 const fetch = (...args) => import("node-fetch").then(module => module.default(...args));
 const json2csv = require('json2csv').parse;
 
