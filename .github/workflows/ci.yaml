@@ -15,7 +15,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up environment
-        run: source ./setup-env.sh
+        run: |
+          source ./setup-env.sh
+          echo "STEEM_LB_PATH=$STEEM_LB_PATH" >> $GITHUB_ENV
+          echo "DOCKER_IMAGE=$DOCKER_IMAGE" >> $GITHUB_ENV
+          echo "NODE_ENV=$NODE_ENV" >> $GITHUB_ENV
+          echo "RETRY_COUNT=$RETRY_COUNT" >> $GITHUB_ENV
+          echo "SSL_CERT_PATH=$SSL_CERT_PATH" >> $GITHUB_ENV
+          echo "SSL_KEY_PATH=$SSL_KEY_PATH" >> $GITHUB_ENV
+          echo "HOST_PORT=$HOST_PORT" >> $GITHUB_ENV
 
       - name: Run integration tests
         run: ./tests/integration-tests.sh
