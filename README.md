@@ -117,11 +117,23 @@ docker run --name $DOCKER_IMAGE -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acm
 ```
 ![image](https://github.com/user-attachments/assets/ff6da76b-4506-4452-b742-04eeff7596b5)
 
-## ./build-and-run.sh
+## Build and Run
 Use the following utility to build the docker and then start the server.
 
 ```bash
-./build-and-run.sh
+source ./setup-env.sh
+./build.sh
+./run.sh
+```
+
+## Test
+Use the following script to perform a basic integration test — it builds the Docker image, starts the server locally, sends a request, and verifies that the response has a 'status' of 'OK' with a status code of 200.
+
+```bash
+source ./setup-env.sh
+## on success, exit code is 0.
+## on failure, exit code is 1.
+./tests/integration-tests.sh
 ```
 
 ## View the Logs
