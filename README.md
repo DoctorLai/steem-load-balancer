@@ -268,6 +268,9 @@ Setting NODE_ENV to "production" (by default) or "development".
 ## License
 This project is licensed under the [MIT License](./LICENSE).
 
+## Contributing?
+Contribution are absolutely welcome! Please follow the guidance [here](./CONTRIBUTING.md)
+
 ## Support me
 If you like this and want to support me in continuous development, you can do the following:
 - [Buy me a coffee](https://justyy.com/out/bmc)

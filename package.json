@@ -4,7 +4,8 @@
   "description": "Load Balancer RPC Node for Steem Blockchain",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ."
   },
   "repository": {
     "type": "git",
@@ -27,5 +28,10 @@
     "json2csv": "^6.0.0-alpha.2",
     "node-fetch": "^3.3.2",
     "p-limit": "^6.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "eslint": "^9.23.0",
+    "globals": "^16.0.0"
   }
 }

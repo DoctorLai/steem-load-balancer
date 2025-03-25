@@ -321,7 +321,7 @@ async function forwardRequestGET(apiURL) {
       return { statusCode: res.status, data };
     } catch (error) {
       if (i < retry_count - 1) {
-        log(`Retrying ${url}, attempt ${i + 1}`);
+        log(`Retrying ${apiURL}, attempt ${i + 1}`);
         await sleep(100);
         continue;
       }
@@ -349,7 +349,7 @@ async function forwardRequestPOST(apiURL, body) {
       return { statusCode: res.status, data };
     } catch (error) {
       if (i < retry_count - 1) {
-        log(`Retrying ${url}, attempt ${i + 1}`);
+        log(`Retrying ${apiURL}, attempt ${i + 1}`);
         await sleep(100);
         continue;
       }
@@ -363,7 +363,7 @@ app.head('/', (req, res, next) => {
   next();
 });
 
-function calculatePercentage(accessCounters, totalCounter) {
+function calculatePercentage(accessCounters) {
   const percentageDict = {};
 
   for (let [url, count] of accessCounters) {
@@ -511,7 +511,7 @@ app.all('/', async (req, res) => {
         "month": diff.months,
         "year": diff.years
       },
-      "access_counters": calculatePercentage(access_counters, total_counter),
+      "access_counters": calculatePercentage(access_counters),
       "error_counters": calculateErrorPercentage(error_counters, access_counters),
       "not_chosen_counters": Object.fromEntries(not_chosen_counters),
       "jussi_behind_counters": Object.fromEntries(jussi_behind_counters),
