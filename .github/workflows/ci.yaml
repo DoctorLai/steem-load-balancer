@@ -22,8 +22,8 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run ESLint
-        run: npm run lint
+      - name: Run ESLint with Node.js Environment
+        run: npx eslint . --env node
 
       - name: Set up environment
         run: |
