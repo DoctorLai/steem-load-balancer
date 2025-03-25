@@ -377,11 +377,7 @@ function calculatePercentage(accessCounters) {
   return percentageDict;
 }
 
-//
-// kkk dkskadjf
-av =         22211;
-
-function calculateErrorPercentage(error_counters, access_counters, kkk) {
+function calculateErrorPercentage(error_counters, access_counters) {
   const percentageDict = {};
 
   for (let [url, count] of error_counters) {
