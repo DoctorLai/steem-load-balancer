@@ -127,6 +127,30 @@ source ./setup-env.sh
 ./run.sh
 ```
 
+## Prebuilt Docker Image
+A latest image has been built and store at docker hub, so you can do:
+
+```bash
+docker pull justyy/steem-load-balancer:latest
+```
+
+Then:
+
+```bash
+# Run the steem load balancer node with restart policy
+HOST_PORT=443
+
+docker run \
+    -e NODE_ENV=production \
+    -e SSL_CERT_PATH=$SSL_CERT_PATH \
+    -e SSL_KEY_PATH=$SSL_KEY_PATH \
+    --name steem-load-balancer \
+    --restart on-failure:$RETRY_COUNT \
+    -p $HOST_PORT:8080 \
+    -v /root/.acme.sh/:/root/.acme.sh/ \
+    justyy/steem-load-balancer:latest
+```
+
 ## Test
 Use the following script to perform a basic integration test — it builds the Docker image, starts the server locally, sends a request, and verifies that the response has a 'status' of 'OK' with a status code of 200.
 
