@@ -105,16 +105,16 @@ Update the [config.yaml](./config.yaml) file with your desired nodes, rate limit
 
 ## Build the Docker Image
 ```bash
-DOCKER_IMAGE=steem-load-balancer
+DOCKER_IMAGE_NAME=steem-load-balancer
 HOST_PORT=8080
 
 # Build the Docker image
-docker build -t $DOCKER_IMAGE .
+docker build -t $DOCKER_IMAGE_NAME .
 ```
 
 ## Run the Server
 ```bash
-docker run --name $DOCKER_IMAGE -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
+docker run --name $DOCKER_IMAGE_NAME -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
 ```
 ![image](https://github.com/user-attachments/assets/ff6da76b-4506-4452-b742-04eeff7596b5)
 
@@ -126,6 +126,8 @@ source ./setup-env.sh
 ./build.sh
 ./run.sh
 ```
+
+And also, there are [stop](./stop.sh) and [restart](./restart.sh).
 
 ## Prebuilt Docker Image
 A latest image has been built and store at docker hub, so you can do:
@@ -139,6 +141,7 @@ Then:
 ```bash
 # Run the steem load balancer node with restart policy
 HOST_PORT=443
+RETRY_COUNT=3
 
 docker run \
     -e NODE_ENV=production \

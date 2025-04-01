@@ -10,8 +10,9 @@ docker run \
     -e NODE_ENV=$NODE_ENV \
     -e SSL_CERT_PATH=$SSL_CERT_PATH \
     -e SSL_KEY_PATH=$SSL_KEY_PATH \
-    --name $DOCKER_IMAGE \
+    --name $DOCKER_IMAGE_NAME \
     --restart on-failure:$RETRY_COUNT \
     -p $HOST_PORT:8080 \
     -v /root/.acme.sh/:/root/.acme.sh/ \
+    -v ./config.yaml:/app/config.yaml \
     $DOCKER_IMAGE
