@@ -15,10 +15,16 @@ if ! pushd $STEEM_LB_PATH; then
     exit 1
 fi
 
+echo "Stopping any existing server..."
+./stop.sh || true
+
+echo "Building the docker image..."
 if ! ./build.sh; then
     echo "Failed to build the docker image"
     exit 1
 fi
+
+echo "Starting the server..."
 ./run.sh &
 
 MAX_TIMEOUT_SEC=300

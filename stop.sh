@@ -7,3 +7,4 @@ fi
 
 # Stop the steem load balancer node
 docker stop $DOCKER_IMAGE
+docker rm $DOCKER_IMAGE
