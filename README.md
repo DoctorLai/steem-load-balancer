@@ -105,16 +105,16 @@ Update the [config.yaml](./config.yaml) file with your desired nodes, rate limit
 
 ## Build the Docker Image
 ```bash
-DOCKER_IMAGE_NAME=steem-load-balancer
+DOCKER_IMAGE=steem-load-balancer
 HOST_PORT=8080
 
 # Build the Docker image
-docker build -t $DOCKER_IMAGE_NAME .
+docker build -t $DOCKER_IMAGE .
 ```
 
 ## Run the Server
 ```bash
-docker run --name $DOCKER_IMAGE_NAME -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
+docker run --name $DOCKER_IMAGE -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
 ```
 ![image](https://github.com/user-attachments/assets/ff6da76b-4506-4452-b742-04eeff7596b5)
 

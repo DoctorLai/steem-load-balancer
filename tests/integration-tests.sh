@@ -91,8 +91,7 @@ if ! retry_test send_a_get_request; then
     RESULT=false
 fi
 
-docker kill $DOCKER_IMAGE || true
-docker rm $DOCKER_IMAGE || true
+$STEEM_LB_PATH/stop.sh
 
 if [ "$RESULT" = false ]; then
     echo "Integration tests failed!"
