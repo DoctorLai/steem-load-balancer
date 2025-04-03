@@ -6,5 +6,5 @@ if [ -z "$STEEM_LB_PATH" ]; then
 fi
 
 # Stop the steem load balancer node
-docker stop $DOCKER_IMAGE
+docker kill $DOCKER_IMAGE || true
 docker rm $DOCKER_IMAGE
