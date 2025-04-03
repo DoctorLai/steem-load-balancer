@@ -6,7 +6,7 @@ if [ -z "$STEEM_LB_PATH" ]; then
 fi
 
 # Stop the steem load balancer node
-./stop.sh
+./stop.sh || true
 
 # Start the steem load balancer node
 ./run.sh
