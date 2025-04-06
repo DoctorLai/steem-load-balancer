@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  steem_lb:
+    container_name: ${DOCKER_IMAGE}
+    image: ${DOCKER_IMAGE}
+    build:
+      context: .
+      dockerfile: Dockerfile    
+    restart: on-failure:${RETRY_COUNT}
+    ports:
+      - "${HOST_PORT}:8080"
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - SSL_CERT_PATH=${SSL_CERT_PATH}
+      - SSL_KEY_PATH=${SSL_KEY_PATH}
+    volumes:
+      - /root/.acme.sh/:/root/.acme.sh/
+      - ./config.yaml:/app/config.yaml
