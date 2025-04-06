@@ -154,8 +154,36 @@ docker run \
     justyy/steem-load-balancer:latest
 ```
 
-## Test
-Use the following script to perform a basic integration test — it builds the Docker image, starts the server locally, sends a request, and verifies that the response has a 'status' of 'OK' with a status code of 200.
+## Docker Compose (Optional)
+You can use the `docker-compose` or `docker compose` to build the load balancer:
+
+```bash
+docker-compose up --build -d
+```
+
+This will build and start the steem load balancer.
+
+To view the logs using docker-compose, run:
+
+```bash
+docker-compose logs -f
+```
+
+To restart the docker-compose container, run:
+
+```bash
+docker-compose down  # Stop the containers
+docker-compose up -d  # Start the containers in detached mode
+```
+
+Or simply:
+
+```bash
+docker-compose restart steem_lb
+```
+
+## Tests
+Use the following script i.e. [integration-tests.sh](./tests/integration-tests.sh) to perform a basic integration test — it builds the Docker image, starts the server locally, sends a request, and verifies that the response has a 'status' of 'OK' with a status code of 200.
 
 ```bash
 source ./setup-env.sh
@@ -163,6 +191,8 @@ source ./setup-env.sh
 ## on failure, exit code is 1.
 ./tests/integration-tests.sh
 ```
+
+Use [integration-tests-docker-compose.sh](./tests/integration-tests-docker-compose.sh) to test the steem load balancer via [docker-compose](./docker-compose.yml).
 
 ## Tools
 Tools are placed at [./tools](./tools/) directory.
