@@ -1,4 +1,4 @@
-const { isObjectEmptyOrNullOrUndefined, compareVersion,secondsToTimeDict } = require("../../functions");
+import { secondsToTimeDict, compareVersion, isObjectEmptyOrNullOrUndefined } from "../functions.js";
 
 describe("secondsToTimeDict", () => {
   test("should convert seconds to time dictionary", () => {
