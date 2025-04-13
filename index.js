@@ -1,16 +1,17 @@
-const { Mutex } = require('async-mutex');
-const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
-const fs = require('fs');
-const yaml = require('js-yaml');
-const path = require('path');
-const https = require('https');
-const http = require('http');
-const compression = require('compression');
-const helmet = require('helmet');
-const {
+import { Mutex } from 'async-mutex';
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import fs from 'fs';
+import yaml from 'js-yaml';
+import path from 'path';
+import https from 'https';
+import http from 'http';
+import compression from 'compression';
+import helmet from 'helmet';
+
+import {
   shuffle,
   log,
   compareVersion,
@@ -19,10 +20,14 @@ const {
   sleep,
   isObjectEmptyOrNullOrUndefined,
   fetchWithTimeout
-} = require('./functions');
+} from './functions.js'; // Make sure functions.js uses ES exports
 
-// p-limit library to limit the number of concurrent requests
-const pLimit = (...args) => import("p-limit").then(module => module.default(...args));
+const pLimit = (...args) => import('p-limit').then(module => module.default(...args));
+
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let startTime = new Date();
 log(`Current Time: ${startTime.toISOString()}`);

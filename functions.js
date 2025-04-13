@@ -1,5 +1,4 @@
-const { AbortController } = require('abort-controller');
-// const fetch = require('node-fetch');
+import { AbortController } from 'abort-controller';
 const fetch = (...args) => import("node-fetch").then(module => module.default(...args));
 
 // Shuffle function
@@ -105,7 +104,7 @@ async function fetchWithTimeout(url, options = {}, timeout = 3000) {
   }
 }
 
-module.exports = {
+export {
   shuffle,
   log,
   compareVersion,
@@ -114,4 +113,4 @@ module.exports = {
   sleep,
   isObjectEmptyOrNullOrUndefined,
   fetchWithTimeout
-}
+};
