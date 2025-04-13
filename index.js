@@ -90,18 +90,36 @@ app.use(compression());
 // Protects against common vulnerabilities like XSS and clickjacking.
 app.use(helmet());
 
+app.head('/', (req, res, next) => {
+  req.method = 'GET';
+  next();
+});
+
+
 // Middleware to assume 'Content-Type: application/json' if not provided
-app.use((req, _, next) => {
+app.use((req, res, next) => {
   const now = Date.now();
   requestTimestamps.push(now);
   // Remove timestamps older than 15 minutes (900000 milliseconds)
   const cutoffTime = now - 15 * 60 * 1000;
   requestTimestamps = requestTimestamps.filter(timestamp => timestamp > cutoffTime);
 
-  if (!req.headers['content-type']) {
-    req.headers['content-type'] = 'application/json';
+  const contentType = req.headers['content-type'];
+  if (contentType && contentType.toLowerCase().includes('application/json')) {
+    return express.json()(req, res, next);
   }
-  next();
+
+  let data = '';
+  req.on('data', chunk => data += chunk);
+  req.on('end', () => {
+    try {
+      req.body = data ? JSON.parse(data) : {};
+      next();
+    } catch (e) {
+      console.error('JSON parse failed:', e.message);
+      res.status(400).json({ error: 'Invalid JSON' });
+    }
+  });
 });
 
 // Function to calculate RPS for 1, 5, and 15 minutes
@@ -126,7 +144,6 @@ function calculateRPS() {
 // Configure body-parser to accept larger payloads
 log(`Max Payload Size = ${config.max_payload_size}`);
 app.use(bodyParser.json({ limit: config.max_payload_size })); // For JSON payloads
-app.use(bodyParser.urlencoded({ limit: config.max_payload_size, extended: true })); // For URL-encoded payloads
 
 // Configure rate limiting
 const limiter = rateLimit({
@@ -138,9 +155,6 @@ const limiter = rateLimit({
 
 // Apply the rate limiting middleware to all requests
 app.use(limiter);
-
-// Parse JSON request bodies
-app.use(express.json());
 
 // user agent sent in the header
 const user_agent = config.user_agent ?? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36";
@@ -358,11 +372,6 @@ async function forwardRequestPOST(apiURL, body) {
   }
 }
 
-app.head('/', (req, res, next) => {
-  req.method = 'GET';
-  next();
-});
-
 function calculatePercentage(accessCounters) {
   const percentageDict = {};
 
@@ -458,7 +467,8 @@ app.all('/', async (req, res) => {
     if (method === 'GET') {
       result = await forwardRequestGET(chosenNode.server);
     } else if (method === 'POST') {
-      const body = JSON.stringify(req.body);
+      let reqbody = req.body;
+      const body = JSON.stringify(reqbody);
       log(`Request Body is ${limitStringMaxLength(body, logging_max_body_len)}`);
       result = await forwardRequestPOST(chosenNode.server, body);
     } else {
