@@ -36,6 +36,9 @@ jobs:
           echo "SSL_KEY_PATH=$SSL_KEY_PATH" >> $GITHUB_ENV
           echo "HOST_PORT=$HOST_PORT" >> $GITHUB_ENV
 
+      - name: Run unit tests
+        run: NODE_ENV=production npm test
+
       - name: Run integration tests
         run: ./tests/integration-tests.sh
 

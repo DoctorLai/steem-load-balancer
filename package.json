@@ -4,13 +4,14 @@
   "description": "Load Balancer RPC Node for Steem Blockchain",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --config jest.config.mjs",
     "lint": "eslint ."
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DoctorLai/steem-load-balancer.git"
   },
+  "type": "module",
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -30,8 +31,19 @@
     "p-limit": "^6.2.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.23.0",
+    "@babel/core": "^7.26.10",
+    "@babel/preset-env": "^7.26.9",
+    "@eslint/js": "^9.24.0",
+    "babel-jest": "^29.7.0",
     "eslint": "^9.23.0",
-    "globals": "^16.0.0"
+    "globals": "^16.0.0",
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "transform": {},
+    "extensionsToTreatAsEsm": [
+      ".js"
+    ],
+    "testEnvironment": "node"
   }
 }

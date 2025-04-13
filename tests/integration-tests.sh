@@ -50,6 +50,9 @@ echo "Server is up and running"
 ## Running all Tests
 source $STEEM_LB_PATH/tests/tests.sh
 
+popd
+
+echo "Stopping the server..."
 $STEEM_LB_PATH/stop.sh
 
 if [ "$RESULT" = false ]; then

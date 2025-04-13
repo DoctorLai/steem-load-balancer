@@ -1,5 +1,6 @@
 // eslint.config.js
 import js from "@eslint/js";
+import globals from 'globals';
 
 export default [
   js.configs.recommended,
@@ -22,4 +23,17 @@ export default [
       "no-console": "off",
     },
   },
+  {
+    // Jest-specific config
+    files: ['**/*.test.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        ...globals.node,
+        ...globals.jest,  // 👈 this is the key to fixing `describe`, `test`, `expect`
+      },
+    },
+  }  
 ];
+

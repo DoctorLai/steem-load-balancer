@@ -1,5 +1,4 @@
-const { AbortController } = require('abort-controller');
-// const fetch = require('node-fetch');
+import { AbortController } from 'abort-controller';
 const fetch = (...args) => import("node-fetch").then(module => module.default(...args));
 
 // Shuffle function
@@ -85,13 +84,6 @@ function sleep(ms) {
 }
 
 function isObjectEmptyOrNullOrUndefined(obj) {
-  // console.log(isObjectEmptyOrNullOrUndefined(null)); // true
-  // console.log(isObjectEmptyOrNullOrUndefined(undefined)); // true
-  // console.log(isObjectEmptyOrNullOrUndefined({})); // true (empty object)
-  // console.log(isObjectEmptyOrNullOrUndefined([])); // false (an array is not considered empty)
-  // console.log(isObjectEmptyOrNullOrUndefined({ a: 1 })); // false (not empty)
-  // console.log(isObjectEmptyOrNullOrUndefined(0)); // false (not an object)
-  // console.log(isObjectEmptyOrNullOrUndefined("")); // false (not an object)
   return (obj == null) || (typeof obj === "object" && Object.keys(obj).length === 0);
 }
 
@@ -112,7 +104,7 @@ async function fetchWithTimeout(url, options = {}, timeout = 3000) {
   }
 }
 
-module.exports = {
+export {
   shuffle,
   log,
   compareVersion,
@@ -121,4 +113,4 @@ module.exports = {
   sleep,
   isObjectEmptyOrNullOrUndefined,
   fetchWithTimeout
-}
+};

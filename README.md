@@ -194,6 +194,10 @@ source ./setup-env.sh
 
 Use [integration-tests-docker-compose.sh](./tests/integration-tests-docker-compose.sh) to test the steem load balancer via [docker-compose](./docker-compose.yml).
 
+## Unit Tests
+Run `npm test` to run the unit tests on the project.
+
+
 ## Tools
 Tools are placed at [./tools](./tools/) directory.
 
