@@ -49,6 +49,7 @@ const mutexTotalCounter = new Mutex();
 const mutexNotChosenCounter = new Mutex();
 const mutexJussiBehindCounter = new Mutex();
 const mutexTimedOutCounter = new Mutex();
+const mutexCacheLastNode = new Mutex();
 
 // Initialize queues to store request timestamps
 let requestTimestamps = [];
@@ -56,7 +57,7 @@ let requestTimestamps = [];
 // Read the YAML config file
 const configPath = path.join(__dirname, 'config.yaml');
 
-// Load the YAML file content
+// Load the YAML file content with environment variable replacement
 let config = yaml.load(fs.readFileSync(configPath, 'utf8'));
 
 // Replace environment variables in the loaded config
@@ -78,7 +79,7 @@ log(`Timeout: ${timeout}`);
 // caching
 const cache = config.cache ?? { "enabled": false, "ttl": 3 };
 const cacheEnabled = cache.enabled ?? false;
-const cacheMaxAge = parseFloat(cache.ttl ?? 3);
+const cacheMaxAge = cache.ttl ?? 3;
 const cacheLastNode = new Map();
 
 log(`Cache Enabled: ${cacheEnabled}`);
@@ -439,15 +440,17 @@ app.all('/', async (req, res) => {
   // caching the last chosen node, should we just cache the last node regardless of the method and ip?
   const cacheKey = `${ip}-${method}`;
   if (cacheEnabled) {
-    if (cacheLastNode.has(cacheKey)) {
-      const cachedNode = cacheLastNode.get(cacheKey);
-      log("Cached node found: ", cachedNode);
-      if (Date.now() - cachedNode.timestamp < cacheMaxAge * 1000) {
-        log(`Using cached node: ${cachedNode.server}`);
-        log(`Last timestamp: ${cachedNode.timestamp}`);
-        chosenNode = cachedNode;
+    await mutexCacheLastNode.runExclusive(() => {
+      if (cacheLastNode.has(cacheKey)) {
+        const cachedNode = cacheLastNode.get(cacheKey);        
+        if (Date.now() - cachedNode.timestamp < cacheMaxAge * 1000) {
+          log("Cached node found: ", cachedNode);
+          log(`Using cached node: ${cachedNode.server}`);
+          log(`Last timestamp: ${cachedNode.timestamp}`);
+          chosenNode = cachedNode;
+        }
       }
-    }
+    });
   }
   if (chosenNode == null) {
     const plimit = await pLimit(config.plimit);
@@ -467,7 +470,9 @@ app.all('/', async (req, res) => {
         return;
     }
     if (cacheEnabled) {
-      cacheLastNode.set(cacheKey, chosenNode);
+      await mutexCacheLastNode.runExclusive(() => {
+        cacheLastNode.set(cacheKey, chosenNode);
+      });
     }
   }
   log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server} - jussi_number: ${chosenNode.jussi_number}`);

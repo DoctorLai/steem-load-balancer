@@ -40,12 +40,16 @@ jobs:
         run: NODE_ENV=production npm test
 
       - name: Run integration tests
-        run: ./tests/integration-tests.sh
+        run: |
+          cd ./tests/
+          ./run-tests.sh ./integration-tests.sh
 
       - name: Install docker-compose
         run: |
           sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
           sudo chmod +x /usr/local/bin/docker-compose
 
-      - name: Run integration tests (docker-compose)
-        run: ./tests/integration-tests-docker-compose.sh
+      - name: Run integration tests (Docker Compose)
+        run: |
+          cd ./tests/
+          ./run-tests.sh ./integration-tests-docker-compose.sh

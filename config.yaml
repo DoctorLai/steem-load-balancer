@@ -30,5 +30,5 @@ rejectUnauthorized: false
 timeout: 2500
 plimit: 5
 cache:
-  enabled: true
-  ttl: 3
+  enabled: ${CACHE_ENABLED}
+  ttl: ${CACHE_TTL}

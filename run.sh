@@ -10,6 +10,8 @@ docker run \
     -e NODE_ENV=$NODE_ENV \
     -e SSL_CERT_PATH=$SSL_CERT_PATH \
     -e SSL_KEY_PATH=$SSL_KEY_PATH \
+    -e CACHE_ENABLED=$CACHE_ENABLED \
+    -e CACHE_TTL=$CACHE_TTL \
     --name $DOCKER_IMAGE \
     --restart on-failure:$RETRY_COUNT \
     -p $HOST_PORT:8080 \
