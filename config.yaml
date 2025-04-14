@@ -29,3 +29,6 @@ sslKeyPath: "${SSL_KEY_PATH}"
 rejectUnauthorized: false
 timeout: 2500
 plimit: 5
+cache:
+  enabled: true
+  ttl: 3
