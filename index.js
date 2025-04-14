@@ -76,8 +76,8 @@ const timeout = config.timeout ?? 3000;
 log(`Timeout: ${timeout}`);
 
 // caching
-const cache = config.cache ?? { "enabled": false, "maxAge": 3600 };
-const cacheEnabled = cache.enabled;
+const cache = config.cache ?? { "enabled": false, "ttl": 3 };
+const cacheEnabled = cache.enabled ?? false;
 const cacheMaxAge = parseFloat(cache.ttl ?? 3);
 const cacheLastNode = new Map();
 
