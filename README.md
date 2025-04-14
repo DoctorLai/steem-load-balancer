@@ -70,6 +70,9 @@ sslKeyPath: "${SSL_KEY_PATH}"
 rejectUnauthorized: false
 timeout: 2500
 plimit: 5
+cache:
+  enabled: true
+  ttl: 3
 ```
 
 ### Configuration Options
@@ -91,6 +94,8 @@ plimit: 5
 - rejectUnauthorized: Should we ignore SSL errors? Default false
 - timeout: Max timeout (milliseconds) for fetch to time out.
 - plimit: Max concurrent requests to poke the servers. Reduce this if the server is laggy.
+- cache.enabled: Should we cache the chosen Node?
+- cache.ttl: When cache.enabled, how many seconds before cache expires.
 
 ## Installation
 Clone the Repository:

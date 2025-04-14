@@ -75,6 +75,17 @@ log(`Reject Unauthorized: ${rejectUnauthorized}`);
 const timeout = config.timeout ?? 3000;
 log(`Timeout: ${timeout}`);
 
+// caching
+const cache = config.cache ?? { "enabled": false, "maxAge": 3600 };
+const cacheEnabled = cache.enabled;
+const cacheMaxAge = parseFloat(cache.ttl ?? 3);
+const cacheLastNode = new Map();
+
+log(`Cache Enabled: ${cacheEnabled}`);
+if (cacheEnabled) {
+  log(`Cache Max Age: ${cacheMaxAge}`);
+}
+
 // Extract configuration values
 const nodes = config.nodes;
 const rateLimitConfig = config.rateLimit;
@@ -423,21 +434,41 @@ app.all('/', async (req, res) => {
   const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown IP';
   const method = req.method.toUpperCase();
   const shuffledNodes = shuffle(nodes);
+  let chosenNode = null;
 
-  const plimit = await pLimit(config.plimit);
-  const promises = shuffledNodes.map(node => plimit(() => getServerData(node)));
-  let chosenNode = await Promise.any(promises).catch((error) => {
-    log(`Error: ${error.message}`);
-    return null;
-  });
-  if (isObjectEmptyOrNullOrUndefined(chosenNode) ||
-      isObjectEmptyOrNullOrUndefined(chosenNode.server) ||
-      isObjectEmptyOrNullOrUndefined(chosenNode.version) ||
-      isObjectEmptyOrNullOrUndefined(chosenNode.jussi_number)
-    ) {
-      // return 500
-      res.status(500).json({ error: "No valid node found" });
-      return;
+  // caching the last chosen node, should we just cache the last node regardless of the method and ip?
+  const cacheKey = `${ip}-${method}`;
+  if (cacheEnabled) {
+    if (cacheLastNode.has(cacheKey)) {
+      const cachedNode = cacheLastNode.get(cacheKey);
+      log("Cached node found: ", cachedNode);
+      if (Date.now() - cachedNode.timestamp < cacheMaxAge * 1000) {
+        log(`Using cached node: ${cachedNode.server}`);
+        log(`Last timestamp: ${cachedNode.timestamp}`);
+        chosenNode = cachedNode;
+      }
+    }
+  }
+  if (chosenNode == null) {
+    const plimit = await pLimit(config.plimit);
+    const promises = shuffledNodes.map(node => plimit(() => getServerData(node)));
+    chosenNode = await Promise.any(promises).catch((error) => {
+      log(`Error: ${error.message}`);
+      return null;
+    });
+    chosenNode.timestamp = Date.now();
+    if (isObjectEmptyOrNullOrUndefined(chosenNode) ||
+        isObjectEmptyOrNullOrUndefined(chosenNode.server) ||
+        isObjectEmptyOrNullOrUndefined(chosenNode.version) ||
+        isObjectEmptyOrNullOrUndefined(chosenNode.jussi_number)
+      ) {
+        // return 500
+        res.status(500).json({ error: "No valid node found" });
+        return;
+    }
+    if (cacheEnabled) {
+      cacheLastNode.set(cacheKey, chosenNode);
+    }
   }
   log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server} - jussi_number: ${chosenNode.jussi_number}`);
   log(`Current Max Jussi: ${current_max_jussi}`);
