@@ -40,8 +40,9 @@ done
 
 echo "Server is up and running"
 
-## Running all Tests
+## Run the integration tests
 source $STEEM_LB_PATH/tests/tests.sh
+
 popd
 
 echo "Stopping the server..."
