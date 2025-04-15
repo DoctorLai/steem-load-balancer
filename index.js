@@ -458,8 +458,7 @@ app.all('/', async (req, res) => {
     chosenNode = await Promise.any(promises).catch((error) => {
       log(`Error: ${error.message}`);
       return null;
-    });
-    chosenNode.timestamp = Date.now();
+    });    
     if (isObjectEmptyOrNullOrUndefined(chosenNode) ||
         isObjectEmptyOrNullOrUndefined(chosenNode.server) ||
         isObjectEmptyOrNullOrUndefined(chosenNode.version) ||
@@ -469,6 +468,7 @@ app.all('/', async (req, res) => {
         res.status(500).json({ error: "No valid node found" });
         return;
     }
+    chosenNode.timestamp = Date.now();
     if (cacheEnabled) {
       await mutexCacheLastNode.runExclusive(() => {
         cacheLastNode.set(cacheKey, chosenNode);
