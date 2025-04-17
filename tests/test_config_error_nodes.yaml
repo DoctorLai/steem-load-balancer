@@ -1,0 +1,22 @@
+nodes:
+  - https://example.com
+rateLimit:
+  windowMs: 30000
+  maxRequests: 600
+version: "2025-03-07"
+max_age: 3
+logging: true
+max_payload_size: "5mb"
+max_jussi_number_diff: 500
+min_blockchain_version: "0.23.0"
+logging_max_body_len: 100
+retry_count: 3
+user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+sslCertPath: "${SSL_CERT_PATH}"
+sslKeyPath: "${SSL_KEY_PATH}"
+rejectUnauthorized: false
+timeout: 2500
+plimit: 5
+cache:
+  enabled: ${CACHE_ENABLED}
+  ttl: ${CACHE_TTL}

@@ -5,6 +5,19 @@ if [ -z "$STEEM_LB_PATH" ]; then
     exit 1
 fi
 
+config="$STEEM_LB_PATH/config.yaml"
+
+if [ -z "$1" ]; then
+    echo "No config file provided. Using default: $config"
+else
+    config="$1"
+fi
+
+if [ ! -f "$config" ]; then
+    echo "Config file $config does not exist"
+    exit 1
+fi
+
 # Run the steem load balancer node with restart policy
 docker run \
     -e NODE_ENV=$NODE_ENV \
@@ -16,5 +29,5 @@ docker run \
     --restart on-failure:$RETRY_COUNT \
     -p $HOST_PORT:8080 \
     -v /root/.acme.sh/:/root/.acme.sh/ \
-    -v ./config.yaml:/app/config.yaml \
+    -v $config:/app/config.yaml \
     $DOCKER_IMAGE

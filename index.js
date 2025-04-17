@@ -88,7 +88,11 @@ if (cacheEnabled) {
 }
 
 // Extract configuration values
-const nodes = config.nodes;
+const nodes = config.nodes ?? [];
+if (!Array.isArray(nodes) || nodes.length === 0) {
+  log("No nodes provided in the configuration.");
+  process.exit(1);
+}
 const rateLimitConfig = config.rateLimit;
 
 const app = express();

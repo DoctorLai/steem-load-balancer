@@ -9,6 +9,8 @@ if [ -z "$STEEM_LB_PATH" ]; then
     exit 1
 fi
 
+source $STEEM_LB_PATH/tests/retry-tests.sh
+
 ## build-and-run
 if ! pushd $STEEM_LB_PATH; then
     echo "Failed to pushd to $STEEM_LB_PATH"
