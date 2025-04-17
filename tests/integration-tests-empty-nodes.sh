@@ -9,7 +9,7 @@ if [ -z "$STEEM_LB_PATH" ]; then
     exit 1
 fi
 
-source ./retry-tests.sh
+source $STEEM_LB_PATH/tests/retry-tests.sh
 
 ## build-and-run
 if ! pushd $STEEM_LB_PATH; then
@@ -27,30 +27,19 @@ if ! ./build.sh; then
 fi
 
 echo "Starting the server..."
-./run.sh &
 
-MAX_TIMEOUT_SEC=300
-while :
-do
-    echo "Waiting for the server to start..."
-    # check $DOCKER_IMAGE status via docker ps
-    status=$(docker ps | grep $DOCKER_IMAGE | awk '{print $7}')
-    if [ "$status" == "Up" ]; then
-        break
-    fi
-    ## check if timeout
-    if [ $MAX_TIMEOUT_SEC -le 0 ]; then
-        echo "Timeout: Server did not start"
-        exit 1
-    fi
-    MAX_TIMEOUT_SEC=$((MAX_TIMEOUT_SEC-1))
-    sleep 1
-done
+./run.sh $STEEM_LB_PATH/tests/test_config_empty_list.yaml &
 
-echo "Server is up and running"
+sleep 5
 
-## Run the integration tests
-source $STEEM_LB_PATH/tests/tests.sh
+count=$(docker logs steem-load-balancer | grep "No nodes provided in the configuration." | wc -l)
+if [ "$count" -gt 0 ]; then
+    echo "Server started successfully with empty node list"
+    RESULT=true
+else
+    echo "Failed: Server started successfully with empty node list"
+    RESULT=false
+fi
 
 popd
 

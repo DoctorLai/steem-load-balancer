@@ -44,6 +44,17 @@ jobs:
           cd ./tests/
           ./run-tests.sh ./integration-tests.sh
 
+      - name: Run integration tests (Empty Nodes in config.yaml)
+        run: |
+          cd ./tests/
+          ./run-tests.sh ./integration-tests-empty-nodes.sh
+
+      - name: Run integration tests (No Valid Nodes in config.yaml)
+        run: |
+          cd ./tests/
+          echo "No valid node found"
+          ./run-tests.sh ./integration-tests-error-nodes.sh
+
       - name: Install docker-compose
         run: |
           sudo curl -L "https://github.com/docker/compose/releases/download/v2.24.5/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
