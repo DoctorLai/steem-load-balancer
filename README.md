@@ -1,6 +1,8 @@
 # Steem Load Balancer
 [![Node.js CI](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml)
 
+Here is the [AI-generated documentation](https://deepwiki.com/DoctorLai/steem-load-balancer/) by Deep-Wiki.
+
 ## Overview
 The Steem Load Balancer is a Node.js-based application designed to distribute API requests across a list of predefined Steem Blockchain RPC Nodes. It enhances application availability and reliability by routing requests to the most responsive node. 
 
@@ -201,7 +203,6 @@ Use [integration-tests-docker-compose.sh](./tests/integration-tests-docker-compo
 
 ## Unit Tests
 Run `npm test` to run the unit tests on the project.
-
 
 ## Tools
 Tools are placed at [./tools](./tools/) directory.
