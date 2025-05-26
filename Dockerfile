@@ -16,7 +16,6 @@ RUN npm install p-limit
 RUN npm install js-yaml
 RUN npm install compression
 RUN npm install helmet
-RUN npm install prettier
 
 # Copy the rest of the application
 COPY . .
