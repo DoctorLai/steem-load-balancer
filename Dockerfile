@@ -16,7 +16,6 @@ RUN npm install p-limit
 RUN npm install js-yaml
 RUN npm install compression
 RUN npm install helmet
-RUN npm install eslint --save-dev
 
 # Copy the rest of the application
 COPY . .
@@ -28,4 +27,4 @@ EXPOSE 8080
 ENV NODE_ENV=production
 
 # Entry
-CMD ["node", "index.js"]
+CMD ["node", "src/index.js"]

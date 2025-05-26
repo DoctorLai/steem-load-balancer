@@ -1,15 +1,15 @@
-import { Mutex } from 'async-mutex';
-import express from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import fs from 'fs';
-import yaml from 'js-yaml';
-import path from 'path';
-import https from 'https';
-import http from 'http';
-import compression from 'compression';
-import helmet from 'helmet';
+import { Mutex } from "async-mutex";
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
+import fs from "fs";
+import yaml from "js-yaml";
+import path from "path";
+import https from "https";
+import http from "http";
+import compression from "compression";
+import helmet from "helmet";
 
 import {
   shuffle,
@@ -19,12 +19,13 @@ import {
   secondsToTimeDict,
   sleep,
   isObjectEmptyOrNullOrUndefined,
-  fetchWithTimeout
-} from './functions.js'; // Make sure functions.js uses ES exports
+  fetchWithTimeout,
+} from "./functions.js"; // Make sure functions.js uses ES exports
 
-const pLimit = (...args) => import('p-limit').then(module => module.default(...args));
+const pLimit = (...args) =>
+  import("p-limit").then((module) => module.default(...args));
 
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,21 +55,30 @@ const mutexCacheLastNode = new Mutex();
 // Initialize queues to store request timestamps
 let requestTimestamps = [];
 
-// Read the YAML config file
-const configPath = path.join(__dirname, 'config.yaml');
+// Read the YAML config file located one level up from the current directory
+const configPath = path.join(__dirname, "../config.yaml");
+if (!fs.existsSync(configPath)) {
+  console.error(`Configuration file not found at ${configPath}`);
+  process.exit(1);
+}
 
 // Load the YAML file content with environment variable replacement
-let config = yaml.load(fs.readFileSync(configPath, 'utf8'));
+let config = yaml.load(fs.readFileSync(configPath, "utf8"));
 
 // Replace environment variables in the loaded config
-config = JSON.parse(JSON.stringify(config).replace(/\$\{(.+?)\}/g, (_, name) => process.env[name]));
+config = JSON.parse(
+  JSON.stringify(config).replace(
+    /\$\{(.+?)\}/g,
+    (_, name) => process.env[name],
+  ),
+);
 
 log(`PLimit: ${config.plimit}`);
 
 const rejectUnauthorized = config.rejectUnauthorized ?? false;
 
 const agent = new https.Agent({
-  rejectUnauthorized: rejectUnauthorized
+  rejectUnauthorized: rejectUnauthorized,
 });
 
 log(`Reject Unauthorized: ${rejectUnauthorized}`);
@@ -77,7 +87,7 @@ const timeout = config.timeout ?? 3000;
 log(`Timeout: ${timeout}`);
 
 // caching
-const cache = config.cache ?? { "enabled": false, "ttl": 3 };
+const cache = config.cache ?? { enabled: false, ttl: 3 };
 const cacheEnabled = cache.enabled ?? false;
 const cacheMaxAge = cache.ttl ?? 3;
 const cacheLastNode = new Map();
@@ -111,11 +121,10 @@ app.use(compression());
 // Protects against common vulnerabilities like XSS and clickjacking.
 app.use(helmet());
 
-app.head('/', (req, res, next) => {
-  req.method = 'GET';
+app.head("/", (req, res, next) => {
+  req.method = "GET";
   next();
 });
-
 
 // Middleware to assume 'Content-Type: application/json' if not provided
 app.use((req, res, next) => {
@@ -123,22 +132,24 @@ app.use((req, res, next) => {
   requestTimestamps.push(now);
   // Remove timestamps older than 15 minutes (900000 milliseconds)
   const cutoffTime = now - 15 * 60 * 1000;
-  requestTimestamps = requestTimestamps.filter(timestamp => timestamp > cutoffTime);
+  requestTimestamps = requestTimestamps.filter(
+    (timestamp) => timestamp > cutoffTime,
+  );
 
-  const contentType = req.headers['content-type'];
-  if (contentType && contentType.toLowerCase().includes('application/json')) {
+  const contentType = req.headers["content-type"];
+  if (contentType && contentType.toLowerCase().includes("application/json")) {
     return express.json()(req, res, next);
   }
 
-  let data = '';
-  req.on('data', chunk => data += chunk);
-  req.on('end', () => {
+  let data = "";
+  req.on("data", (chunk) => (data += chunk));
+  req.on("end", () => {
     try {
       req.body = data ? JSON.parse(data) : {};
       next();
     } catch (e) {
-      console.error('JSON parse failed:', e.message);
-      res.status(400).json({ error: 'Invalid JSON' });
+      console.error("JSON parse failed:", e.message);
+      res.status(400).json({ error: "Invalid JSON" });
     }
   });
 });
@@ -148,15 +159,19 @@ function calculateRPS() {
   const now = Date.now();
 
   const intervals = {
-    '1min': now - 1 * 60 * 1000,
-    '5min': now - 5 * 60 * 1000,
-    '15min': now - 15 * 60 * 1000,
+    "1min": now - 1 * 60 * 1000,
+    "5min": now - 5 * 60 * 1000,
+    "15min": now - 15 * 60 * 1000,
   };
 
   const rps = {};
   for (const [key, intervalStart] of Object.entries(intervals)) {
-    const requestsInInterval = requestTimestamps.filter(timestamp => timestamp > intervalStart).length;
-    rps[key] = parseFloat((requestsInInterval / (parseInt(key) * 60)).toFixed(2)); // requests per second
+    const requestsInInterval = requestTimestamps.filter(
+      (timestamp) => timestamp > intervalStart,
+    ).length;
+    rps[key] = parseFloat(
+      (requestsInInterval / (parseInt(key) * 60)).toFixed(2),
+    ); // requests per second
   }
 
   return rps;
@@ -169,7 +184,7 @@ app.use(bodyParser.json({ limit: config.max_payload_size })); // For JSON payloa
 // Configure rate limiting
 const limiter = rateLimit({
   windowMs: rateLimitConfig.windowMs, // Time window in milliseconds
-  max: rateLimitConfig.maxRequests,   // Max requests per windowMs
+  max: rateLimitConfig.maxRequests, // Max requests per windowMs
   message: { error: "Too Many Requests", errorCode: 429 },
   headers: true,
 });
@@ -178,7 +193,9 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // user agent sent in the header
-const user_agent = config.user_agent ?? "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36";
+const user_agent =
+  config.user_agent ??
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36";
 // max jussi difference to check for validity
 const max_jussi_number_diff = config.max_jussi_number_diff ?? 100;
 // min blockchain version
@@ -200,29 +217,43 @@ log(`Nodes: ${config.nodes}`);
 // Fetch version from the server
 async function getServerData(server) {
   try {
-    const versionPromise = fetchWithTimeout(server, {
-      method: 'POST',
-      cache: 'no-cache',
-      mode: 'cors',
-      redirect: "follow",
-      headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
-      body: JSON.stringify({
-        id: 0,
-        jsonrpc: "2.0",
-        method: "call",
-        params: ["login_api", "get_version", []]
-      }),
-      agent,
-    }, timeout);
+    const versionPromise = fetchWithTimeout(
+      server,
+      {
+        method: "POST",
+        cache: "no-cache",
+        mode: "cors",
+        redirect: "follow",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": user_agent,
+        },
+        body: JSON.stringify({
+          id: 0,
+          jsonrpc: "2.0",
+          method: "call",
+          params: ["login_api", "get_version", []],
+        }),
+        agent,
+      },
+      timeout,
+    );
 
-    const jussiPromise = fetchWithTimeout(server, {
-      method: 'GET',
-      cache: 'no-cache',
-      mode: 'cors',
-      redirect: "follow",
-      headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
-      agent,
-    }, timeout);
+    const jussiPromise = fetchWithTimeout(
+      server,
+      {
+        method: "GET",
+        cache: "no-cache",
+        mode: "cors",
+        redirect: "follow",
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": user_agent,
+        },
+        agent,
+      },
+      timeout,
+    );
 
     // log(jsonResponse);
     // {
@@ -236,13 +267,19 @@ async function getServerData(server) {
     // }
 
     // Wait for both fetches to complete
-    const [versionResponse, jussiResponse] = await Promise.all([versionPromise, jussiPromise]);
+    const [versionResponse, jussiResponse] = await Promise.all([
+      versionPromise,
+      jussiPromise,
+    ]);
 
     if (!versionResponse.ok) {
       let err_msg = `Server ${server} (version) responded with status: ${versionResponse.status}`;
       log(err_msg);
       await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+        not_chosen_counters.set(
+          server,
+          (not_chosen_counters.get(server) ?? 0) + 1,
+        );
       });
       throw new Error(err_msg);
     }
@@ -251,18 +288,27 @@ async function getServerData(server) {
       let err_msg = `Server ${server} (jussi_number) responded with status: ${jussiResponse.status}`;
       log(err_msg);
       await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+        not_chosen_counters.set(
+          server,
+          (not_chosen_counters.get(server) ?? 0) + 1,
+        );
       });
       throw new Error(err_msg);
     }
 
     const jsonResponse = await versionResponse.json();
 
-    if (isObjectEmptyOrNullOrUndefined(jsonResponse) || isObjectEmptyOrNullOrUndefined(jsonResponse["result"])) {
+    if (
+      isObjectEmptyOrNullOrUndefined(jsonResponse) ||
+      isObjectEmptyOrNullOrUndefined(jsonResponse["result"])
+    ) {
       let err_msg = `Server ${server} Invalid version response: ${JSON.stringify(jsonResponse)}`;
       log(err_msg);
       await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+        not_chosen_counters.set(
+          server,
+          (not_chosen_counters.get(server) ?? 0) + 1,
+        );
       });
       throw new Error(err_msg);
     }
@@ -272,7 +318,10 @@ async function getServerData(server) {
       let err_msg = `Server ${server} version = ${blockchain_version}: but min version is ${min_blockchain_version}`;
       log(err_msg);
       await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+        not_chosen_counters.set(
+          server,
+          (not_chosen_counters.get(server) ?? 0) + 1,
+        );
       });
       throw new Error(err_msg);
     }
@@ -282,7 +331,10 @@ async function getServerData(server) {
       let err_msg = `Server ${server} Invalid jussi response: ${JSON.stringify(jussi)}`;
       log(err_msg);
       await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+        not_chosen_counters.set(
+          server,
+          (not_chosen_counters.get(server) ?? 0) + 1,
+        );
       });
       throw new Error(err_msg);
     }
@@ -290,21 +342,27 @@ async function getServerData(server) {
       let err_msg = `Server ${server} Jussi Status != "OK": ${JSON.stringify(jussi)}`;
       log(err_msg);
       await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(server, (not_chosen_counters.get(server) ?? 0) + 1);
+        not_chosen_counters.set(
+          server,
+          (not_chosen_counters.get(server) ?? 0) + 1,
+        );
       });
       throw new Error(err_msg);
     }
     let jussi_number = jussi["jussi_num"];
 
     log(`Server ${server} jussi_number: ${jussi_number}`);
-    if (typeof jussi_number === 'number' && Number.isInteger(jussi_number)) {
+    if (typeof jussi_number === "number" && Number.isInteger(jussi_number)) {
       jussi_number = parseInt(jussi_number);
     }
 
     if (jussi_number === 20000000) {
       let err_msg = `Server ${server} Invalid jussi_number value (20000000): ${jussi_number}`;
       await mutexJussiBehindCounter.runExclusive(() => {
-        jussi_behind_counters.set(server, (jussi_behind_counters.get(server) ?? 0) + 1);
+        jussi_behind_counters.set(
+          server,
+          (jussi_behind_counters.get(server) ?? 0) + 1,
+        );
       });
       throw new Error(err_msg);
     }
@@ -317,21 +375,29 @@ async function getServerData(server) {
       let err_msg = `Server ${server} is too far behind: jussi_number ${jussi_number} vs latest ${current_max_jussi} - diff ${current_max_jussi - jussi_number}`;
       log(err_msg);
       await mutexJussiBehindCounter.runExclusive(() => {
-        jussi_behind_counters.set(server, (jussi_behind_counters.get(server) ?? 0) + 1);
+        jussi_behind_counters.set(
+          server,
+          (jussi_behind_counters.get(server) ?? 0) + 1,
+        );
       });
       throw new Error(err_msg);
     }
 
-    log(`Tested OK: Server ${server} version=${blockchain_version}, jussi_number=${jussi_number}`);
+    log(
+      `Tested OK: Server ${server} version=${blockchain_version}, jussi_number=${jussi_number}`,
+    );
     return { server, version: jsonResponse, jussi_number };
   } catch (error) {
     let err_msg = `${error.name}: Server ${server} Failed to fetch version from ${server}: ${error.message}`;
     log(err_msg);
-    if (error.name === 'AbortError') {
+    if (error.name === "AbortError") {
       err_msg = `Fetch request to ${server} timed out after ${timeout} ms`;
       log(err_msg);
       await mutexTimedOutCounter.runExclusive(() => {
-        timed_out_counters.set(server, (timed_out_counters.get(server) ?? 0) + 1);
+        timed_out_counters.set(
+          server,
+          (timed_out_counters.get(server) ?? 0) + 1,
+        );
       });
     }
     throw new Error(err_msg);
@@ -343,14 +409,21 @@ async function forwardRequestGET(apiURL) {
   for (let i = 0; i < retry_count; ++i) {
     try {
       log(`GET: Forwarding to ${apiURL}`);
-      const res = await fetchWithTimeout(apiURL, {
-        method: 'GET',
-        cache: 'no-cache',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
-        redirect: "follow",
-        agent,
-      }, timeout);
+      const res = await fetchWithTimeout(
+        apiURL,
+        {
+          method: "GET",
+          cache: "no-cache",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": user_agent,
+          },
+          redirect: "follow",
+          agent,
+        },
+        timeout,
+      );
       const data = await res.text();
       log(`Status: ${res.status}`);
       return { statusCode: res.status, data };
@@ -369,16 +442,25 @@ async function forwardRequestGET(apiURL) {
 async function forwardRequestPOST(apiURL, body) {
   for (let i = 0; i < retry_count; ++i) {
     try {
-      log(`POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, logging_max_body_len)}`);
-      const res = await fetchWithTimeout(apiURL, {
-        method: 'POST',
-        cache: 'no-cache',
-        mode: 'cors',
-        headers: { 'Content-Type': 'application/json', 'User-Agent': user_agent },
-        redirect: "follow",
-        body: body,
-        agent,
-      }, timeout);
+      log(
+        `POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, logging_max_body_len)}`,
+      );
+      const res = await fetchWithTimeout(
+        apiURL,
+        {
+          method: "POST",
+          cache: "no-cache",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+            "User-Agent": user_agent,
+          },
+          redirect: "follow",
+          body: body,
+          agent,
+        },
+        timeout,
+      );
       log(`Status: ${res.status}`);
       const data = await res.text();
       return { statusCode: res.status, data };
@@ -399,9 +481,9 @@ function calculatePercentage(accessCounters) {
   for (let [url, count] of accessCounters) {
     let percentage = (count / total_counter) * 100;
     percentageDict[url] = {
-      "percent": parseFloat(percentage.toFixed(2)),
-      "count": count
-    }
+      percent: parseFloat(percentage.toFixed(2)),
+      count: count,
+    };
   }
 
   return percentageDict;
@@ -415,18 +497,18 @@ function calculateErrorPercentage(error_counters, access_counters) {
     if (totalRequests > 0) {
       let percentage = (count / totalRequests) * 100;
       percentageDict[url] = {
-        "errRate": parseFloat(percentage.toFixed(3)),
-        "total": totalRequests,
-        "errorCount": count,
-        "succRate": parseFloat((100 - percentage).toFixed(3))
-      }
+        errRate: parseFloat(percentage.toFixed(3)),
+        total: totalRequests,
+        errorCount: count,
+        succRate: parseFloat((100 - percentage).toFixed(3)),
+      };
     } else {
       // If there are no requests, set rates to zero
       percentageDict[url] = {
-        "errRate": 0,
-        "total": 0,
-        "errorCount": 0,
-        "succRate": 100
+        errRate: 0,
+        total: 0,
+        errorCount: 0,
+        succRate: 100,
       };
     }
   }
@@ -435,8 +517,8 @@ function calculateErrorPercentage(error_counters, access_counters) {
 }
 
 // Handle incoming requests
-app.all('/', async (req, res) => {
-  const ip = req.ip || req.headers['x-forwarded-for'] || 'Unknown IP';
+app.all("/", async (req, res) => {
+  const ip = req.ip || req.headers["x-forwarded-for"] || "Unknown IP";
   const method = req.method.toUpperCase();
   const shuffledNodes = shuffle(nodes);
   let chosenNode = null;
@@ -446,7 +528,7 @@ app.all('/', async (req, res) => {
   if (cacheEnabled) {
     await mutexCacheLastNode.runExclusive(() => {
       if (cacheLastNode.has(cacheKey)) {
-        const cachedNode = cacheLastNode.get(cacheKey);        
+        const cachedNode = cacheLastNode.get(cacheKey);
         if (Date.now() - cachedNode.timestamp < cacheMaxAge * 1000) {
           log("Cached node found: ", cachedNode);
           log(`Using cached node: ${cachedNode.server}`);
@@ -458,19 +540,22 @@ app.all('/', async (req, res) => {
   }
   if (chosenNode == null) {
     const plimit = await pLimit(config.plimit);
-    const promises = shuffledNodes.map(node => plimit(() => getServerData(node)));
+    const promises = shuffledNodes.map((node) =>
+      plimit(() => getServerData(node)),
+    );
     chosenNode = await Promise.any(promises).catch((error) => {
       log(`Error: ${error.message}`);
       return null;
-    });    
-    if (isObjectEmptyOrNullOrUndefined(chosenNode) ||
-        isObjectEmptyOrNullOrUndefined(chosenNode.server) ||
-        isObjectEmptyOrNullOrUndefined(chosenNode.version) ||
-        isObjectEmptyOrNullOrUndefined(chosenNode.jussi_number)
-      ) {
-        // return 500
-        res.status(500).json({ error: "No valid node found" });
-        return;
+    });
+    if (
+      isObjectEmptyOrNullOrUndefined(chosenNode) ||
+      isObjectEmptyOrNullOrUndefined(chosenNode.server) ||
+      isObjectEmptyOrNullOrUndefined(chosenNode.version) ||
+      isObjectEmptyOrNullOrUndefined(chosenNode.jussi_number)
+    ) {
+      // return 500
+      res.status(500).json({ error: "No valid node found" });
+      return;
     }
     chosenNode.timestamp = Date.now();
     if (cacheEnabled) {
@@ -479,7 +564,9 @@ app.all('/', async (req, res) => {
       });
     }
   }
-  log(`Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server} - jussi_number: ${chosenNode.jussi_number}`);
+  log(
+    `Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server} - jussi_number: ${chosenNode.jussi_number}`,
+  );
   log(`Current Max Jussi: ${current_max_jussi}`);
   res.setHeader("IP", ip);
   res.setHeader("Server", chosenNode.server);
@@ -487,11 +574,11 @@ app.all('/', async (req, res) => {
     res.setHeader("Version", JSON.stringify(chosenNode.version));
   }
   res.setHeader("LoadBalancerVersion", proxy_version);
-  res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Access-Control-Allow-Origin", "*");
   if (method === "GET") {
     if (typeof config.max_age !== "undefined") {
-      res.setHeader('Cache-Control', 'max-age=' + config.max_age);
+      res.setHeader("Cache-Control", "max-age=" + config.max_age);
     }
   }
   let data = {};
@@ -502,40 +589,48 @@ app.all('/', async (req, res) => {
     total_counter++;
   });
   await mutexAccessCounter.runExclusive(() => {
-    access_counters.set(chosenNode.server, (access_counters.get(chosenNode.server) ?? 0) + 1);
+    access_counters.set(
+      chosenNode.server,
+      (access_counters.get(chosenNode.server) ?? 0) + 1,
+    );
   });
   let currentDate = new Date();
   let differenceInSeconds = Math.floor((currentDate - startTime) / 1000);
-  const diff = secondsToTimeDict(differenceInSeconds)
+  const diff = secondsToTimeDict(differenceInSeconds);
 
   try {
-    if (method === 'GET') {
+    if (method === "GET") {
       result = await forwardRequestGET(chosenNode.server);
-    } else if (method === 'POST') {
+    } else if (method === "POST") {
       let reqbody = req.body;
       const body = JSON.stringify(reqbody);
-      log(`Request Body is ${limitStringMaxLength(body, logging_max_body_len)}`);
+      log(
+        `Request Body is ${limitStringMaxLength(body, logging_max_body_len)}`,
+      );
       result = await forwardRequestPOST(chosenNode.server, body);
     } else {
       return res.status(405).json({ error: "Method Not Allowed" });
     }
     data = JSON.parse(result.data);
-    if (method === 'GET') {
+    if (method === "GET") {
       data["status_code"] = 200;
     }
   } catch (ex) {
     data = {
-      "status_code": 500,
-      "error": ex,
-      "__load_balancer_version__": proxy_version
+      status_code: 500,
+      error: ex,
+      __load_balancer_version__: proxy_version,
     };
-    res.setHeader('Error', JSON.stringify(ex));
+    res.setHeader("Error", JSON.stringify(ex));
     // set error counters - this is after max-retry
     await mutexErrorCounter.runExclusive(() => {
-      error_counters.set(chosenNode.server, (error_counters.get(chosenNode.server) ?? 0) + 1);
+      error_counters.set(
+        chosenNode.server,
+        (error_counters.get(chosenNode.server) ?? 0) + 1,
+      );
     });
   }
-  if (method === 'GET') {
+  if (method === "GET") {
     data["__server__"] = chosenNode.server;
     data["__version__"] = chosenNode.version;
     data["__servers__"] = config.nodes;
@@ -544,34 +639,34 @@ app.all('/', async (req, res) => {
     // Calculate and include RPS stats
     const rpsStats = calculateRPS();
     data["__stats__"] = {
-      "total": total_counter,
-      "rps": parseFloat((total_counter / differenceInSeconds).toFixed(2)),
-      "rps_stats": {
-        "1min": rpsStats['1min'],
-        "5min": rpsStats['5min'],
-        "15min": rpsStats['15min']
+      total: total_counter,
+      rps: parseFloat((total_counter / differenceInSeconds).toFixed(2)),
+      rps_stats: {
+        "1min": rpsStats["1min"],
+        "5min": rpsStats["5min"],
+        "15min": rpsStats["15min"],
       },
-      "rate_limit": {
-        "windowMs": rateLimitConfig.windowMs,
-        "maxRequests": rateLimitConfig.maxRequests
+      rate_limit: {
+        windowMs: rateLimitConfig.windowMs,
+        maxRequests: rateLimitConfig.maxRequests,
       },
-      "seconds": differenceInSeconds,
-      "uptime": {
-        "startTime": startTime,
-        "currentTime": currentDate,
-        "seconds": diff.seconds,
-        "minutes": diff.minutes,
-        "hours": diff.hours,
-        "days": diff.days,
-        "month": diff.months,
-        "year": diff.years
+      seconds: differenceInSeconds,
+      uptime: {
+        startTime: startTime,
+        currentTime: currentDate,
+        seconds: diff.seconds,
+        minutes: diff.minutes,
+        hours: diff.hours,
+        days: diff.days,
+        month: diff.months,
+        year: diff.years,
       },
-      "access_counters": calculatePercentage(access_counters),
-      "error_counters": calculateErrorPercentage(error_counters, access_counters),
-      "not_chosen_counters": Object.fromEntries(not_chosen_counters),
-      "jussi_behind_counters": Object.fromEntries(jussi_behind_counters),
-      "timed_out_counters": Object.fromEntries(timed_out_counters),
-    }
+      access_counters: calculatePercentage(access_counters),
+      error_counters: calculateErrorPercentage(error_counters, access_counters),
+      not_chosen_counters: Object.fromEntries(not_chosen_counters),
+      jussi_behind_counters: Object.fromEntries(jussi_behind_counters),
+      timed_out_counters: Object.fromEntries(timed_out_counters),
+    };
   }
   if (isObjectEmptyOrNullOrUndefined(result)) {
     res.status(500).json(data);
@@ -597,7 +692,7 @@ if (fs.existsSync(sslCertPath) && fs.existsSync(sslKeyPath)) {
   // SSL certificates are available; create HTTPS server
   const options = {
     key: fs.readFileSync(sslKeyPath),
-    cert: fs.readFileSync(sslCertPath)
+    cert: fs.readFileSync(sslCertPath),
   };
 
   server = https.createServer(options, app);
@@ -605,7 +700,6 @@ if (fs.existsSync(sslCertPath) && fs.existsSync(sslKeyPath)) {
   server.listen(PORT, () => {
     console.log(`HTTPS server is running on https://localhost:${PORT}`);
   });
-
 } else {
   // SSL certificates are not available; create HTTP server
   server = http.createServer(app);
@@ -616,7 +710,7 @@ if (fs.existsSync(sslCertPath) && fs.existsSync(sslKeyPath)) {
 }
 
 // Graceful shutdown on Ctrl+C
-process.on('SIGINT', () => {
+process.on("SIGINT", () => {
   console.log("\nGracefully shutting down...");
   server.close(() => {
     console.log("Server closed.");
@@ -625,7 +719,7 @@ process.on('SIGINT', () => {
 });
 
 // Graceful shutdown on SIGTERM
-process.on('SIGTERM', () => {
+process.on("SIGTERM", () => {
   console.log("\nGracefully shutting down on SIGTERM...");
   server.close(() => {
     console.log("Server closed.");

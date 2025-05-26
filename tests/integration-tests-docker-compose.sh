@@ -50,7 +50,7 @@ popd
 echo "Stopping the server..."
 docker-compose down
 
-if [ "$RESULT" = false ]; then
+if [ "$RESULT" != "true" ]; then
     echo "Integration tests failed!"
     exit 1
 fi

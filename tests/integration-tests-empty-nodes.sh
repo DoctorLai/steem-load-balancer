@@ -35,10 +35,10 @@ sleep 5
 count=$(docker logs steem-load-balancer | grep "No nodes provided in the configuration." | wc -l)
 if [ "$count" -gt 0 ]; then
     echo "Server started successfully with empty node list"
-    RESULT=true
+    export RESULT=true
 else
     echo "Failed: Server started successfully with empty node list"
-    RESULT=false
+    export RESULT=false
 fi
 
 popd
@@ -46,7 +46,7 @@ popd
 echo "Stopping the server..."
 $STEEM_LB_PATH/stop.sh
 
-if [ "$RESULT" = false ]; then
+if [ "$RESULT" != "true" ]; then
     echo "Integration tests failed!"
     exit 1
 fi

@@ -138,7 +138,7 @@ send_request_database_api_get_accounts_with_header() {
     return 0
 }
 
-RESULT=true
+export RESULT=true
 
 TEST_CASES=(
     "send_request_database_api_get_accounts"
@@ -152,7 +152,7 @@ TEST_CASES=(
 for test_case in "${TEST_CASES[@]}"; do
     echo "Running test case: $test_case"
     if ! retry_test $test_case; then
-        RESULT=false
+        export RESULT=false
         break
     fi
 done

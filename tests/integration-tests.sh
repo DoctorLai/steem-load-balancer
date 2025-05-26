@@ -57,7 +57,7 @@ popd
 echo "Stopping the server..."
 $STEEM_LB_PATH/stop.sh
 
-if [ "$RESULT" = false ]; then
+if [ "$RESULT" != "true" ]; then
     echo "Integration tests failed!"
     exit 1
 fi
