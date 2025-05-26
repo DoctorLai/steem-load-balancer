@@ -36,6 +36,10 @@ jobs:
           echo "SSL_KEY_PATH=$SSL_KEY_PATH" >> $GITHUB_ENV
           echo "HOST_PORT=$HOST_PORT" >> $GITHUB_ENV
 
+      # Run Prettier (Linting)
+      - name: Run Prettier
+        run: npm run format
+
       - name: Run unit tests
         run: NODE_ENV=production npm test
 

@@ -24,9 +24,9 @@ Thank you for considering contributing to this project! We welcome contributions
    ```
 2. **Make Your Changes:**
    - Follow the project's coding style.
-   - Run linting to ensure code quality:
+   - Run format to ensure code style:
      ```bash
-     npm run lint
+     npm run format
      ```
 3. **Commit Your Changes:**
    ```bash
