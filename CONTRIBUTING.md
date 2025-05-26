@@ -26,6 +26,8 @@ Thank you for considering contributing to this project! We welcome contributions
    - Run format to ensure code style:
      ```bash
      npm run format
+     ## Fix automatically the coding style
+     npm run format:fix
      ```
    - Run linter to ensure code quality:
      ```bash
