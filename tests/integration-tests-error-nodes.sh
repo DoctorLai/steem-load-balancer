@@ -71,10 +71,10 @@ send_a_get_request_header_when_all_nodes_are_down() {
 
 if ! retry_test send_a_get_request_header_when_all_nodes_are_down; then
     echo "send_a_get_request_header_when_all_nodes_are_down failed"
-    RESULT=false
+    export RESULT=false
 else
     echo "send_a_get_request_header_when_all_nodes_are_down passed"
-    RESULT=true
+    export RESULT=true
 fi
 
 echo "Stopping the server..."
