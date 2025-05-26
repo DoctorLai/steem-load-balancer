@@ -55,8 +55,12 @@ const mutexCacheLastNode = new Mutex();
 // Initialize queues to store request timestamps
 let requestTimestamps = [];
 
-// Read the YAML config file
-const configPath = path.join(__dirname, "config.yaml");
+// Read the YAML config file located one level up from the current directory
+const configPath = path.join(__dirname, "../config.yaml");
+if (!fs.existsSync(configPath)) {
+  console.error(`Configuration file not found at ${configPath}`);
+  process.exit(1);
+}
 
 // Load the YAML file content with environment variable replacement
 let config = yaml.load(fs.readFileSync(configPath, "utf8"));
