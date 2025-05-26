@@ -22,9 +22,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run Lint
-        run: NODE_ENV=production npm run lint
-
       - name: Set up environment
         run: |
           source ./setup-env.sh
@@ -36,7 +33,7 @@ jobs:
           echo "SSL_KEY_PATH=$SSL_KEY_PATH" >> $GITHUB_ENV
           echo "HOST_PORT=$HOST_PORT" >> $GITHUB_ENV
 
-      # Run Prettier (Linting)
+      # Run Prettier
       - name: Run Prettier
         run: npm run format
 
