@@ -28,4 +28,4 @@ EXPOSE 8080
 ENV NODE_ENV=production
 
 # Entry
-CMD ["node", "index.js"]
+CMD ["node", "src/index.js"]

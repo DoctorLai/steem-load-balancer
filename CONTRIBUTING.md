@@ -23,11 +23,14 @@ Thank you for considering contributing to this project! We welcome contributions
    git checkout -b feature/your-feature-name
    ```
 2. **Make Your Changes:**
-   - Follow the project's coding style.
    - Run format to ensure code style:
      ```bash
      npm run format
      ```
+   - Run linter to ensure code quality:
+     ```bash
+     npm run lint
+     ``` 
 3. **Commit Your Changes:**
    ```bash
    git add .
