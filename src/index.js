@@ -153,7 +153,7 @@ app.use((req, res, next) => {
       req.body = data ? JSON.parse(data) : {};
       next();
     } catch (e) {
-      log(f`JSON parse failed (content type=${contentType}):`, e.message);
+      log(`JSON parse failed (content type=${contentType}):`, e.message);
       res.status(400).json({ error: "Invalid JSON" });
     }
   });
