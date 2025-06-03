@@ -136,9 +136,14 @@ app.use((req, res, next) => {
     (timestamp) => timestamp > cutoffTime,
   );
 
-  const contentType = req.headers["content-type"];
+  const contentType = req.headers["content-type"] || "";
   if (contentType && contentType.toLowerCase().includes("application/json")) {
-    return express.json()(req, res, next);
+    try {
+      return express.json()(req, res, next);
+    } catch (e) {
+      log("JSON payload parse failed:", e.message);
+      return res.status(400).json({ error: "Invalid JSON payload" });
+    }
   }
 
   let data = "";
@@ -148,7 +153,7 @@ app.use((req, res, next) => {
       req.body = data ? JSON.parse(data) : {};
       next();
     } catch (e) {
-      console.error("JSON parse failed:", e.message);
+      log(`JSON parse failed (content type=${contentType}):`, e.message);
       res.status(400).json({ error: "Invalid JSON" });
     }
   });
