@@ -713,8 +713,9 @@ if (fs.existsSync(sslCertPath) && fs.existsSync(sslKeyPath)) {
 process.on("SIGINT", () => {
   console.log("\nGracefully shutting down...");
   server.close(() => {
-    console.log("Server closed.");
-    process.exit(0); // Exit the process after server is closed
+    console.log("Server closed normally.");
+    // We can exit with a zero code to indicate a clean shutdown
+    process.exit(0);
   });
 });
 
@@ -722,7 +723,8 @@ process.on("SIGINT", () => {
 process.on("SIGTERM", () => {
   console.log("\nGracefully shutting down on SIGTERM...");
   server.close(() => {
-    console.log("Server closed.");
-    process.exit(0); // Exit the process after server is closed
+    console.log("Server closed with exit code 1.");
+    // Let the process exit with a non-zero code, so it can be restarted.
+    process.exit(1);
   });
 });
