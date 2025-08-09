@@ -558,7 +558,9 @@ app.all("/", async (req, res) => {
       isObjectEmptyOrNullOrUndefined(chosenNode.jussi_number)
     ) {
       // return 500
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "No valid node found" });
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: "No valid node found" });
       return;
     }
     chosenNode.timestamp = Date.now();
