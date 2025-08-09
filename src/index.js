@@ -10,6 +10,7 @@ import https from "https";
 import http from "http";
 import compression from "compression";
 import helmet from "helmet";
+import { StatusCodes } from "http-status-codes";
 
 import {
   shuffle,
@@ -531,17 +532,15 @@ app.all("/", async (req, res) => {
   // caching the last chosen node, should we just cache the last node regardless of the method and ip?
   const cacheKey = `${ip}-${method}`;
   if (cacheEnabled) {
-    await mutexCacheLastNode.runExclusive(() => {
-      if (cacheLastNode.has(cacheKey)) {
-        const cachedNode = cacheLastNode.get(cacheKey);
-        if (Date.now() - cachedNode.timestamp < cacheMaxAge * 1000) {
-          log("Cached node found: ", cachedNode);
-          log(`Using cached node: ${cachedNode.server}`);
-          log(`Last timestamp: ${cachedNode.timestamp}`);
-          chosenNode = cachedNode;
-        }
+    if (cacheLastNode.has(cacheKey)) {
+      const cachedNode = cacheLastNode.get(cacheKey);
+      if (Date.now() - cachedNode.timestamp < cacheMaxAge * 1000) {
+        log("Cached node found: ", cachedNode);
+        log(`Using cached node: ${cachedNode.server}`);
+        log(`Last timestamp: ${cachedNode.timestamp}`);
+        chosenNode = cachedNode;
       }
-    });
+    }
   }
   if (chosenNode == null) {
     const plimit = await pLimit(config.plimit);
@@ -559,7 +558,7 @@ app.all("/", async (req, res) => {
       isObjectEmptyOrNullOrUndefined(chosenNode.jussi_number)
     ) {
       // return 500
-      res.status(500).json({ error: "No valid node found" });
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "No valid node found" });
       return;
     }
     chosenNode.timestamp = Date.now();

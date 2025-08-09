@@ -7,7 +7,7 @@ nodes:
   - "https://api.moecki.online"
   - "https://api.botsteem.com"
   # - "https://rpc.amarbangla.net"
-  # - "https://api.dlike.io"
+  - "https://api.dlike.io"
   # - "https://api.campingclub.me"
   # - "https://api.wherein.io"
   # - "https://api.steememory.com"
