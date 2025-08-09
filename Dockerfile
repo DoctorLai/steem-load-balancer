@@ -16,6 +16,7 @@ RUN npm install p-limit
 RUN npm install js-yaml
 RUN npm install compression
 RUN npm install helmet
+RUN npm install http-status-codes
 
 # Copy the rest of the application
 COPY . .
