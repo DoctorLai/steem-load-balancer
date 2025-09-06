@@ -137,27 +137,9 @@ app.use((req, res, next) => {
     (timestamp) => timestamp > cutoffTime,
   );
 
-  const contentType = req.headers["content-type"] || "";
-  if (contentType && contentType.toLowerCase().includes("application/json")) {
-    try {
-      return express.json()(req, res, next);
-    } catch (e) {
-      log("JSON payload parse failed:", e.message);
-      return res.status(400).json({ error: "Invalid JSON payload" });
-    }
-  }
-
-  let data = "";
-  req.on("data", (chunk) => (data += chunk));
-  req.on("end", () => {
-    try {
-      req.body = data ? JSON.parse(data) : {};
-      next();
-    } catch (e) {
-      log(`JSON parse failed (content type=${contentType}):`, e.message);
-      res.status(400).json({ error: "Invalid JSON" });
-    }
-  });
+  // Force JSON parsing for every request
+  req.headers["content-type"] = "application/json";
+  next();
 });
 
 // Function to calculate RPS for 1, 5, and 15 minutes
