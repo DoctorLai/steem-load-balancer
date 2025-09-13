@@ -327,6 +327,26 @@ Port 443 is already taken: Ensure no other process is using port 443. Use sudo l
 
 SSL Certificate Issues: Ensure the SSL certificate and key files are in the correct format and paths are correctly specified.
 
+## Choose a "stable" RPC node in your Steem App by using the Load Balancer Node
+See [this post](https://steemit.com/steem/@justyy/choose-a-stable-rpc-node-in-your-steem-app-by-using-the-load-balancer-node),
+
+### Example: Dynamic RPC Node Selection with Fallback
+```python
+node = fetch_from_load_balancer("https://api.steemyy.com")
+while your_app_is_running:
+    try:
+        # use the node in your API calls
+        pass
+    except:
+        # if the node fails, refresh it from the load balancer
+        node = fetch_from_load_balancer("https://api.steemyy.com")
+```
+
+With this setup, your app will:
+- Always start with a healthy RPC node
+- Automatically switch to a new one if the current node fails
+- This approach provides better stability and resilience compared to relying on a single hardcoded RPC endpoint.
+
 ## NODE_ENV
 Setting NODE_ENV to "production" (by default) or "development".
 
