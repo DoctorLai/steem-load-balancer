@@ -32,7 +32,7 @@ echo "Starting the server..."
 
 sleep 5
 
-count=$(docker logs steem-load-balancer | grep "No nodes provided in the configuration." | wc -l)
+count=$(docker logs justyy/steem-load-balancer | grep "No nodes provided in the configuration." | wc -l)
 if [ "$count" -gt 0 ]; then
     echo "Server started successfully with empty node list"
     export RESULT=true

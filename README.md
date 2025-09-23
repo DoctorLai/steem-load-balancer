@@ -155,7 +155,7 @@ docker run \
     -e NODE_ENV=production \
     -e SSL_CERT_PATH=$SSL_CERT_PATH \
     -e SSL_KEY_PATH=$SSL_KEY_PATH \
-    --name steem-load-balancer \
+    --name justyy/steem-load-balancer \
     --restart on-failure:$RETRY_COUNT \
     -p $STEEM_LB_PORT:9091 \
     -v /root/.acme.sh/:/root/.acme.sh/ \
@@ -213,7 +213,7 @@ Tools are placed at [./tools](./tools/) directory.
 
 ## View the Logs
 ```bash
-docker logs -f steem-load-balancer
+docker logs -f justyy/steem-load-balancer
 ```
 
 ## SSL Configuration
