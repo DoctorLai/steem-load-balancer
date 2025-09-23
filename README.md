@@ -113,7 +113,7 @@ Update the [config.yaml](./config.yaml) file with your desired nodes, rate limit
 
 ## Build the Docker Image
 ```bash
-DOCKER_IMAGE=justyy/steem-load-balancer
+DOCKER_IMAGE=steem-load-balancer
 STEEM_LB_PORT=9091
 
 # Build the Docker image
@@ -142,6 +142,7 @@ A latest image has been built and store at docker hub, so you can do:
 
 ```bash
 docker pull justyy/steem-load-balancer:latest
+docker tag justyy/steem-load-balancer:latest steem-load-balancer:latest
 ```
 
 Then:
@@ -155,14 +156,14 @@ docker run \
     -e NODE_ENV=production \
     -e SSL_CERT_PATH=$SSL_CERT_PATH \
     -e SSL_KEY_PATH=$SSL_KEY_PATH \
-    --name justyy/steem-load-balancer \
+    --name steem-load-balancer \
     --restart on-failure:$RETRY_COUNT \
     -p $STEEM_LB_PORT:9091 \
     -v /root/.acme.sh/:/root/.acme.sh/ \
-    justyy/steem-load-balancer:latest
+    steem-load-balancer:latest
 
 ## or simply
-./run.sh
+./run.sh # or ./restart.sh
 ```
 
 ## Docker Compose (Optional)
@@ -213,7 +214,7 @@ Tools are placed at [./tools](./tools/) directory.
 
 ## View the Logs
 ```bash
-docker logs -f justyy/steem-load-balancer
+docker logs -f steem-load-balancer
 ```
 
 ## SSL Configuration
