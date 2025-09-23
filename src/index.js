@@ -109,7 +109,8 @@ const rateLimitConfig = config.rateLimit;
 const app = express();
 
 // Port inside the container
-const PORT = 8080;
+// This can be overridden in config.yaml
+const PORT = config.port ?? 9091;
 
 // app.set('trust proxy', true);
 

@@ -34,7 +34,7 @@ jobs:
           echo "RETRY_COUNT=$RETRY_COUNT" >> $GITHUB_ENV
           echo "SSL_CERT_PATH=$SSL_CERT_PATH" >> $GITHUB_ENV
           echo "SSL_KEY_PATH=$SSL_KEY_PATH" >> $GITHUB_ENV
-          echo "HOST_PORT=$HOST_PORT" >> $GITHUB_ENV
+          echo "STEEM_LB_PORT=$STEEM_LB_PORT" >> $GITHUB_ENV
 
       # Run Prettier (Formatting)
       - name: Run Prettier

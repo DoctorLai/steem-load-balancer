@@ -72,6 +72,7 @@ sslKeyPath: "${SSL_KEY_PATH}"
 rejectUnauthorized: false
 timeout: 2500
 plimit: 5
+port: 9091
 cache:
   enabled: true
   ttl: 3
@@ -112,8 +113,8 @@ Update the [config.yaml](./config.yaml) file with your desired nodes, rate limit
 
 ## Build the Docker Image
 ```bash
-DOCKER_IMAGE=steem-load-balancer
-HOST_PORT=8080
+DOCKER_IMAGE=justyy/steem-load-balancer
+STEEM_LB_PORT=9091
 
 # Build the Docker image
 docker build -t $DOCKER_IMAGE .
@@ -121,7 +122,7 @@ docker build -t $DOCKER_IMAGE .
 
 ## Run the Server
 ```bash
-docker run --name $DOCKER_IMAGE -p $HOST_PORT:8080 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
+docker run --name $DOCKER_IMAGE -p $STEEM_LB_PORT:9091 -v /root/.acme.sh/:/root/.acme.sh/ $DOCKER_IMAGE
 ```
 ![image](https://github.com/user-attachments/assets/ff6da76b-4506-4452-b742-04eeff7596b5)
 
@@ -147,7 +148,7 @@ Then:
 
 ```bash
 # Run the steem load balancer node with restart policy
-HOST_PORT=443
+STEEM_LB_PORT=443
 RETRY_COUNT=3
 
 docker run \
@@ -156,9 +157,12 @@ docker run \
     -e SSL_KEY_PATH=$SSL_KEY_PATH \
     --name steem-load-balancer \
     --restart on-failure:$RETRY_COUNT \
-    -p $HOST_PORT:8080 \
+    -p $STEEM_LB_PORT:9091 \
     -v /root/.acme.sh/:/root/.acme.sh/ \
     justyy/steem-load-balancer:latest
+
+## or simply
+./run.sh
 ```
 
 ## Docker Compose (Optional)
@@ -322,10 +326,16 @@ See the sample JSON response for sending a GET:
 }
 ```
 
-## Troubleshooting
-Port 443 is already taken: Ensure no other process is using port 443. Use sudo lsof -i :443 to check. Change the port in the configuration if needed.
+## Running without Container
+Port 9091 is the port number used in the container. However this can be changed in [config.yaml](./config.yaml). This is useful in you want to run directly e.g:
 
-SSL Certificate Issues: Ensure the SSL certificate and key files are in the correct format and paths are correctly specified.
+```bash
+node src/index.js
+```
+
+## Troubleshooting
+- Port 443 is already taken: Ensure no other process is using port 443. Use sudo lsof -i :443 to check. Change the port in the configuration if needed.
+- SSL Certificate Issues: Ensure the SSL certificate and key files are in the correct format and paths are correctly specified.
 
 ## Choose a "stable" RPC node in your Steem App by using the Load Balancer Node
 See [this post](https://steemit.com/steem/@justyy/choose-a-stable-rpc-node-in-your-steem-app-by-using-the-load-balancer-node),
