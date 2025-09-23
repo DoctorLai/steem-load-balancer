@@ -27,7 +27,7 @@ docker run \
     -e CACHE_TTL=$CACHE_TTL \
     --name $DOCKER_IMAGE \
     --restart on-failure:$RETRY_COUNT \
-    -p $HOST_PORT:8080 \
+    -p $STEEM_LB_PORT:9091 \
     -v /root/.acme.sh/:/root/.acme.sh/ \
     -v $config:/app/config.yaml \
     $DOCKER_IMAGE

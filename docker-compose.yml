@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile    
     restart: on-failure:${RETRY_COUNT}
     ports:
-      - "${HOST_PORT}:8080"
+      - "${STEEM_LB_PORT}:9091"
     environment:
       - NODE_ENV=${NODE_ENV}
       - SSL_CERT_PATH=${SSL_CERT_PATH}

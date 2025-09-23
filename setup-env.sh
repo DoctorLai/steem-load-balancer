@@ -10,4 +10,4 @@ export CACHE_ENABLED=true
 export CACHE_TTL=3
 
 ## listen to port 443 (HTTPS)
-export HOST_PORT=443
+export STEEM_LB_PORT=443

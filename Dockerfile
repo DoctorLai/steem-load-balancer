@@ -22,7 +22,7 @@ RUN npm install http-status-codes
 COPY . .
 
 # Expose port
-EXPOSE 8080
+EXPOSE 9091
 
 # production
 ENV NODE_ENV=production
