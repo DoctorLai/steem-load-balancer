@@ -76,7 +76,7 @@ config = JSON.parse(
 
 log(`PLimit: ${config.plimit}`);
 
-const rejectUnauthorized = config.rejectUnauthorized ?? false;
+const rejectUnauthorized = config.rejectUnauthorized ?? true;
 
 const agent = new https.Agent({
   rejectUnauthorized: rejectUnauthorized,
@@ -111,6 +111,7 @@ const app = express();
 // Port inside the container
 // This can be overridden in config.yaml
 const PORT = config.port ?? 9091;
+log(`Listening on Port: ${PORT}`);
 
 // app.set('trust proxy', true);
 
@@ -513,7 +514,8 @@ app.all("/", async (req, res) => {
   let chosenNode = null;
 
   // caching the last chosen node, should we just cache the last node regardless of the method and ip?
-  const cacheKey = `${ip}-${method}`;
+  const path = req.path;
+  const cacheKey = `${ip}-${method}-${path}`;
   if (cacheEnabled) {
     if (cacheLastNode.has(cacheKey)) {
       const cachedNode = cacheLastNode.get(cacheKey);
@@ -610,7 +612,10 @@ app.all("/", async (req, res) => {
       error: ex,
       __load_balancer_version__: proxy_version,
     };
-    res.setHeader("Error", JSON.stringify(ex));
+    if (config.debug === true) {
+      res.setHeader("Error", JSON.stringify(ex));
+    }
+    log(`Error forwarding request to ${chosenNode.server}: ${ex.message}`);
     // set error counters - this is after max-retry
     await mutexErrorCounter.runExclusive(() => {
       error_counters.set(

@@ -76,6 +76,7 @@ port: 9091
 cache:
   enabled: true
   ttl: 3
+debug: false
 ```
 
 ### Configuration Options
@@ -94,11 +95,12 @@ cache:
 - max_jussi_number_diff: The maximum difference of block difference is allowed.
 - logging_max_body_len: truncate the request.body in log.
 - retry_count: Retry count for GET and POST forward requests. There is a 100ms between retries.
-- rejectUnauthorized: Should we ignore SSL errors? Default false
+- rejectUnauthorized: Should we ignore SSL errors? Default true.
 - timeout: Max timeout (milliseconds) for fetch to time out.
 - plimit: Max concurrent requests to poke the servers. Reduce this if the server is laggy.
 - cache.enabled: Should we cache the chosen Node?
 - cache.ttl: When cache.enabled, how many seconds before cache expires.
+- debug: When set to debug, more messages are set e.g. in the response header.
 
 ## Installation
 Clone the Repository:

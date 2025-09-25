@@ -15,7 +15,7 @@ nodes:
 rateLimit:
   windowMs: 10000
   maxRequests: 600
-version: "2025-09-13"
+version: "2025-09-25"
 max_age: 3
 logging: true
 max_payload_size: "5mb"
@@ -33,3 +33,4 @@ plimit: 5
 cache:
   enabled: ${CACHE_ENABLED}
   ttl: ${CACHE_TTL}
+debug: false
