@@ -1,31 +1,25 @@
 FROM node:alpine
 
-# Install jq
-RUN apk add --no-cache jq
-
 # Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
-COPY package*.json ./
-RUN npm install
-RUN npm install abort-controller
-RUN npm install node-fetch
-RUN npm install async-mutex
-RUN npm install p-limit
-RUN npm install js-yaml
-RUN npm install compression
-RUN npm install helmet
-RUN npm install http-status-codes
+# Install system dependencies in a single step
+RUN apk add --no-cache jq
 
-# Copy the rest of the application
+# Copy only package files first (for caching)
+COPY package*.json ./
+
+# Install all dependencies in one step
+RUN npm install --production
+
+# Copy rest of the app
 COPY . .
 
 # Expose port
 EXPOSE 9091
 
-# production
+# Set environment
 ENV NODE_ENV=production
 
-# Entry
+# Run the app
 CMD ["node", "src/index.js"]
