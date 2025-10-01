@@ -24,16 +24,17 @@
   "dependencies": {
     "abort-controller": "^3.0.0",
     "async-mutex": "^0.5.0",
+    "compression": "^1.8.1",
     "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.0",
-    "express-rate-limit": "^7.4.0",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
     "http-status-codes": "^2.3.0",
+    "js-yaml": "^4.1.0",
     "json2csv": "^6.0.0-alpha.2",
     "node-fetch": "^3.3.2",
-    "p-limit": "^6.2.0",
-    "compression": "^1.7.4",
-    "helmet": "^7.0.0"
+    "p-limit": "^7.1.1"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
