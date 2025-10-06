@@ -2,6 +2,10 @@ import {
   secondsToTimeDict,
   compareVersion,
   isObjectEmptyOrNullOrUndefined,
+  limitStringMaxLength,
+  shuffle,
+  log,
+  sleep,
 } from "../src/functions.js";
 
 describe("secondsToTimeDict", () => {
@@ -86,5 +90,60 @@ describe("isObjectEmptyOrNullOrUndefined", () => {
 
   test("should return false for function", () => {
     expect(isObjectEmptyOrNullOrUndefined(() => {})).toBe(false);
+  });
+});
+
+describe("limitStringMaxLength", () => {
+  test("should return the same string if within limit", () => {
+    expect(limitStringMaxLength("Hello", 10)).toBe("Hello");
+  });
+
+  test("should truncate and add ellipsis if exceeding limit", () => {
+    expect(limitStringMaxLength("Hello, World!", 5)).toBe("Hello...");
+  });
+
+  test("should handle empty string", () => {
+    expect(limitStringMaxLength("", 5)).toBe("");
+  });
+
+  test("should handle limit equal to string length", () => {
+    expect(limitStringMaxLength("Hello", 5)).toBe("Hello");
+  });
+});
+
+describe("shuffle", () => {
+  test("should shuffle the array", () => {
+    const array = [1, 2, 3, 4, 5];
+    const shuffledArray = shuffle(array);
+    expect(shuffledArray).toHaveLength(array.length);
+    expect(shuffledArray).toEqual(expect.arrayContaining(array));
+  });
+
+  test("should handle empty array", () => {
+    expect(shuffle([])).toEqual([]);
+  });
+
+  test("should handle single element array", () => {
+    expect(shuffle([1])).toEqual([1]);
+  });
+});
+
+describe("log", () => {
+  test("should log messages with timestamp", () => {
+    console.log = jest.fn();
+    log("Test message");
+    expect(console.log).toHaveBeenCalledWith(
+      expect.stringMatching(/\[\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\]/),
+      "Test message",
+    );
+  });
+});
+
+describe("sleep", () => {
+  test("should resolve after specified time", async () => {
+    const start = Date.now();
+    await sleep(100);
+    const end = Date.now();
+    expect(end - start).toBeGreaterThanOrEqual(100);
   });
 });
