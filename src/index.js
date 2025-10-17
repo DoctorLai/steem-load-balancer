@@ -568,11 +568,8 @@ app.all("/", async (req, res) => {
       log(`Error: ${error.message}`);
       return null;
     });
-    chosenNode = _chosenNode;
+    chosenNode = _chosenNode.selected;
     candidates = _candidates;
-    log(
-      `Chosen Node: ${chosenNode.server} with jussi_number ${chosenNode.jussi_number}`,
-    );
     if (
       isObjectEmptyOrNullOrUndefined(chosenNode) ||
       isObjectEmptyOrNullOrUndefined(chosenNode.server) ||
@@ -585,6 +582,9 @@ app.all("/", async (req, res) => {
         .json({ error: "No valid node found [server, version, jussi_number]" });
       return;
     }
+    log(
+      `Chosen Node: ${chosenNode.server} with jussi_number ${chosenNode.jussi_number}`,
+    );
     chosenNode.timestamp = Date.now();
     if (cacheEnabled) {
       await mutexCacheLastNode.runExclusive(() => {
@@ -664,6 +664,7 @@ app.all("/", async (req, res) => {
   if (method === "GET") {
     data["__server__"] = chosenNode.server;
     data["__version__"] = chosenNode.version;
+    data["__selected__"] = chosenNode;
     data["__servers__"] = config.nodes;
     data["__ip__"] = ip;
     data["__config__"] = {
