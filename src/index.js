@@ -546,7 +546,7 @@ app.all("/", async (req, res) => {
     if (fulfilledNodes.length === 0) {
       log("No valid nodes found after checking all nodes.");
       res
-        .status(StatusCodes.SERVICE_UNAVAILABLE)
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
         .json({ error: "No valid nodes available" });
       return;
     }
@@ -565,7 +565,7 @@ app.all("/", async (req, res) => {
       // return 500
       res
         .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: "No valid node found" });
+        .json({ error: "No valid node found [server, version, jussi_number]" });
       return;
     }
     chosenNode.timestamp = Date.now();
