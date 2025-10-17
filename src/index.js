@@ -20,9 +20,9 @@ import {
   secondsToTimeDict,
   sleep,
   isObjectEmptyOrNullOrUndefined,
-  fetchWithTimeout,
-  firstKFulfilled,
-} from "./functions.js"; // Make sure functions.js uses ES exports
+} from "./functions.js";
+
+import { firstKFulfilled } from "./firstk.js";
 
 const pLimit = (...args) =>
   import("p-limit").then((module) => module.default(...args));
