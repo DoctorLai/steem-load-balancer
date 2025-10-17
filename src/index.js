@@ -560,16 +560,21 @@ app.all("/", async (req, res) => {
     //fulfilledNodes.sort((a, b) => b.jussi_number - a.jussi_number);
     //chosenNode = fulfilledNodes[0];
 
-    const { _chosenNode, _candidates } = await chooseNode(
-      promises,
-      firstK,
-      strategy,
-    ).catch((error) => {
-      log(`Error: ${error.message}`);
-      return null;
-    });
-    chosenNode = _chosenNode.selected;
-    candidates = _candidates;
+    const result = await chooseNode(promises, firstK, strategy).catch(
+      (error) => {
+        log(`Error: ${error.message}`);
+        return null;
+      },
+    );
+
+    if (!result) {
+      res.status(500).json({ error: "Failed to choose node" });
+      return;
+    }
+
+    chosenNode = result.selected;
+    candidates = result.candidates;
+
     if (
       isObjectEmptyOrNullOrUndefined(chosenNode) ||
       isObjectEmptyOrNullOrUndefined(chosenNode.server) ||
