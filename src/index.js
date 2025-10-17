@@ -94,8 +94,9 @@ log(
   `Choosing the max jussi node from the first k=${firstK} nodes that respond OK.`,
 );
 
-log(`Node Strategy: ${config.strategy}`);
-const strategy = getStrategyByName(config.strategy);
+const strategyName = config.strategy ?? "max_jussi_number";
+log(`Node Strategy: ${strategyName}`);
+const strategy = getStrategyByName(strategyName);
 
 // caching
 const cache = config.cache ?? { enabled: false, ttl: 3 };

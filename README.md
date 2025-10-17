@@ -109,7 +109,7 @@ strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest
 - cache.ttl: When cache.enabled, how many seconds before cache expires.
 - debug: When set to debug, more messages are set e.g. in the response header.
 - firstK: Choosing the node which has the max Jussi Number from the first `firstK` nodes that respond OK. Default is 1.
-- strategy: The strategy to pick the chosen node. This can be one of: first, random, max_jussi_number, latest_version
+- strategy: The strategy to pick the chosen node. This can be one of: first, random, max_jussi_number (default), latest_version
 
 ## Installation
 Clone the Repository:
