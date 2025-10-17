@@ -23,7 +23,10 @@ import {
   isObjectEmptyOrNullOrUndefined,
 } from "./functions.js";
 
-import { firstKFulfilled } from "./firstk.js";
+import {
+  chooseNode,
+  getStrategyByName,
+} from "./choose-node.js";
 
 const pLimit = (...args) =>
   import("p-limit").then((module) => module.default(...args));
@@ -89,9 +92,13 @@ log(`Reject Unauthorized: ${rejectUnauthorized}`);
 const timeout = config.timeout ?? 3000;
 log(`Timeout: ${timeout}`);
 
+const firstK = config.firstK ?? 1;
 log(
-  `Choosing the max jussi node from the first k=${config.first} nodes that respond OK.`,
+  `Choosing the max jussi node from the first k=${firstK} nodes that respond OK.`,
 );
+
+log(`Node Strategy: ${config.strategy}`);
+const strategy = getStrategyByName(config.strategy);
 
 // caching
 const cache = config.cache ?? { enabled: false, ttl: 3 };
@@ -518,6 +525,7 @@ app.all("/", async (req, res) => {
   const method = req.method.toUpperCase();
   const shuffledNodes = shuffle(nodes);
   let chosenNode = null;
+  let candidates = [];
 
   // caching the last chosen node, should we just cache the last node regardless of the method and ip?
   const path = req.path;
@@ -542,18 +550,25 @@ app.all("/", async (req, res) => {
     //   log(`Error: ${error.message}`);
     //   return null;
     // });
-    const firstK = config.firstK ?? 1;
-    const fulfilledNodes = await firstKFulfilled(promises, firstK);
-    if (fulfilledNodes.length === 0) {
-      log("No valid nodes found after checking all nodes.");
-      res
-        .status(StatusCodes.INTERNAL_SERVER_ERROR)
-        .json({ error: "No valid nodes available" });
-      return;
-    }
+
+    // const fulfilledNodes = await firstKFulfilled(promises, firstK);
+    // if (fulfilledNodes.length === 0) {
+    //   log("No valid nodes found after checking all nodes.");
+    //   res
+    //     .status(StatusCodes.INTERNAL_SERVER_ERROR)
+    //     .json({ error: "No valid nodes available" });
+    //   return;
+    // }
     // choose the node with the highest jussi_number
-    fulfilledNodes.sort((a, b) => b.jussi_number - a.jussi_number);
-    chosenNode = fulfilledNodes[0];
+    //fulfilledNodes.sort((a, b) => b.jussi_number - a.jussi_number);
+    //chosenNode = fulfilledNodes[0];
+
+    const { _chosenNode, _candidates } = await chooseNode(promises, firstK, strategy).catch((error) => {
+      log(`Error: ${error.message}`);
+      return null;
+    });
+    chosenNode = _chosenNode;
+    candidates = _candidates;
     log(
       `Chosen Node: ${chosenNode.server} with jussi_number ${chosenNode.jussi_number}`,
     );
@@ -650,6 +665,17 @@ app.all("/", async (req, res) => {
     data["__version__"] = chosenNode.version;
     data["__servers__"] = config.nodes;
     data["__ip__"] = ip;
+    data["__config__"] = {
+      strategy: config.strategy,
+      firstK: firstK,
+      timeout: timeout,
+      user_agent: user_agent,
+      min_blockchain_version: min_blockchain_version,
+      max_jussi_number_diff: max_jussi_number_diff,
+      cache_enabled: cacheEnabled,
+      cache_ttl: cacheMaxAge,
+    };
+    data["__first_k_candidates__"] = candidates;
     data["__load_balancer_version__"] = proxy_version;
     // Calculate and include RPS stats
     const rpsStats = calculateRPS();

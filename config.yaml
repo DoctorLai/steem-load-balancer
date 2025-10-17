@@ -15,7 +15,7 @@ nodes:
 rateLimit:
   windowMs: 10000
   maxRequests: 600
-version: "2025-09-25"
+version: "${STEEM_LB_VERSION}"
 max_age: 3
 logging: true
 max_payload_size: "5mb"
@@ -35,3 +35,4 @@ cache:
   ttl: ${CACHE_TTL}
 debug: false
 firstK: 2
+strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest_version
