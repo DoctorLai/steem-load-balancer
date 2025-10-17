@@ -23,10 +23,7 @@ import {
   isObjectEmptyOrNullOrUndefined,
 } from "./functions.js";
 
-import {
-  chooseNode,
-  getStrategyByName,
-} from "./choose-node.js";
+import { chooseNode, getStrategyByName } from "./choose-node.js";
 
 const pLimit = (...args) =>
   import("p-limit").then((module) => module.default(...args));
@@ -563,7 +560,11 @@ app.all("/", async (req, res) => {
     //fulfilledNodes.sort((a, b) => b.jussi_number - a.jussi_number);
     //chosenNode = fulfilledNodes[0];
 
-    const { _chosenNode, _candidates } = await chooseNode(promises, firstK, strategy).catch((error) => {
+    const { _chosenNode, _candidates } = await chooseNode(
+      promises,
+      firstK,
+      strategy,
+    ).catch((error) => {
       log(`Error: ${error.message}`);
       return null;
     });

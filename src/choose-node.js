@@ -26,8 +26,8 @@ function strategyLatestVersion(arr) {
 async function chooseNode(promises, k, strategy) {
   const fulfilled = await firstKFulfilled(promises, k);
   return {
-    "selected": strategy(fulfilled),
-    "candidates": fulfilled,
+    selected: strategy(fulfilled),
+    candidates: fulfilled,
   };
 }
 

@@ -46,7 +46,7 @@ describe("chooseNode()", () => {
   // helper delay
   const delay = (val, ms, fail = false) =>
     new Promise((resolve, reject) =>
-      setTimeout(() => (fail ? reject(val) : resolve(val)), ms)
+      setTimeout(() => (fail ? reject(val) : resolve(val)), ms),
     );
 
   test("uses strategyFirst with firstKFulfilled", async () => {
@@ -102,7 +102,7 @@ describe("chooseNode()", () => {
 
     const result = await chooseNode(promises, 3, strategyLatestVersion);
 
-    expect(result.candidates.map(x => x.id)).toEqual(["v2", "v3", "v1"]);
+    expect(result.candidates.map((x) => x.id)).toEqual(["v2", "v3", "v1"]);
     expect(result.selected).toEqual({ id: "v2", version: "0.23.1" });
   });
 
@@ -116,7 +116,7 @@ describe("chooseNode()", () => {
     const result = await chooseNode(promises, 3, strategyRandom);
 
     expect(result.candidates.length).toBe(3);
-    expect(result.candidates.map(x => x.id)).toEqual(["x", "y", "z"]);
+    expect(result.candidates.map((x) => x.id)).toEqual(["x", "y", "z"]);
     expect(result.candidates).toContainEqual(result.selected);
   });
 
@@ -148,7 +148,7 @@ describe("chooseNode()", () => {
 
     const result = await chooseNode(promises, 3, strategyFirst);
     expect(result.candidates.length).toBe(2);
-    expect(result.candidates.map(x => x.id)).toEqual(["ok1", "ok2"]);
+    expect(result.candidates.map((x) => x.id)).toEqual(["ok1", "ok2"]);
     expect(result.selected.id).toBe("ok1");
   });
 
