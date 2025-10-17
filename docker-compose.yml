@@ -16,6 +16,7 @@ services:
       - SSL_KEY_PATH=${SSL_KEY_PATH}
       - CACHE_ENABLED=${CACHE_ENABLED}
       - CACHE_TTL=${CACHE_TTL}
+      - STEEM_LB_VERSION=${STEEM_LB_VERSION}
     volumes:
       - /root/.acme.sh/:/root/.acme.sh/
       - ./config.yaml:/app/config.yaml

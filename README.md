@@ -83,6 +83,7 @@ cache:
   ttl: 3
 debug: false
 firstK: 1
+strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest_version
 ```
 
 ### Configuration Options
@@ -108,6 +109,7 @@ firstK: 1
 - cache.ttl: When cache.enabled, how many seconds before cache expires.
 - debug: When set to debug, more messages are set e.g. in the response header.
 - firstK: Choosing the node which has the max Jussi Number from the first `firstK` nodes that respond OK. Default is 1.
+- strategy: The strategy to pick the chosen node. This can be one of: first, random, max_jussi_number (default), latest_version
 
 ## Installation
 Clone the Repository:
@@ -165,6 +167,7 @@ docker run \
     -e NODE_ENV=production \
     -e SSL_CERT_PATH=$SSL_CERT_PATH \
     -e SSL_KEY_PATH=$SSL_KEY_PATH \
+    -e STEEM_LB_VERSION=$STEEM_LB_VERSION \
     --name steem-load-balancer \
     --restart on-failure:$RETRY_COUNT \
     -p $STEEM_LB_PORT:9091 \
@@ -271,8 +274,7 @@ See the sample JSON response for sending a GET:
     "https://rpc.amarbangla.net",
     "https://api.steememory.com",
     "https://api.moecki.online",
-    "https://steemapi.boylikegirl.club",
-    "https://api.steemzzang.com"
+    "https://steemapi.boylikegirl.club"
   ],
   "__ip__": "**Redacted**",
   "__load_balancer_version__": "2025-02-01",
@@ -337,7 +339,7 @@ See the sample JSON response for sending a GET:
 ```
 
 ## Running without Container
-Port 9091 is the port number used in the container. However this can be changed in [config.yaml](./config.yaml). This is useful in you want to run directly e.g:
+Port 9091 is the port number used in the container. However this can be changed in [config.yaml](./config.yaml). This is useful if you want to run the node directly e.g:
 
 ```bash
 node src/index.js

@@ -3,6 +3,7 @@
 source ./retry-tests.sh
 
 config_version=$(cat config.yaml | grep version | awk '{print $2}' | tr -d '"' | head -n 1)
+config_version=$(eval echo $config_version)
 
 ## This tests the load balancer by sending a GET request to the server and checking the response
 ## curl -s https://api.steemyy.com | jq
@@ -42,6 +43,7 @@ send_a_get_request_header() {
     ## check if the response is OK and the version is correct
     if [ "$resp_status" != "OK" ] || [ "$resp_status_code" != "200" ] || [ "$resp_load_balancer_version__" != "$config_version" ]; then
         echo "send_a_get_request_header failed: $resp"
+        echo "Expected version: $config_version, Got: $resp_load_balancer_version__"
         return 1
     fi
     echo "send_a_get_request_header passed!"

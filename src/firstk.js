@@ -3,28 +3,36 @@ async function firstKFulfilled(promises, k) {
     const fulfilled = [];
     let settledCount = 0;
     const total = promises.length;
+    const startTimes = new Map();
 
-    if (k <= 0) {
-      return resolve([]);
-    }
-    if (total === 0) {
-      return resolve([]);
-    }
+    if (k <= 0) return resolve([]);
+    if (total === 0) return resolve([]);
 
-    promises.forEach((p) => {
+    promises.forEach((p, index) => {
+      const start = Date.now();
+      startTimes.set(index, start);
+
       Promise.resolve(p)
         .then((value) => {
-          fulfilled.push(value);
+          const latency = Date.now() - start;
+          fulfilled.push({ value, latency });
           if (fulfilled.length === k) {
-            resolve(fulfilled); // early resolve once k succeeded
+            // Sort the first k by latency before resolving
+            const sorted = fulfilled
+              .sort((a, b) => a.latency - b.latency)
+              .map((x) => x.value);
+            resolve(sorted);
           }
         })
         .catch(() => {})
         .finally(() => {
           settledCount++;
-          // if everything has settled and we never reached k
           if (settledCount === total && fulfilled.length < k) {
-            resolve(fulfilled);
+            // Fewer than k succeeded; still return sorted
+            const sorted = fulfilled
+              .sort((a, b) => a.latency - b.latency)
+              .map((x) => x.value);
+            resolve(sorted);
           }
         });
     });
