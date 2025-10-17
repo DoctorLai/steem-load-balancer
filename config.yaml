@@ -34,3 +34,4 @@ cache:
   enabled: ${CACHE_ENABLED}
   ttl: ${CACHE_TTL}
 debug: false
+firstK: 2

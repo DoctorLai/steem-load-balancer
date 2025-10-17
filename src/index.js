@@ -87,6 +87,10 @@ log(`Reject Unauthorized: ${rejectUnauthorized}`);
 const timeout = config.timeout ?? 3000;
 log(`Timeout: ${timeout}`);
 
+log(
+  `Choosing the max jussi node from the first k=${config.first} nodes that respond OK.`,
+);
+
 // caching
 const cache = config.cache ?? { enabled: false, ttl: 3 };
 const cacheEnabled = cache.enabled ?? false;
@@ -532,10 +536,25 @@ app.all("/", async (req, res) => {
     const promises = shuffledNodes.map((node) =>
       plimit(() => getServerData(node)),
     );
-    chosenNode = await Promise.any(promises).catch((error) => {
-      log(`Error: ${error.message}`);
-      return null;
-    });
+    // chosenNode = await Promise.any(promises).catch((error) => {
+    //   log(`Error: ${error.message}`);
+    //   return null;
+    // });
+    const firstK = config.firstK ?? 1;
+    const fulfilledNodes = await firstKFulfilled(promises, firstK);
+    if (fulfilledNodes.length === 0) {
+      log("No valid nodes found after checking all nodes.");
+      res
+        .status(StatusCodes.SERVICE_UNAVAILABLE)
+        .json({ error: "No valid nodes available" });
+      return;
+    }
+    // choose the node with the highest jussi_number
+    fulfilledNodes.sort((a, b) => b.jussi_number - a.jussi_number);
+    chosenNode = fulfilledNodes[0];
+    log(
+      `Chosen Node: ${chosenNode.server} with jussi_number ${chosenNode.jussi_number}`,
+    );
     if (
       isObjectEmptyOrNullOrUndefined(chosenNode) ||
       isObjectEmptyOrNullOrUndefined(chosenNode.server) ||

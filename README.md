@@ -8,7 +8,9 @@ The Steem Load Balancer is a Node.js-based application designed to distribute AP
 
 This project was developed by STEEM's Top Witness, [@justyy](https://steemyy.com), who also established Two STEEM Load Balancer RPC Nodes, [steem.justyy.com](https://steem.justyy.com) (New York) and [api.steemyy.com](https://api.steemyy.com) (London), using this project as its foundation.
 
-A similar service, [https://steem.senior.workers.dev/](https://steem.senior.workers.dev/), is based on CloudFlare Worker which runs at the CloudFlare Edge Network but comes with a daily quota of 100,000 requests.
+A similar service, [https://steem.senior.workers.dev](https://steem.senior.workers.dev/), is based on CloudFlare Worker which runs at the CloudFlare Edge Network but comes with a daily quota of 100,000 requests.
+
+Another similar service, [https://api2.steemyy.com](https://api2.steemyy.com) is based on CloudFlare's snippets. This node requires a CloudFlare Pro Plan and it will route to one of the 2 nodes whichever responds quicker.
 
 ![image](https://github.com/user-attachments/assets/02f6265d-1ad0-40b4-a5e7-a400dab689eb)
 
@@ -22,6 +24,9 @@ Please note that this can be easily configured to work with other Blockchains su
 - Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 300 requests per 60 second window. This can be set in the [config.yaml](./config.yaml).
 - Logging: Provides detailed logs for debugging and monitoring.
 - SSL Support: Configurable SSL certificates for secure HTTPS communication. Reject or Ignore the SSL certificates when forwarding the requests via the field `rejectUnauthorized` in [config.yaml](./config.yaml)
+
+## How It Works?
+The node first checks whether a previously selected node is still valid (i.e., the cached entry hasn't expired). If it is valid, the request is directly forwarded to that node. Otherwise, the system sends a `get_version` request to the candidate nodes listed in `config.nodes`. Among the first `config.firstK` nodes (default: 1), the node with the highest `jussi_num` value is selected, cached, and used for subsequent requests.
 
 ### A Healthy Node
 A Steem RPC node should return the following to indicate the healthy state. The `jussi_num` needs to catch up with the latest block height. If the `jussi_num` is far behind, e.g. the `max_jussi_number_diff` in [config.yaml](./config.yaml), then the node will not be considered. Currently, it is set to 100.
@@ -77,6 +82,7 @@ cache:
   enabled: true
   ttl: 3
 debug: false
+firstK: 1
 ```
 
 ### Configuration Options
@@ -101,6 +107,7 @@ debug: false
 - cache.enabled: Should we cache the chosen Node?
 - cache.ttl: When cache.enabled, how many seconds before cache expires.
 - debug: When set to debug, more messages are set e.g. in the response header.
+- firstK: Choosing the node which has the max Jussi Number from the first `firstK` nodes that respond OK. Default is 1.
 
 ## Installation
 Clone the Repository:
