@@ -21,6 +21,7 @@ import {
   sleep,
   isObjectEmptyOrNullOrUndefined,
   fetchWithTimeout,
+  firstKFulfilled,
 } from "./functions.js"; // Make sure functions.js uses ES exports
 
 const pLimit = (...args) =>
