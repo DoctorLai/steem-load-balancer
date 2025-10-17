@@ -19,6 +19,7 @@ import {
   limitStringMaxLength,
   secondsToTimeDict,
   sleep,
+  fetchWithTimeout,
   isObjectEmptyOrNullOrUndefined,
 } from "./functions.js";
 
