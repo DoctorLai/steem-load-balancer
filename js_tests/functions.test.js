@@ -207,7 +207,7 @@ describe("fetchWithTimeout", () => {
     const mockResponse = { ok: true, json: async () => ({ id: 1 }) };
     fetch.mockImplementation(async () => {
       // simulate 50ms latency
-      await new Promise((res) => setTimeout(res, 50));            
+      await new Promise((res) => setTimeout(res, 50));
       return mockResponse;
     });
 

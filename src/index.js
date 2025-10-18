@@ -265,7 +265,9 @@ async function getServerData(server) {
     ] = await Promise.all([versionPromise, jussiPromise]);
 
     const latencyMs = performance.now() - startTime; // end timer
-    log(`Server ${server} Latency: ${latencyMs.toFixed(2)} ms (version: ${versionLatency} ms, jussi: ${jussiLatency} ms)`);
+    log(
+      `Server ${server} Latency: ${latencyMs.toFixed(2)} ms (version: ${versionLatency} ms, jussi: ${jussiLatency} ms)`,
+    );
 
     if (!versionResponse.ok) {
       let err_msg = `Server ${server} (version) responded with status: ${versionResponse.status}`;
