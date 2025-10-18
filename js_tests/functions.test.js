@@ -145,9 +145,9 @@ describe("log", () => {
 
 describe("sleep", () => {
   test("should resolve after specified time", async () => {
-    const start = Date.now();
+    const start = performance.now();
     await sleep(100);
-    const end = Date.now();
+    const end = performance.now();
     expect(end - start).toBeGreaterThanOrEqual(100);
   });
 });
