@@ -1,0 +1,144 @@
+{
+  "status": "OK",
+  "datetime": "2025-10-18T18:50:40.197377",
+  "source_commit": "ae6c6c77601436e496a8816ece2cbc6e26fbe3c2",
+  "docker_tag": "latest",
+  "jussi_num": 100078298,
+  "status_code": 200,
+  "__server__": "https://api2.justyy.com",
+  "__version__": {
+    "id": 0,
+    "jsonrpc": "2.0",
+    "result": {
+      "blockchain_version": "0.23.1",
+      "steem_revision": "46c7d93db350e8b031a81626e727c92b27d7348b",
+      "fc_revision": "46c7d93db350e8b031a81626e727c92b27d7348b"
+    }
+  },
+  "__selected__": {
+    "server": "https://api2.justyy.com",
+    "version": {
+      "id": 0,
+      "jsonrpc": "2.0",
+      "result": {
+        "blockchain_version": "0.23.1",
+        "steem_revision": "46c7d93db350e8b031a81626e727c92b27d7348b",
+        "fc_revision": "46c7d93db350e8b031a81626e727c92b27d7348b"
+      }
+    },
+    "jussi_number": 100078298,
+    "latencyMs": 171.44709700000385,
+    "timestamp": 1760813440090
+  },
+  "__servers__": [
+    "https://api.steemit.com",
+    "https://api2.justyy.com",
+    "https://api.moecki.online",
+    "https://api.pennsif.net",
+    "https://api.botsteem.com",
+    "https://api.steemitdev.com",
+    "https://steemapi.boylikegirl.club",
+    "https://api.justyy.com"
+  ],
+  "__ip__": "::ffff:51.6.121.145",
+  "__config__": {
+    "strategy": "max_jussi_number",
+    "firstK": 2,
+    "timeout": 2000,
+    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
+    "min_blockchain_version": "0.23.0",
+    "max_jussi_number_diff": 500,
+    "cache_enabled": "true",
+    "cache_ttl": "3"
+  },
+  "__first_k_candidates__": [
+    {
+      "server": "https://api.botsteem.com",
+      "version": {
+        "id": 0,
+        "jsonrpc": "2.0",
+        "result": {
+          "blockchain_version": "0.23.0",
+          "steem_revision": "5feab9b78d30a37506f252d7c72cfcdc88c34231",
+          "fc_revision": "5feab9b78d30a37506f252d7c72cfcdc88c34231"
+        }
+      },
+      "jussi_number": 100078278,
+      "latencyMs": 133.53905600000144
+    },
+    {
+      "server": "https://api2.justyy.com",
+      "version": {
+        "id": 0,
+        "jsonrpc": "2.0",
+        "result": {
+          "blockchain_version": "0.23.1",
+          "steem_revision": "46c7d93db350e8b031a81626e727c92b27d7348b",
+          "fc_revision": "46c7d93db350e8b031a81626e727c92b27d7348b"
+        }
+      },
+      "jussi_number": 100078298,
+      "latencyMs": 171.44709700000385,
+      "timestamp": 1760813440090
+    }
+  ],
+  "__load_balancer_version__": "54007649e8d54ec38cab2ccaf02845aa17924678",
+  "__stats__": {
+    "total": 75,
+    "rps": 1.25,
+    "rps_stats": {
+      "1min": 1.27,
+      "5min": 0.25,
+      "15min": 0.08
+    },
+    "rate_limit": {
+      "windowMs": 10000,
+      "maxRequests": 600
+    },
+    "seconds": 60,
+    "uptime": {
+      "startTime": "2025-10-18T18:49:39.223Z",
+      "currentTime": "2025-10-18T18:50:40.090Z",
+      "seconds": 0,
+      "minutes": 1,
+      "hours": 0,
+      "days": 0,
+      "month": 0,
+      "year": 0
+    },
+    "access_counters": {
+      "https://api.justyy.com": {
+        "percent": 49.33,
+        "count": 37
+      },
+      "https://api.botsteem.com": {
+        "percent": 25.33,
+        "count": 19
+      },
+      "https://api.steemit.com": {
+        "percent": 4,
+        "count": 3
+      },
+      "https://api2.justyy.com": {
+        "percent": 12,
+        "count": 9
+      },
+      "https://api.moecki.online": {
+        "percent": 9.33,
+        "count": 7
+      }
+    },
+    "error_counters": {
+      
+    },
+    "not_chosen_counters": {
+      
+    },
+    "jussi_behind_counters": {
+      
+    },
+    "timed_out_counters": {
+      
+    }
+  }
+}

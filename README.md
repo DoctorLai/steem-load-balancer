@@ -28,6 +28,13 @@ Please note that this can be easily configured to work with other Blockchains su
 ## How It Works?
 The node first checks whether a previously selected node is still valid (i.e., the cached entry hasn't expired). If it is valid, the request is directly forwarded to that node. Otherwise, the system sends a `get_version` request to the candidate nodes listed in `config.nodes`. Among the first `config.firstK` nodes (default: 1), the node with the highest `jussi_num` value is selected, cached, and used for subsequent requests.
 
+### Better Algorithms?
+The Steem blockchain ensures idempotency at the transaction level when the signed content is identical. See [Testing Parallel Transfer on STEEM](https://steemit.com/steem/@justyy/testing-parallel-transfer-on-steem) which means that: 
+
+> We can simplify the load-balancing logics. Just fan out the requests to multiple nodes and return the quickest response.
+
+However, this is against the idea of load balancing. Faning out requests will be putting loads on RPC nodes.
+
 ### A Healthy Node
 A Steem RPC node should return the following to indicate the healthy state. The `jussi_num` needs to catch up with the latest block height. If the `jussi_num` is far behind, e.g. the `max_jussi_number_diff` in [config.yaml](./config.yaml), then the node will not be considered. Currently, it is set to 100.
 
@@ -241,102 +248,7 @@ Enable logging by setting "logging": true in [config.yaml](./config.yaml). Logs 
 ## Statistics
 On the GET requests, the response JSON will show some additional data including statistics (including Uptime, Access Counters, Error Counters, Not Chosen Counters and Jussi Behind Counters):
 
-See the sample JSON response for sending a GET:
-
-```json
-{
-  "status": "OK",
-  "datetime": "2025-02-01T11:17:40.185321",
-  "source_commit": "ae6c6c77601436e496a8816ece2cbc6e26fbe3c2",
-  "docker_tag": "latest",
-  "jussi_num": 92629647,
-  "status_code": 200,
-  "__server__": "https://api.justyy.com",
-  "__version__": {
-    "id": 0,
-    "jsonrpc": "2.0",
-    "result": {
-      "blockchain_version": "0.23.1",
-      "steem_revision": "46c7d93db350e8b031a81626e727c92b27d7348b",
-      "fc_revision": "46c7d93db350e8b031a81626e727c92b27d7348b"
-    }
-  },
-  "__servers__": [
-    "https://api.campingclub.me",
-    "https://api.botsteem.com",
-    "https://api.pennsif.net",
-    "https://api2.justyy.com",
-    "https://api.steemit.com",
-    "https://api.justyy.com",
-    "https://api.dlike.io",
-    "https://api.steemitdev.com",
-    "https://api.wherein.io",
-    "https://rpc.amarbangla.net",
-    "https://api.steememory.com",
-    "https://api.moecki.online",
-    "https://steemapi.boylikegirl.club"
-  ],
-  "__ip__": "**Redacted**",
-  "__load_balancer_version__": "2025-02-01",
-  "__stats__": {
-    "total": 646,
-    "rps": 1.38,
-    "rps_stats": {
-      "1min": 1.28,
-      "5min": 1.44,
-      "15min": 0.72
-    },
-    "rate_limit": {
-      "windowMs": 60000,
-      "maxRequests": 600
-    },
-    "seconds": 467,
-    "uptime": {
-      "startTime": "2025-02-01T11:09:52.608Z",
-      "currentTime": "2025-02-01T11:17:40.096Z",
-      "seconds": 47,
-      "minutes": 7,
-      "hours": 0,
-      "days": 0,
-      "month": 0,
-      "year": 0
-    },
-    "access_counters": {
-      "https://api2.justyy.com": {
-        "percent": 28.48,
-        "count": 184
-      },
-      "https://api.botsteem.com": {
-        "percent": 19.81,
-        "count": 128
-      },
-      "https://api.justyy.com": {
-        "percent": 51.55,
-        "count": 333
-      },
-      "https://api.steemit.com": {
-        "percent": 0.15,
-        "count": 1
-      }
-    },
-    "error_counters": {
-      
-    },
-    "not_chosen_counters": {
-      "https://api.steemzzang.com": 645,
-      "https://steemapi.boylikegirl.club": 5
-    },
-    "jussi_behind_counters": {
-      "https://api.campingclub.me": 177,
-      "https://api.steememory.com": 645,
-      "https://api.pennsif.net": 1,
-      "https://rpc.amarbangla.net": 2,
-      "https://api.botsteem.com": 14,
-      "https://api.dlike.io": 6
-    }
-  }
-}
-```
+See [a sample JSON response](./example-response.json) for sending a GET to the STEEM RPC Load Balancer.
 
 ## Running without Container
 Port 9091 is the port number used in the container. However this can be changed in [config.yaml](./config.yaml). This is useful if you want to run the node directly e.g:
