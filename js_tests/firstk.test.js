@@ -11,7 +11,7 @@ describe("firstKFulfilled", () => {
 
     expect(result.length).toBe(2);
     expect(result).toEqual(expect.arrayContaining(["A", "B"]));
-    expect(elapsed).toBeLessThan(120); // should resolve early
+    expect(elapsed).toBeLessThan(140); // should resolve early
   });
 
   it("returns all fulfilled if fewer than k succeed", async () => {

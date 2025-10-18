@@ -1,8 +1,7 @@
 import { AbortController } from "abort-controller";
 
 // const fetch = (...args) => import("node-fetch").then((module) => module.default(...args));
-const fetch = require("node-fetch");
-// import fetch from "node-fetch";
+import fetch from "node-fetch";
 
 // Shuffle function
 function shuffle(array) {
