@@ -1,7 +1,8 @@
 import { AbortController } from "abort-controller";
 
 // const fetch = (...args) => import("node-fetch").then((module) => module.default(...args));
-import fetch from "node-fetch";
+const fetch = require("node-fetch");
+// import fetch from "node-fetch";
 
 // Shuffle function
 function shuffle(array) {
@@ -91,21 +92,26 @@ function isObjectEmptyOrNullOrUndefined(obj) {
   );
 }
 
-async function fetchWithTimeout(url, options = {}, timeout = 3000) {
+async function fetchWithTimeout(url, options = {}, timeout = 5000) {
   const controller = new AbortController();
   const signal = controller.signal;
+
+  const fetchPromise = fetch(url, { ...options, signal });
+
   const timeoutId = setTimeout(() => controller.abort(), timeout);
+
   try {
-    const start = performance.now();
-    const response = await fetch(url, { ...options, signal });
-    const end = performance.now();
-    clearTimeout(timeoutId); // Clear timeout if request completes successfully
-    return { response, latency: end - start };
-  } catch (error) {
-    if (error.name === "AbortError") {
+    const start = Date.now();
+    const response = await fetchPromise;
+    const latency = Date.now() - start;
+    return { response, latency };
+  } catch (err) {
+    if (err.name === "AbortError") {
       throw new Error(`Fetch request to ${url} timed out after ${timeout} ms`);
     }
-    throw error;
+    throw err;
+  } finally {
+    clearTimeout(timeoutId); // cleanup timer
   }
 }
 

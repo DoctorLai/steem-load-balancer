@@ -11,6 +11,7 @@ import http from "http";
 import compression from "compression";
 import helmet from "helmet";
 import { StatusCodes } from "http-status-codes";
+import { performance } from "perf_hooks";
 
 import {
   shuffle,
@@ -258,12 +259,13 @@ async function getServerData(server) {
     );
 
     // Wait for both fetches to complete
-    const [versionResponse, jussiResponse] = await Promise.all([
-      versionPromise,
-      jussiPromise,
-    ]);
+    const [
+      { response: versionResponse, latency: versionLatency },
+      { response: jussiResponse, latency: jussiLatency },
+    ] = await Promise.all([versionPromise, jussiPromise]);
 
     const latencyMs = performance.now() - startTime; // end timer
+    log(`Server ${server} Latency: ${latencyMs.toFixed(2)} ms (version: ${versionLatency} ms, jussi: ${jussiLatency} ms)`);
 
     if (!versionResponse.ok) {
       let err_msg = `Server ${server} (version) responded with status: ${versionResponse.status}`;
@@ -402,7 +404,7 @@ async function forwardRequestGET(apiURL) {
   for (let i = 0; i < retry_count; ++i) {
     try {
       log(`GET: Forwarding to ${apiURL}`);
-      const res = await fetchWithTimeout(
+      const { response: res, latency } = await fetchWithTimeout(
         apiURL,
         {
           method: "GET",
@@ -418,7 +420,7 @@ async function forwardRequestGET(apiURL) {
         timeout,
       );
       const data = await res.text();
-      log(`Status: ${res.status}`);
+      log(`Status: ${res.status} Latency: ${latency}ms`);
       return { statusCode: res.status, data };
     } catch (error) {
       if (i < retry_count - 1) {
@@ -438,7 +440,7 @@ async function forwardRequestPOST(apiURL, body) {
       log(
         `POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, logging_max_body_len)}`,
       );
-      const res = await fetchWithTimeout(
+      const { response: res, latency } = await fetchWithTimeout(
         apiURL,
         {
           method: "POST",
@@ -454,7 +456,7 @@ async function forwardRequestPOST(apiURL, body) {
         },
         timeout,
       );
-      log(`Status: ${res.status}`);
+      log(`Status: ${res.status} Latency: ${latency}ms`);
       const data = await res.text();
       return { statusCode: res.status, data };
     } catch (error) {
