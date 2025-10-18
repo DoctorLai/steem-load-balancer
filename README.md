@@ -10,7 +10,7 @@ This project was developed by STEEM's Top Witness, [@justyy](https://steemyy.com
 
 A similar service, [https://steem.senior.workers.dev](https://steem.senior.workers.dev/), is based on CloudFlare Worker which runs at the CloudFlare Edge Network but comes with a daily quota of 100,000 requests.
 
-Another similar service, [https://api2.steemyy.com](https://api2.steemyy.com) is based on CloudFlare's snippets. This node requires a CloudFlare Pro Plan and it will route to one of the 2 nodes whichever responds quicker.
+Another similar service, [https://api2.steemyy.com](https://api2.steemyy.com) is based on CloudFlare's snippets. This node requires a CloudFlare Paid Plan (Pro+) and it will route to a quickest RPC node. See [steem-proxy-cloudflare](https://github.com/DoctorLai/steem-proxy-cloudflare) for more information.
 
 ![image](https://github.com/user-attachments/assets/02f6265d-1ad0-40b4-a5e7-a400dab689eb)
 
@@ -310,7 +310,7 @@ Setting NODE_ENV to "production" (by default) or "development".
 This project is licensed under the [MIT License](./LICENSE).
 
 ## Contributing?
-Contribution are absolutely welcome! Please follow the guidance [here](./CONTRIBUTING.md)
+Contribution are absolutely welcome! Please follow the guidance [here](./CONTRIBUTING.md) and [CODE OF CONDUCT](./CODE_OF_CONDUCT.md)
 
 ## Sibling Projects
 - [steem-proxy-cloudflare](https://github.com/DoctorLai/steem-proxy-cloudflare)
