@@ -1,13 +1,13 @@
-const {
+import {
   chooseNode,
   strategyFirst,
   strategyRandom,
   strategyMaxJussiNumber,
   strategyLatestVersion,
   getStrategyByName,
-} = require("../src/choose-node.js");
+} from "../src/choose-node.js";
 
-const { compareVersion } = require("../src/functions.js");
+import { compareVersion } from "../src/functions.js";
 
 // Mock data
 const nodes = [

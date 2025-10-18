@@ -354,14 +354,34 @@ See [this post](https://steemit.com/steem/@justyy/choose-a-stable-rpc-node-in-yo
 
 ### Example: Dynamic RPC Node Selection with Fallback
 ```python
-node = fetch_from_load_balancer("https://api.steemyy.com")
-while your_app_is_running:
+load_balancing_nodes = [
+    "https://api.steemyy.com",
+    "https://api2.steemyy.com",
+    "https://steem.justyy.com"
+]
+
+def node_rotator(nodes):
+    """Infinite generator that yields nodes in round-robin."""
+    while True:
+        for node in nodes:
+            yield node
+
+def fetch_from_load_balancer(node):
+    """Optional preprocessing, health check, or logging."""
+    print(f"Selected node: {node}")
+    return node
+
+node_gen = node_rotator(load_balancing_nodes)
+node = fetch_from_load_balancer(next(node_gen))
+
+## Replace with your actual app loop condition
+while True:
     try:
         # use the node in your API calls
         pass
-    except:
-        # if the node fails, refresh it from the load balancer
-        node = fetch_from_load_balancer("https://api.steemyy.com")
+    except Exception as e:
+        print(f"Node error: {e}, switching node...")
+        node = fetch_from_load_balancer(next(node_gen))
 ```
 
 With this setup, your app will:
