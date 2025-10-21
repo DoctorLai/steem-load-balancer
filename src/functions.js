@@ -1,3 +1,4 @@
+import { performance } from "perf_hooks";
 import { AbortController } from "abort-controller";
 
 // const fetch = (...args) => import("node-fetch").then((module) => module.default(...args));
@@ -100,9 +101,9 @@ async function fetchWithTimeout(url, options = {}, timeout = 5000) {
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const start = Date.now();
+    const start = performance.now();
     const response = await fetchPromise;
-    const latency = Date.now() - start;
+    const latency = performance.now() - start;
     return { response, latency };
   } catch (err) {
     if (err.name === "AbortError") {

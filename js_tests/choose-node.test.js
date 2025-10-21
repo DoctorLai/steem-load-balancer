@@ -132,9 +132,9 @@ describe("chooseNode()", () => {
     const fast = delay({ id: "fast" }, 50);
     const slow = delay({ id: "slow" }, 200);
 
-    const start = Date.now();
+    const start = performance.now();
     await chooseNode([fast, slow], 1, strategyFirst);
-    const elapsed = Date.now() - start;
+    const elapsed = performance.now() - start;
 
     expect(elapsed).toBeLessThan(120);
   });

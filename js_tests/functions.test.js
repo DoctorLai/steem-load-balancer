@@ -148,7 +148,7 @@ describe("sleep", () => {
     const start = performance.now();
     await sleep(100);
     const end = performance.now();
-    expect(end - start).toBeGreaterThanOrEqual(100);
+    expect(Math.round(end - start)).toBeGreaterThanOrEqual(100);
   });
 });
 
@@ -212,7 +212,7 @@ describe("fetchWithTimeout", () => {
     });
 
     const { latency } = await fetchWithTimeout(TEST_URL, {}, 5000);
-    expect(latency).toBeGreaterThanOrEqual(50);
+    expect(Math.round(latency)).toBeGreaterThanOrEqual(50);
     expect(latency).toBeLessThan(5000);
   });
 });

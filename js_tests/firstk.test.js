@@ -2,12 +2,12 @@ import { firstKFulfilled, delay } from "../src/firstk.js";
 
 describe("firstKFulfilled", () => {
   it("resolves after first k fulfillments", async () => {
-    const start = Date.now();
+    const start = performance.now();
     const result = await firstKFulfilled(
       [delay("A", 100), delay("B", 50), delay("C", 150), delay("D", 200)],
       2,
     );
-    const elapsed = Date.now() - start;
+    const elapsed = performance.now() - start;
 
     expect(result.length).toBe(2);
     expect(result).toEqual(expect.arrayContaining(["A", "B"]));
