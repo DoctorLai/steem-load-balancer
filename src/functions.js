@@ -100,9 +100,9 @@ async function fetchWithTimeout(url, options = {}, timeout = 5000) {
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const start = Date.now();
+    const start = performance.now();
     const response = await fetchPromise;
-    const latency = Date.now() - start;
+    const latency = performance.now() - start;
     return { response, latency };
   } catch (err) {
     if (err.name === "AbortError") {

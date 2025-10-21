@@ -9,12 +9,12 @@ async function firstKFulfilled(promises, k) {
     if (total === 0) return resolve([]);
 
     promises.forEach((p, index) => {
-      const start = Date.now();
+      const start = performance.now();
       startTimes.set(index, start);
 
       Promise.resolve(p)
         .then((value) => {
-          const latency = Date.now() - start;
+          const latency = performance.now() - start;
           fulfilled.push({ value, latency });
           if (fulfilled.length === k) {
             // Sort the first k by latency before resolving

@@ -61,12 +61,7 @@ nodes:
   - "https://api.pennsif.net"
   - "https://api.moecki.online"
   - "https://api.botsteem.com"
-  # - "https://rpc.amarbangla.net"
-  # - "https://api.dlike.io"
-  # - "https://api.campingclub.me"
-  # - "https://api.wherein.io"
   # - "https://api.steememory.com"
-  # - "https://steemapi.boylikegirl.club"
 rateLimit:
   windowMs: 30000
   maxRequests: 600
@@ -226,7 +221,10 @@ source ./setup-env.sh
 Use [integration-tests-docker-compose.sh](./tests/integration-tests-docker-compose.sh) to test the steem load balancer via [docker-compose](./docker-compose.yml).
 
 ## Unit Tests
-Run `npm test` to run the unit tests on the project.
+Run `npm test` or `npm run test` to run the unit tests on the project.
+
+## Test Coverage
+Run `npm test:coverage` to run the tests with coverage report.
 
 ## Tools
 Tools are placed at [./tools](./tools/) directory.
