@@ -1,3 +1,5 @@
+import { performance } from "perf_hooks";
+
 async function firstKFulfilled(promises, k) {
   return new Promise((resolve) => {
     const fulfilled = [];

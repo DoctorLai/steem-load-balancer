@@ -1,3 +1,4 @@
+import { performance } from "perf_hooks";
 import { AbortController } from "abort-controller";
 
 // const fetch = (...args) => import("node-fetch").then((module) => module.default(...args));
