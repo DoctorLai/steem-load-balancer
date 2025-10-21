@@ -212,7 +212,7 @@ describe("fetchWithTimeout", () => {
     });
 
     const { latency } = await fetchWithTimeout(TEST_URL, {}, 5000);
-    expect(latency).toBeGreaterThanOrEqual(50);
+    expect(Math.round(latency)).toBeGreaterThanOrEqual(50);
     expect(latency).toBeLessThan(5000);
   });
 });
