@@ -1,5 +1,5 @@
 # Steem Load Balancer
-[![Node.js CI](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml)
+[![Build and Tests](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml) [![Test Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml)
 
 Here is the [AI-generated documentation](https://deepwiki.com/DoctorLai/steem-load-balancer/) by Deep-Wiki.
 
