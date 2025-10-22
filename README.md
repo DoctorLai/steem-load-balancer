@@ -224,7 +224,7 @@ Use [integration-tests-docker-compose.sh](./tests/integration-tests-docker-compo
 Run `npm test` or `npm run test` to run the unit tests on the project.
 
 ## Test Coverage
-Run `npm test:coverage` to run the tests with coverage report.
+Run `npm coverage` to run the tests with coverage report.
 
 ## Tools
 Tools are placed at [./tools](./tools/) directory.

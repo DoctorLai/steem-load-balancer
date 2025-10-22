@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --config jest.config.mjs",
-    "test:coverage": "jest --config jest.config.mjs --coverage",
+    "coverage": "jest --config jest.config.mjs --coverage",
     "format": "prettier --check 'src/*.js' 'js_tests/*.js'",
     "format:fix": "prettier --write 'src/*.js' 'js_tests/*.js'",
     "lint": "eslint 'src/*.js' 'js_tests/*.js' --max-warnings=0"
