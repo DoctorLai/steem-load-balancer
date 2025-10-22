@@ -19,11 +19,14 @@ import {
   compareVersion,
   limitStringMaxLength,
   secondsToTimeDict,
-  fetchWithTimeout,
   isObjectEmptyOrNullOrUndefined,
 } from "./functions.js";
 
-import { forwardRequestPOST, forwardRequestGET } from "./network.js";
+import {
+  fetchWithTimeout,
+  forwardRequestPOST,
+  forwardRequestGET,
+} from "./network.js";
 
 import { chooseNode, getStrategyByName } from "./choose-node.js";
 
