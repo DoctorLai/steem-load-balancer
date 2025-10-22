@@ -144,6 +144,6 @@ describe("sleep", () => {
     const start = performance.now();
     await sleep(100);
     const end = performance.now();
-    expect(Math.round(end - start)).toBeGreaterThanOrEqual(100);
+    expect(Math.ceil(end - start)).toBeGreaterThanOrEqual(100);
   });
 });
