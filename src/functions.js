@@ -1,9 +1,3 @@
-import { performance } from "perf_hooks";
-import { AbortController } from "abort-controller";
-
-// const fetch = (...args) => import("node-fetch").then((module) => module.default(...args));
-import fetch from "node-fetch";
-
 // Shuffle function
 function shuffle(array) {
   let currentIndex = array.length;
@@ -92,29 +86,6 @@ function isObjectEmptyOrNullOrUndefined(obj) {
   );
 }
 
-async function fetchWithTimeout(url, options = {}, timeout = 5000) {
-  const controller = new AbortController();
-  const signal = controller.signal;
-
-  const fetchPromise = fetch(url, { ...options, signal });
-
-  const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const start = performance.now();
-    const response = await fetchPromise;
-    const latency = performance.now() - start;
-    return { response, latency };
-  } catch (err) {
-    if (err.name === "AbortError") {
-      throw new Error(`Fetch request to ${url} timed out after ${timeout} ms`);
-    }
-    throw err;
-  } finally {
-    clearTimeout(timeoutId); // cleanup timer
-  }
-}
-
 export {
   shuffle,
   log,
@@ -123,5 +94,4 @@ export {
   secondsToTimeDict,
   sleep,
   isObjectEmptyOrNullOrUndefined,
-  fetchWithTimeout,
 };

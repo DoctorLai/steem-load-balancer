@@ -19,10 +19,11 @@ import {
   compareVersion,
   limitStringMaxLength,
   secondsToTimeDict,
-  sleep,
   fetchWithTimeout,
   isObjectEmptyOrNullOrUndefined,
 } from "./functions.js";
+
+import { forwardRequestPOST, forwardRequestGET } from "./network.js";
 
 import { chooseNode, getStrategyByName } from "./choose-node.js";
 
@@ -401,77 +402,6 @@ async function getServerData(server) {
   }
 }
 
-// Forward GET request to the chosen node
-async function forwardRequestGET(apiURL) {
-  for (let i = 0; i < retry_count; ++i) {
-    try {
-      log(`GET: Forwarding to ${apiURL}`);
-      const { response: res, latency } = await fetchWithTimeout(
-        apiURL,
-        {
-          method: "GET",
-          cache: "no-cache",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-            "User-Agent": user_agent,
-          },
-          redirect: "follow",
-          agent,
-        },
-        timeout,
-      );
-      const data = await res.text();
-      log(`Status: ${res.status} Latency: ${latency}ms`);
-      return { statusCode: res.status, data };
-    } catch (error) {
-      if (i < retry_count - 1) {
-        log(`Retrying ${apiURL}, attempt ${i + 1}`);
-        await sleep(100);
-        continue;
-      }
-      throw error;
-    }
-  }
-}
-
-// Forward POST request to the chosen node
-async function forwardRequestPOST(apiURL, body) {
-  for (let i = 0; i < retry_count; ++i) {
-    try {
-      log(
-        `POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, logging_max_body_len)}`,
-      );
-      const { response: res, latency } = await fetchWithTimeout(
-        apiURL,
-        {
-          method: "POST",
-          cache: "no-cache",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-            "User-Agent": user_agent,
-          },
-          redirect: "follow",
-          body: body,
-          agent,
-        },
-        timeout,
-      );
-      log(`Status: ${res.status} Latency: ${latency}ms`);
-      const data = await res.text();
-      return { statusCode: res.status, data };
-    } catch (error) {
-      if (i < retry_count - 1) {
-        log(`Retrying ${apiURL}, attempt ${i + 1}`);
-        await sleep(100);
-        continue;
-      }
-      throw error;
-    }
-  }
-}
-
 function calculatePercentage(accessCounters) {
   const percentageDict = {};
 
@@ -630,14 +560,28 @@ app.all("/", async (req, res) => {
 
   try {
     if (method === "GET") {
-      result = await forwardRequestGET(chosenNode.server);
+      result = await forwardRequestGET(
+        chosenNode.server,
+        retry_count,
+        user_agent,
+        timeout,
+        agent,
+      );
     } else if (method === "POST") {
       let reqbody = req.body;
       const body = JSON.stringify(reqbody);
       log(
         `Request Body is ${limitStringMaxLength(body, logging_max_body_len)}`,
       );
-      result = await forwardRequestPOST(chosenNode.server, body);
+      result = await forwardRequestPOST(
+        chosenNode.server,
+        body,
+        agent,
+        timeout,
+        retry_count,
+        user_agent,
+        logging_max_body_len,
+      );
     } else {
       return res.status(405).json({ error: "Method Not Allowed" });
     }
