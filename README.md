@@ -57,10 +57,10 @@ nodes:
   - "https://api2.justyy.com"
   - "https://api.justyy.com"
   - "https://api.steemit.com"
-  - "https://api.steemitdev.com"
-  - "https://api.pennsif.net"
-  - "https://api.moecki.online"
-  - "https://api.botsteem.com"
+  # - "https://api.steemitdev.com"
+  # - "https://api.pennsif.net"
+  # - "https://api.moecki.online"
+  # - "https://api.botsteem.com"
   # - "https://api.steememory.com"
 rateLimit:
   windowMs: 30000
@@ -157,7 +157,7 @@ You can pass [./config.yaml](./config.yaml) to either [./run.sh](./run.sh) or [.
 ```
 
 ## Prebuilt Docker Image
-A latest image has been built and store at docker hub, so you can do:
+A latest image has been built and store at [docker hub](https://hub.docker.com/r/justyy/steem-load-balancer), so you can do:
 
 ```bash
 docker pull justyy/steem-load-balancer:latest
@@ -176,6 +176,7 @@ docker run \
     -e SSL_CERT_PATH=$SSL_CERT_PATH \
     -e SSL_KEY_PATH=$SSL_KEY_PATH \
     -e STEEM_LB_VERSION=$STEEM_LB_VERSION \
+    -e DEBUG=false \
     --name steem-load-balancer \
     --restart on-failure:$RETRY_COUNT \
     -p $STEEM_LB_PORT:9091 \
