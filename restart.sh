@@ -9,4 +9,4 @@ fi
 ./stop.sh || true
 
 # Start the steem load balancer node
-./run.sh
+./run.sh $1

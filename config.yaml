@@ -2,16 +2,16 @@ nodes:
   - "https://api2.justyy.com"
   - "https://api.justyy.com"
   - "https://api.steemit.com"
-  - "https://api.steemitdev.com"
-  - "https://api.pennsif.net"
-  - "https://api.moecki.online"
-  - "https://api.botsteem.com"
+  # - "https://api.steemitdev.com"
+  # - "https://api.pennsif.net"
+  # - "https://api.moecki.online"
+  # - "https://api.botsteem.com"
   # - "https://rpc.amarbangla.net"
   # - "https://api.dlike.io"
   # - "https://api.campingclub.me"
   # - "https://api.wherein.io"
   # - "https://api.steememory.com"
-  - "https://steemapi.boylikegirl.club"
+  # - "https://steemapi.boylikegirl.club"
 rateLimit:
   windowMs: 10000
   maxRequests: 600
@@ -27,12 +27,12 @@ user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML
 sslCertPath: "${SSL_CERT_PATH}"
 sslKeyPath: "${SSL_KEY_PATH}"
 rejectUnauthorized: false
-timeout: 2000
+timeout: 3000
 port: 9091
 plimit: 5
 cache:
   enabled: ${CACHE_ENABLED}
   ttl: ${CACHE_TTL}
-debug: false
+debug: ${DEBUG}
 firstK: 2
 strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest_version
