@@ -150,6 +150,12 @@ source ./setup-env.sh
 
 And also, there are [stop](./stop.sh) and [restart](./restart.sh).
 
+You can pass [./config.yaml](./config.yaml) to either [./run.sh](./run.sh) or [./restart.sh](./restart.sh). For example:
+
+```bash
+./restart.sh ./config.yaml
+```
+
 ## Prebuilt Docker Image
 A latest image has been built and store at docker hub, so you can do:
 
