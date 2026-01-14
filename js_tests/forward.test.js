@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { sleep, limitStringMaxLength, log } from "../src/functions.js";
+import { sleep, limitStringMaxLength } from "../src/functions.js";
 import { forwardRequestGET, forwardRequestPOST } from "../src/network.js";
 
 jest.mock("node-fetch", () => jest.fn());
