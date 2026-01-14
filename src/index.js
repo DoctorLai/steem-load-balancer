@@ -563,28 +563,27 @@ app.all("/", async (req, res) => {
 
   try {
     if (method === "GET") {
-      result = await forwardRequestGET(
-        chosenNode.server,
+      result = await forwardRequestGET(chosenNode.server, {
+        agent,
+        timeout,
         retry_count,
         user_agent,
-        timeout,
-        agent,
-      );
+        headers: config.headers?.[chosenNode.server] || {},
+      });
     } else if (method === "POST") {
       let reqbody = req.body;
       const body = JSON.stringify(reqbody);
       log(
         `Request Body is ${limitStringMaxLength(body, logging_max_body_len)}`,
       );
-      result = await forwardRequestPOST(
-        chosenNode.server,
-        body,
+      result = await forwardRequestPOST(chosenNode.server, body, {
         agent,
         timeout,
         retry_count,
         user_agent,
         logging_max_body_len,
-      );
+        headers: config.headers?.[chosenNode.server] || {},
+      });
     } else {
       return res.status(405).json({ error: "Method Not Allowed" });
     }

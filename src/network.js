@@ -31,10 +31,7 @@ async function fetchWithTimeout(url, options = {}, timeout = 5000) {
 // Forward GET request to the chosen node
 async function forwardRequestGET(
   apiURL,
-  retry_count,
-  user_agent,
-  timeout,
-  agent,
+  { agent, timeout, retry_count, user_agent, headers } = {},
 ) {
   for (let i = 0; i < retry_count; ++i) {
     try {
@@ -48,6 +45,7 @@ async function forwardRequestGET(
           headers: {
             "Content-Type": "application/json",
             "User-Agent": user_agent,
+            ...headers,
           },
           redirect: "follow",
           agent,
@@ -72,11 +70,14 @@ async function forwardRequestGET(
 async function forwardRequestPOST(
   apiURL,
   body,
-  agent,
-  timeout,
-  retry_count,
-  user_agent,
-  logging_max_body_len,
+  {
+    agent,
+    timeout,
+    retry_count,
+    user_agent,
+    logging_max_body_len,
+    headers,
+  } = {},
 ) {
   for (let i = 0; i < retry_count; ++i) {
     try {
@@ -92,6 +93,7 @@ async function forwardRequestPOST(
           headers: {
             "Content-Type": "application/json",
             "User-Agent": user_agent,
+            ...headers,
           },
           redirect: "follow",
           body: body,

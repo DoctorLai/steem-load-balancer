@@ -15,6 +15,11 @@ nodes:
 rateLimit:
   windowMs: 10000
   maxRequests: 600
+headers:
+  "https://api.justyy.com":
+    "X-Edge-Key": "${X_EDGE_KEY}"
+  "https://api2.justyy.com":
+    "X-Edge-Key": "${X_EDGE_KEY}"
 version: "${STEEM_LB_VERSION}"
 max_age: 3
 logging: true
