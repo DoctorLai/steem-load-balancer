@@ -18,6 +18,7 @@ services:
       - CACHE_TTL=${CACHE_TTL}
       - STEEM_LB_VERSION=${STEEM_LB_VERSION}
       - DEBUG=${DEBUG}
+      - X_EDGE_KEY=${X_EDGE_KEY}
     volumes:
       - /root/.acme.sh/:/root/.acme.sh/
       - ./config.yaml:/app/config.yaml

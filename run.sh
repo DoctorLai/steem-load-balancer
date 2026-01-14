@@ -26,6 +26,7 @@ docker run \
     -e CACHE_ENABLED=$CACHE_ENABLED \
     -e CACHE_TTL=$CACHE_TTL \
     -e STEEM_LB_VERSION=$STEEM_LB_VERSION \
+    -e X_EDGE_KEY=$X_EDGE_KEY \
     --name $DOCKER_IMAGE \
     --restart on-failure:$RETRY_COUNT \
     -p $STEEM_LB_PORT:9091 \
