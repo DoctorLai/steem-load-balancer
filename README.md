@@ -65,7 +65,12 @@ nodes:
 rateLimit:
   windowMs: 30000
   maxRequests: 600
-version: "2025-03-07"
+headers:
+  "https://api.justyy.com":
+    "X-Edge-Key": "${X_EDGE_KEY}"
+  "https://api2.justyy.com":
+    "X-Edge-Key": "${X_EDGE_KEY}"
+version: "2026-01-14"
 max_age: 3
 logging: true
 max_payload_size: "5mb"
@@ -112,6 +117,7 @@ strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest
 - debug: When set to debug, more messages are set e.g. in the response header.
 - firstK: Choosing the node which has the max Jussi Number from the first `firstK` nodes that respond OK. Default is 1.
 - strategy: The strategy to pick the chosen node. This can be one of: first, random, max_jussi_number (default), latest_version
+- headers: The headers can be specified to pass to the downstream nodes. When proxying requests, the Load Balancer injects a shared-secret header so downstream nodes can identify trusted traffic and apply elevated (or exempt) rate-limit policies.
 
 ## Installation
 Clone the Repository:
@@ -220,7 +226,7 @@ Use the following script i.e. [integration-tests.sh](./tests/integration-tests.s
 
 ```bash
 source ./setup-env.sh
-## on success, exit code is 0.
+## on success, e1it code is 0.
 ## on failure, exit code is 1.
 ./tests/integration-tests.sh
 ```
