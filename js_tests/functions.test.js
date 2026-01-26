@@ -6,6 +6,8 @@ import {
   shuffle,
   log,
   sleep,
+  calculateErrorPercentage,
+  calculatePercentage,
 } from "../src/functions.js";
 
 describe("secondsToTimeDict", () => {
@@ -145,5 +147,154 @@ describe("sleep", () => {
     await sleep(100);
     const end = performance.now();
     expect(Math.ceil(end - start)).toBeGreaterThanOrEqual(100);
+  });
+});
+
+describe("calculatePercentage", () => {
+  test("calculates percentage correctly for multiple URLs", () => {
+    const accessCounters = new Map([
+      ["/api/a", 30],
+      ["/api/b", 70],
+    ]);
+
+    const totalCounter = 100;
+
+    const result = calculatePercentage(accessCounters, totalCounter);
+
+    expect(result).toEqual({
+      "/api/a": { percent: 30.0, count: 30 },
+      "/api/b": { percent: 70.0, count: 70 },
+    });
+  });
+
+  test("rounds percentage to 2 decimal places", () => {
+    const accessCounters = new Map([["/api/a", 33]]);
+
+    const totalCounter = 99;
+
+    const result = calculatePercentage(accessCounters, totalCounter);
+
+    expect(result).toEqual({
+      "/api/a": { percent: 33.33, count: 33 },
+    });
+  });
+
+  test("handles zero count correctly", () => {
+    const accessCounters = new Map([["/api/a", 0]]);
+
+    const totalCounter = 50;
+
+    const result = calculatePercentage(accessCounters, totalCounter);
+
+    expect(result).toEqual({
+      "/api/a": { percent: 0, count: 0 },
+    });
+  });
+
+  test("handles empty accessCounters", () => {
+    const accessCounters = new Map();
+    const totalCounter = 100;
+
+    const result = calculatePercentage(accessCounters, totalCounter);
+
+    expect(result).toEqual({});
+  });
+
+  test("handles total_counter smaller than individual count", () => {
+    const accessCounters = new Map([["/api/a", 150]]);
+
+    const totalCounter = 100;
+
+    const result = calculatePercentage(accessCounters, totalCounter);
+
+    expect(result).toEqual({
+      "/api/a": { percent: 150.0, count: 150 },
+    });
+  });
+
+  test("handles total_counter = 0 safely", () => {
+    const accessCounters = new Map([["/api/a", 10]]);
+
+    const result = calculatePercentage(accessCounters, 0);
+
+    expect(result).toEqual({
+      "/api/a": { percent: 0, count: 10 },
+    });
+  });
+});
+
+describe("calculateErrorPercentage", () => {
+  test("calculates error and success rates correctly", () => {
+    const errorCounters = new Map([["/api/a", 5]]);
+
+    const accessCounters = new Map([["/api/a", 100]]);
+
+    const result = calculateErrorPercentage(errorCounters, accessCounters);
+
+    expect(result).toEqual({
+      "/api/a": {
+        errRate: 5.0,
+        total: 100,
+        errorCount: 5,
+        succRate: 95.0,
+      },
+    });
+  });
+
+  test("rounds rates to 3 decimal places", () => {
+    const errorCounters = new Map([["/api/a", 1]]);
+
+    const accessCounters = new Map([["/api/a", 3]]);
+
+    const result = calculateErrorPercentage(errorCounters, accessCounters);
+
+    expect(result["/api/a"].errRate).toBe(33.333);
+    expect(result["/api/a"].succRate).toBe(66.667);
+  });
+
+  test("handles URLs with zero total requests", () => {
+    const errorCounters = new Map([["/api/a", 10]]);
+
+    const accessCounters = new Map(); // no access data
+
+    const result = calculateErrorPercentage(errorCounters, accessCounters);
+
+    expect(result).toEqual({
+      "/api/a": {
+        errRate: 0,
+        total: 0,
+        errorCount: 0,
+        succRate: 100,
+      },
+    });
+  });
+
+  test("handles multiple URLs independently", () => {
+    const errorCounters = new Map([
+      ["/api/a", 2],
+      ["/api/b", 1],
+    ]);
+
+    const accessCounters = new Map([
+      ["/api/a", 10],
+      ["/api/b", 4],
+    ]);
+
+    const result = calculateErrorPercentage(errorCounters, accessCounters);
+
+    expect(result).toEqual({
+      "/api/a": {
+        errRate: 20.0,
+        total: 10,
+        errorCount: 2,
+        succRate: 80.0,
+      },
+      "/api/b": {
+        errRate: 25.0,
+        total: 4,
+        errorCount: 1,
+        succRate: 75.0,
+      },
+    });
   });
 });

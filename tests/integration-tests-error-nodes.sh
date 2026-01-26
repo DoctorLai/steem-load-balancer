@@ -61,7 +61,7 @@ send_a_get_request_header_when_all_nodes_are_down() {
     ## curl -s https://api.steemyy.com | jq 
     resp_status_code=$(curl -m 5 -o /dev/null -s -w "%{http_code}\n" http://127.0.0.1:443/)
 
-    if [ "$resp_status_code" != "500" ]; then
+    if [ "$resp_status_code" != "503" ]; then
         echo "send_a_get_request_header failed with http response code: $resp_status_code"
         return 1
     fi

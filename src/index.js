@@ -20,6 +20,8 @@ import {
   limitStringMaxLength,
   secondsToTimeDict,
   isObjectEmptyOrNullOrUndefined,
+  calculateErrorPercentage,
+  calculatePercentage,
 } from "./functions.js";
 
 import {
@@ -186,6 +188,14 @@ function calculateRPS() {
 // Configure body-parser to accept larger payloads
 log(`Max Payload Size = ${config.max_payload_size}`);
 app.use(bodyParser.json({ limit: config.max_payload_size })); // For JSON payloads
+
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    log(`Invalid JSON received from ${req.ip}`);
+    return res.status(400).json({ error: "Invalid JSON" });
+  }
+  next(err);
+});
 
 // Configure rate limiting
 const limiter = rateLimit({
@@ -405,47 +415,6 @@ async function getServerData(server) {
   }
 }
 
-function calculatePercentage(accessCounters) {
-  const percentageDict = {};
-
-  for (let [url, count] of accessCounters) {
-    let percentage = (count / total_counter) * 100;
-    percentageDict[url] = {
-      percent: parseFloat(percentage.toFixed(2)),
-      count: count,
-    };
-  }
-
-  return percentageDict;
-}
-
-function calculateErrorPercentage(error_counters, access_counters) {
-  const percentageDict = {};
-
-  for (let [url, count] of error_counters) {
-    const totalRequests = access_counters.get(url) || 0;
-    if (totalRequests > 0) {
-      let percentage = (count / totalRequests) * 100;
-      percentageDict[url] = {
-        errRate: parseFloat(percentage.toFixed(3)),
-        total: totalRequests,
-        errorCount: count,
-        succRate: parseFloat((100 - percentage).toFixed(3)),
-      };
-    } else {
-      // If there are no requests, set rates to zero
-      percentageDict[url] = {
-        errRate: 0,
-        total: 0,
-        errorCount: 0,
-        succRate: 100,
-      };
-    }
-  }
-
-  return percentageDict;
-}
-
 // Handle incoming requests
 app.all("/", async (req, res) => {
   const ip = req.ip || req.headers["x-forwarded-for"] || "Unknown IP";
@@ -497,8 +466,8 @@ app.all("/", async (req, res) => {
       },
     );
 
-    if (!result) {
-      res.status(500).json({ error: "Failed to choose node" });
+    if (!result || !result.selected) {
+      res.status(503).json({ error: "Failed to choose node" });
       return;
     }
 
@@ -587,7 +556,14 @@ app.all("/", async (req, res) => {
     } else {
       return res.status(405).json({ error: "Method Not Allowed" });
     }
-    data = JSON.parse(result.data);
+    try {
+      data = JSON.parse(result.data);
+    } catch {
+      data = {
+        raw: result.data,
+        warning: "Upstream did not return JSON",
+      };
+    }
     if (method === "GET") {
       data["status_code"] = 200;
     }
@@ -653,7 +629,7 @@ app.all("/", async (req, res) => {
         month: diff.months,
         year: diff.years,
       },
-      access_counters: calculatePercentage(access_counters),
+      access_counters: calculatePercentage(access_counters, total_counter),
       error_counters: calculateErrorPercentage(error_counters, access_counters),
       not_chosen_counters: Object.fromEntries(not_chosen_counters),
       jussi_behind_counters: Object.fromEntries(jussi_behind_counters),
