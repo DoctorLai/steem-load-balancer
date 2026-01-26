@@ -151,18 +151,15 @@ describe("sleep", () => {
 });
 
 describe("calculatePercentage", () => {
-  beforeEach(() => {
-    // total_counter is used as a global in calculatePercentage
-    global.total_counter = 100;
-  });
-
   test("calculates percentage correctly for multiple URLs", () => {
     const accessCounters = new Map([
       ["/api/a", 30],
       ["/api/b", 70],
     ]);
 
-    const result = calculatePercentage(accessCounters);
+    const totalCounter = 100;
+
+    const result = calculatePercentage(accessCounters, totalCounter);
 
     expect(result).toEqual({
       "/api/a": { percent: 30.0, count: 30 },
@@ -173,20 +170,55 @@ describe("calculatePercentage", () => {
   test("rounds percentage to 2 decimal places", () => {
     const accessCounters = new Map([["/api/a", 33]]);
 
-    global.total_counter = 99;
+    const totalCounter = 99;
 
-    const result = calculatePercentage(accessCounters);
+    const result = calculatePercentage(accessCounters, totalCounter);
 
-    expect(result["/api/a"].percent).toBe(33.33);
+    expect(result).toEqual({
+      "/api/a": { percent: 33.33, count: 33 },
+    });
   });
 
-  test("handles zero counts", () => {
+  test("handles zero count correctly", () => {
     const accessCounters = new Map([["/api/a", 0]]);
 
-    const result = calculatePercentage(accessCounters);
+    const totalCounter = 50;
+
+    const result = calculatePercentage(accessCounters, totalCounter);
 
     expect(result).toEqual({
       "/api/a": { percent: 0, count: 0 },
+    });
+  });
+
+  test("handles empty accessCounters", () => {
+    const accessCounters = new Map();
+    const totalCounter = 100;
+
+    const result = calculatePercentage(accessCounters, totalCounter);
+
+    expect(result).toEqual({});
+  });
+
+  test("handles total_counter smaller than individual count", () => {
+    const accessCounters = new Map([["/api/a", 150]]);
+
+    const totalCounter = 100;
+
+    const result = calculatePercentage(accessCounters, totalCounter);
+
+    expect(result).toEqual({
+      "/api/a": { percent: 150.0, count: 150 },
+    });
+  });
+
+  test("handles total_counter = 0 safely", () => {
+    const accessCounters = new Map([["/api/a", 10]]);
+
+    const result = calculatePercentage(accessCounters, 0);
+
+    expect(result).toEqual({
+      "/api/a": { percent: 0, count: 10 },
     });
   });
 });

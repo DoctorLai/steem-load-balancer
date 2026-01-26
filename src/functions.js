@@ -86,11 +86,12 @@ function isObjectEmptyOrNullOrUndefined(obj) {
   );
 }
 
-function calculatePercentage(accessCounters) {
+function calculatePercentage(accessCounters, total_counter) {
   const percentageDict = {};
 
   for (let [url, count] of accessCounters) {
-    let percentage = (count / total_counter) * 100;
+    let percentage = total_counter > 0 ? (count / total_counter) * 100 : 0;
+
     percentageDict[url] = {
       percent: parseFloat(percentage.toFixed(2)),
       count: count,

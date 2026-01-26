@@ -629,7 +629,7 @@ app.all("/", async (req, res) => {
         month: diff.months,
         year: diff.years,
       },
-      access_counters: calculatePercentage(access_counters),
+      access_counters: calculatePercentage(access_counters, total_counter),
       error_counters: calculateErrorPercentage(error_counters, access_counters),
       not_chosen_counters: Object.fromEntries(not_chosen_counters),
       jussi_behind_counters: Object.fromEntries(jussi_behind_counters),
