@@ -187,6 +187,14 @@ function calculateRPS() {
 log(`Max Payload Size = ${config.max_payload_size}`);
 app.use(bodyParser.json({ limit: config.max_payload_size })); // For JSON payloads
 
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+    log(`Invalid JSON received from ${req.ip}`);
+    return res.status(400).json({ error: "Invalid JSON" });
+  }
+  next(err);
+});
+
 // Configure rate limiting
 const limiter = rateLimit({
   windowMs: rateLimitConfig.windowMs, // Time window in milliseconds
@@ -497,8 +505,8 @@ app.all("/", async (req, res) => {
       },
     );
 
-    if (!result) {
-      res.status(500).json({ error: "Failed to choose node" });
+    if (!result || !result.selected) {
+      res.status(503).json({ error: "Failed to choose node" });
       return;
     }
 
@@ -587,7 +595,14 @@ app.all("/", async (req, res) => {
     } else {
       return res.status(405).json({ error: "Method Not Allowed" });
     }
-    data = JSON.parse(result.data);
+    try {
+      data = JSON.parse(result.data);
+    } catch {
+      data = {
+        raw: result.data,
+        warning: "Upstream did not return JSON",
+      };
+    }
     if (method === "GET") {
       data["status_code"] = 200;
     }
