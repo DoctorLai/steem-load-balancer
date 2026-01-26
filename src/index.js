@@ -20,6 +20,8 @@ import {
   limitStringMaxLength,
   secondsToTimeDict,
   isObjectEmptyOrNullOrUndefined,
+  calculateErrorPercentage,
+  calculatePercentage,
 } from "./functions.js";
 
 import {
@@ -411,47 +413,6 @@ async function getServerData(server) {
     }
     throw new Error(err_msg);
   }
-}
-
-function calculatePercentage(accessCounters) {
-  const percentageDict = {};
-
-  for (let [url, count] of accessCounters) {
-    let percentage = (count / total_counter) * 100;
-    percentageDict[url] = {
-      percent: parseFloat(percentage.toFixed(2)),
-      count: count,
-    };
-  }
-
-  return percentageDict;
-}
-
-function calculateErrorPercentage(error_counters, access_counters) {
-  const percentageDict = {};
-
-  for (let [url, count] of error_counters) {
-    const totalRequests = access_counters.get(url) || 0;
-    if (totalRequests > 0) {
-      let percentage = (count / totalRequests) * 100;
-      percentageDict[url] = {
-        errRate: parseFloat(percentage.toFixed(3)),
-        total: totalRequests,
-        errorCount: count,
-        succRate: parseFloat((100 - percentage).toFixed(3)),
-      };
-    } else {
-      // If there are no requests, set rates to zero
-      percentageDict[url] = {
-        errRate: 0,
-        total: 0,
-        errorCount: 0,
-        succRate: 100,
-      };
-    }
-  }
-
-  return percentageDict;
 }
 
 // Handle incoming requests
