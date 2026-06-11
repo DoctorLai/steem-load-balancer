@@ -139,7 +139,9 @@ describe("createGetServerData", () => {
   test("increments notChosen and throws when jussi status is not OK", async () => {
     const jussiResponse = {
       ok: true,
-      json: jest.fn().mockResolvedValue({ status: "ERROR", jussi_num: 1000200 }),
+      json: jest
+        .fn()
+        .mockResolvedValue({ status: "ERROR", jussi_num: 1000200 }),
     };
     fetchWithTimeout
       .mockResolvedValueOnce({ response: makeOkVersionResponse(), latency: 5 })
