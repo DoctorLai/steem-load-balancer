@@ -4,33 +4,27 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import fs from "fs";
-import yaml from "js-yaml";
 import path from "path";
 import https from "https";
 import http from "http";
 import compression from "compression";
 import helmet from "helmet";
 import { StatusCodes } from "http-status-codes";
-import { performance } from "perf_hooks";
 
 import {
   shuffle,
   log,
-  compareVersion,
   limitStringMaxLength,
   secondsToTimeDict,
   isObjectEmptyOrNullOrUndefined,
-  calculateErrorPercentage,
-  calculatePercentage,
 } from "./functions.js";
 
-import {
-  fetchWithTimeout,
-  forwardRequestPOST,
-  forwardRequestGET,
-} from "./network.js";
+import { forwardRequestPOST, forwardRequestGET } from "./network.js";
 
 import { chooseNode, getStrategyByName } from "./choose-node.js";
+import { loadConfig } from "./config.js";
+import { Counters } from "./counters.js";
+import { createGetServerData } from "./health-check.js";
 
 const pLimit = (...args) =>
   import("p-limit").then((module) => module.default(...args));
@@ -43,45 +37,15 @@ const __dirname = path.dirname(__filename);
 let startTime = new Date();
 log(`Current Time: ${startTime.toISOString()}`);
 
-// counters to keep track of the requests
-let access_counters = new Map();
-let error_counters = new Map();
-let total_counter = 0;
-let not_chosen_counters = new Map();
-let jussi_behind_counters = new Map();
-let timed_out_counters = new Map();
-let current_max_jussi = -1;
+// Statistics (counters, mutexes and request-rate tracking).
+const counters = new Counters();
 
-// Mutexes to Update the counters
-const mutexJussiNumber = new Mutex();
-const mutexAccessCounter = new Mutex();
-const mutexErrorCounter = new Mutex();
-const mutexTotalCounter = new Mutex();
-const mutexNotChosenCounter = new Mutex();
-const mutexJussiBehindCounter = new Mutex();
-const mutexTimedOutCounter = new Mutex();
+// Mutex guarding the cached "last chosen node" map.
 const mutexCacheLastNode = new Mutex();
-
-// Initialize queues to store request timestamps
-let requestTimestamps = [];
 
 // Read the YAML config file located one level up from the current directory
 const configPath = path.join(__dirname, "../config.yaml");
-if (!fs.existsSync(configPath)) {
-  console.error(`Configuration file not found at ${configPath}`);
-  process.exit(1);
-}
-
-// Load the YAML file content with environment variable replacement
-let config = yaml.load(fs.readFileSync(configPath, "utf8"));
-
-// Replace environment variables in the loaded config
-config = JSON.parse(
-  JSON.stringify(config).replace(
-    /\$\{(.+?)\}/g,
-    (_, name) => process.env[name],
-  ),
-);
+const config = loadConfig(configPath);
 
 log(`PLimit: ${config.plimit}`);
 
@@ -149,41 +113,13 @@ app.head("/", (req, res, next) => {
 
 // Middleware to assume 'Content-Type: application/json' if not provided
 app.use((req, res, next) => {
-  const now = Date.now();
-  requestTimestamps.push(now);
-  // Remove timestamps older than 15 minutes (900000 milliseconds)
-  const cutoffTime = now - 15 * 60 * 1000;
-  requestTimestamps = requestTimestamps.filter(
-    (timestamp) => timestamp > cutoffTime,
-  );
+  // Track the request timestamp for requests-per-second statistics.
+  counters.recordRequest();
 
   // Force JSON parsing for every request
   req.headers["content-type"] = "application/json";
   next();
 });
-
-// Function to calculate RPS for 1, 5, and 15 minutes
-function calculateRPS() {
-  const now = Date.now();
-
-  const intervals = {
-    "1min": now - 1 * 60 * 1000,
-    "5min": now - 5 * 60 * 1000,
-    "15min": now - 15 * 60 * 1000,
-  };
-
-  const rps = {};
-  for (const [key, intervalStart] of Object.entries(intervals)) {
-    const requestsInInterval = requestTimestamps.filter(
-      (timestamp) => timestamp > intervalStart,
-    ).length;
-    rps[key] = parseFloat(
-      (requestsInInterval / (parseInt(key) * 60)).toFixed(2),
-    ); // requests per second
-  }
-
-  return rps;
-}
 
 // Configure body-parser to accept larger payloads
 log(`Max Payload Size = ${config.max_payload_size}`);
@@ -230,190 +166,15 @@ log(`Max Body Length Logging: ${logging_max_body_len}`);
 log(`Retry for GET and POST forward: ${retry_count}`);
 log(`Nodes: ${config.nodes}`);
 
-// Fetch version from the server
-async function getServerData(server) {
-  const startTime = performance.now(); // start timer
-  try {
-    const versionPromise = fetchWithTimeout(
-      server,
-      {
-        method: "POST",
-        cache: "no-cache",
-        mode: "cors",
-        redirect: "follow",
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": user_agent,
-        },
-        body: JSON.stringify({
-          id: 0,
-          jsonrpc: "2.0",
-          method: "call",
-          params: ["login_api", "get_version", []],
-        }),
-        agent,
-      },
-      timeout,
-    );
-
-    const jussiPromise = fetchWithTimeout(
-      server,
-      {
-        method: "GET",
-        cache: "no-cache",
-        mode: "cors",
-        redirect: "follow",
-        headers: {
-          "Content-Type": "application/json",
-          "User-Agent": user_agent,
-        },
-        agent,
-      },
-      timeout,
-    );
-
-    // Wait for both fetches to complete
-    const [
-      { response: versionResponse, latency: versionLatency },
-      { response: jussiResponse, latency: jussiLatency },
-    ] = await Promise.all([versionPromise, jussiPromise]);
-
-    const latencyMs = performance.now() - startTime; // end timer
-    log(
-      `Server ${server} Latency: ${latencyMs.toFixed(2)} ms (version: ${versionLatency} ms, jussi: ${jussiLatency} ms)`,
-    );
-
-    if (!versionResponse.ok) {
-      let err_msg = `Server ${server} (version) responded with status: ${versionResponse.status}`;
-      log(err_msg);
-      await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(
-          server,
-          (not_chosen_counters.get(server) ?? 0) + 1,
-        );
-      });
-      throw new Error(err_msg);
-    }
-
-    if (!jussiResponse.ok) {
-      let err_msg = `Server ${server} (jussi_number) responded with status: ${jussiResponse.status}`;
-      log(err_msg);
-      await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(
-          server,
-          (not_chosen_counters.get(server) ?? 0) + 1,
-        );
-      });
-      throw new Error(err_msg);
-    }
-
-    const jsonResponse = await versionResponse.json();
-
-    if (
-      isObjectEmptyOrNullOrUndefined(jsonResponse) ||
-      isObjectEmptyOrNullOrUndefined(jsonResponse["result"])
-    ) {
-      let err_msg = `Server ${server} Invalid version response: ${JSON.stringify(jsonResponse)}`;
-      log(err_msg);
-      await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(
-          server,
-          (not_chosen_counters.get(server) ?? 0) + 1,
-        );
-      });
-      throw new Error(err_msg);
-    }
-
-    const blockchain_version = jsonResponse["result"]["blockchain_version"];
-    if (compareVersion(blockchain_version, min_blockchain_version) == -1) {
-      let err_msg = `Server ${server} version = ${blockchain_version}: but min version is ${min_blockchain_version}`;
-      log(err_msg);
-      await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(
-          server,
-          (not_chosen_counters.get(server) ?? 0) + 1,
-        );
-      });
-      throw new Error(err_msg);
-    }
-
-    const jussi = await jussiResponse.json();
-    if (isObjectEmptyOrNullOrUndefined(jussi)) {
-      let err_msg = `Server ${server} Invalid jussi response: ${JSON.stringify(jussi)}`;
-      log(err_msg);
-      await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(
-          server,
-          (not_chosen_counters.get(server) ?? 0) + 1,
-        );
-      });
-      throw new Error(err_msg);
-    }
-    if (jussi["status"] !== "OK") {
-      let err_msg = `Server ${server} Jussi Status != "OK": ${JSON.stringify(jussi)}`;
-      log(err_msg);
-      await mutexNotChosenCounter.runExclusive(() => {
-        not_chosen_counters.set(
-          server,
-          (not_chosen_counters.get(server) ?? 0) + 1,
-        );
-      });
-      throw new Error(err_msg);
-    }
-    let jussi_number = jussi["jussi_num"];
-
-    log(`Server ${server} jussi_number: ${jussi_number}`);
-    if (typeof jussi_number === "number" && Number.isInteger(jussi_number)) {
-      jussi_number = parseInt(jussi_number);
-    }
-
-    if (jussi_number === 20000000) {
-      let err_msg = `Server ${server} Invalid jussi_number value (20000000): ${jussi_number}`;
-      await mutexJussiBehindCounter.runExclusive(() => {
-        jussi_behind_counters.set(
-          server,
-          (jussi_behind_counters.get(server) ?? 0) + 1,
-        );
-      });
-      throw new Error(err_msg);
-    }
-
-    await mutexJussiNumber.runExclusive(() => {
-      current_max_jussi = Math.max(current_max_jussi, jussi_number);
-    });
-
-    if (current_max_jussi > jussi_number + max_jussi_number_diff) {
-      let err_msg = `Server ${server} is too far behind: jussi_number ${jussi_number} vs latest ${current_max_jussi} - diff ${current_max_jussi - jussi_number}`;
-      log(err_msg);
-      await mutexJussiBehindCounter.runExclusive(() => {
-        jussi_behind_counters.set(
-          server,
-          (jussi_behind_counters.get(server) ?? 0) + 1,
-        );
-      });
-      throw new Error(err_msg);
-    }
-
-    log(
-      `Tested OK: Server ${server} version=${blockchain_version}, jussi_number=${jussi_number}`,
-    );
-    return { server, version: jsonResponse, jussi_number, latencyMs };
-  } catch (error) {
-    let err_msg = `${error.name}: Server ${server} Failed to fetch version from ${server}: ${error.message}`;
-    log(err_msg);
-    if (error.name === "AbortError") {
-      err_msg = `Fetch request to ${server} timed out after ${timeout} ms`;
-      log(err_msg);
-      await mutexTimedOutCounter.runExclusive(() => {
-        timed_out_counters.set(
-          server,
-          (timed_out_counters.get(server) ?? 0) + 1,
-        );
-      });
-    }
-    throw new Error(err_msg);
-  }
-}
+// Health-check function bound to the runtime configuration and counters.
+const getServerData = createGetServerData({
+  agent,
+  timeout,
+  userAgent: user_agent,
+  minBlockchainVersion: min_blockchain_version,
+  maxJussiNumberDiff: max_jussi_number_diff,
+  counters,
+});
 
 // Handle incoming requests
 app.all("/", async (req, res) => {
@@ -442,22 +203,6 @@ app.all("/", async (req, res) => {
     const promises = shuffledNodes.map((node) =>
       plimit(() => getServerData(node)),
     );
-    // chosenNode = await Promise.any(promises).catch((error) => {
-    //   log(`Error: ${error.message}`);
-    //   return null;
-    // });
-
-    // const fulfilledNodes = await firstKFulfilled(promises, firstK);
-    // if (fulfilledNodes.length === 0) {
-    //   log("No valid nodes found after checking all nodes.");
-    //   res
-    //     .status(StatusCodes.INTERNAL_SERVER_ERROR)
-    //     .json({ error: "No valid nodes available" });
-    //   return;
-    // }
-    // choose the node with the highest jussi_number
-    //fulfilledNodes.sort((a, b) => b.jussi_number - a.jussi_number);
-    //chosenNode = fulfilledNodes[0];
 
     const result = await chooseNode(promises, firstK, strategy).catch(
       (error) => {
@@ -499,7 +244,7 @@ app.all("/", async (req, res) => {
   log(
     `Request: ${ip}, ${method}: Chosen Node (version=${chosenNode.version["result"]["blockchain_version"]}): ${chosenNode.server} - jussi_number: ${chosenNode.jussi_number}`,
   );
-  log(`Current Max Jussi: ${current_max_jussi}`);
+  log(`Current Max Jussi: ${counters.maxJussi}`);
   res.setHeader("IP", ip);
   res.setHeader("Server", chosenNode.server);
   if (typeof chosenNode.version !== "undefined") {
@@ -517,15 +262,8 @@ app.all("/", async (req, res) => {
   let result;
 
   // update stats
-  await mutexTotalCounter.runExclusive(() => {
-    total_counter++;
-  });
-  await mutexAccessCounter.runExclusive(() => {
-    access_counters.set(
-      chosenNode.server,
-      (access_counters.get(chosenNode.server) ?? 0) + 1,
-    );
-  });
+  await counters.incrementTotal();
+  await counters.incrementAccess(chosenNode.server);
   let currentDate = new Date();
   let differenceInSeconds = Math.floor((currentDate - startTime) / 1000);
   const diff = secondsToTimeDict(differenceInSeconds);
@@ -578,12 +316,7 @@ app.all("/", async (req, res) => {
     }
     log(`Error forwarding request to ${chosenNode.server}: ${ex.message}`);
     // set error counters - this is after max-retry
-    await mutexErrorCounter.runExclusive(() => {
-      error_counters.set(
-        chosenNode.server,
-        (error_counters.get(chosenNode.server) ?? 0) + 1,
-      );
-    });
+    await counters.incrementError(chosenNode.server);
   }
   if (method === "GET") {
     data["__server__"] = chosenNode.server;
@@ -605,10 +338,13 @@ app.all("/", async (req, res) => {
     data["__first_k_candidates__"] = candidates;
     data["__load_balancer_version__"] = proxy_version;
     // Calculate and include RPS stats
-    const rpsStats = calculateRPS();
+    const rpsStats = counters.calculateRPS();
     data["__stats__"] = {
-      total: total_counter,
-      rps: parseFloat((total_counter / differenceInSeconds).toFixed(2)),
+      total: counters.total,
+      rps:
+        differenceInSeconds > 0
+          ? parseFloat((counters.total / differenceInSeconds).toFixed(2))
+          : 0,
       rps_stats: {
         "1min": rpsStats["1min"],
         "5min": rpsStats["5min"],
@@ -629,11 +365,11 @@ app.all("/", async (req, res) => {
         month: diff.months,
         year: diff.years,
       },
-      access_counters: calculatePercentage(access_counters, total_counter),
-      error_counters: calculateErrorPercentage(error_counters, access_counters),
-      not_chosen_counters: Object.fromEntries(not_chosen_counters),
-      jussi_behind_counters: Object.fromEntries(jussi_behind_counters),
-      timed_out_counters: Object.fromEntries(timed_out_counters),
+      access_counters: counters.getAccessPercentages(),
+      error_counters: counters.getErrorPercentages(),
+      not_chosen_counters: counters.getNotChosen(),
+      jussi_behind_counters: counters.getJussiBehind(),
+      timed_out_counters: counters.getTimedOut(),
     };
   }
   if (isObjectEmptyOrNullOrUndefined(result)) {
