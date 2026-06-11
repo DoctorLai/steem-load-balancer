@@ -1,5 +1,5 @@
 # Steem Load Balancer
-[![Build and Tests](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml) [![Test Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml)
+[![Build and Tests](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml) [![Test Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml) [![Docker Pulls](https://img.shields.io/docker/pulls/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Image Size](https://img.shields.io/docker/image-size/justyy/steem-load-balancer/latest)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Stars](https://img.shields.io/docker/stars/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer)
 
 Here is the [AI-generated documentation](https://deepwiki.com/DoctorLai/steem-load-balancer/) by Deep-Wiki.
 
