@@ -341,7 +341,7 @@ app.all("/", async (req, res) => {
     const rpsStats = counters.calculateRPS();
     data["__stats__"] = {
       total: counters.total,
-      rps: parseFloat((counters.total / differenceInSeconds).toFixed(2)),
+      rps: differenceInSeconds > 0 ? parseFloat((counters.total / differenceInSeconds).toFixed(2)) : 0,
       rps_stats: {
         "1min": rpsStats["1min"],
         "5min": rpsStats["5min"],

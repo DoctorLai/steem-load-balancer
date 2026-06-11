@@ -147,7 +147,10 @@ function createGetServerData({
     } catch (error) {
       let err_msg = `${error.name}: Server ${server} Failed to fetch version from ${server}: ${error.message}`;
       log(err_msg);
-      if (error.name === "AbortError") {
+      if (
+        error.name === "AbortError" ||
+        error.message.includes("timed out")
+      ) {
         err_msg = `Fetch request to ${server} timed out after ${timeout} ms`;
         log(err_msg);
         await counters.incrementTimedOut(server);
