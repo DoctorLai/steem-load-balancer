@@ -163,11 +163,10 @@ You can pass [./config.yaml](./config.yaml) to either [./run.sh](./run.sh) or [.
 ```
 
 ## Prebuilt Docker Image
-A latest image has been built and store at [docker hub](https://hub.docker.com/r/justyy/steem-load-balancer), so you can do:
+A latest image is published to [Docker Hub](https://hub.docker.com/r/justyy/steem-load-balancer) by CI on pushes to `main`, using the `dockerhub` GitHub environment secrets `DOCKERHUB_USER` and `DOCKERHUB_PASSWORD`.
 
 ```bash
 docker pull justyy/steem-load-balancer:latest
-docker tag justyy/steem-load-balancer:latest steem-load-balancer:latest
 ```
 
 Then:
@@ -187,7 +186,7 @@ docker run \
     --restart on-failure:$RETRY_COUNT \
     -p $STEEM_LB_PORT:9091 \
     -v /root/.acme.sh/:/root/.acme.sh/ \
-    steem-load-balancer:latest
+    justyy/steem-load-balancer:latest
 
 ## or simply
 ./run.sh # or ./restart.sh
