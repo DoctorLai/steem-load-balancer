@@ -1,5 +1,7 @@
 # Steem Load Balancer
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-43853d?logo=node.js&logoColor=white)](https://nodejs.org/)[![Build and Tests](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml) [![Test Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml) [![Docker Pulls](https://img.shields.io/docker/pulls/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Image Size](https://img.shields.io/docker/image-size/justyy/steem-load-balancer/latest)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Stars](https://img.shields.io/docker/stars/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer)[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-43853d?logo=node.js&logoColor=white)](https://nodejs.org/) [![Build and Tests](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml) [![Test Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml) [![Docker Pulls](https://img.shields.io/docker/pulls/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Image Size](https://img.shields.io/docker/image-size/justyy/steem-load-balancer/latest)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Stars](https://img.shields.io/docker/stars/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+[![GitHub stars](https://img.shields.io/github/stars/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/stargazers) [![GitHub forks](https://img.shields.io/github/forks/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/network/members) [![GitHub watchers](https://img.shields.io/github/watchers/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/watchers) [![GitHub contributors](https://img.shields.io/github/contributors/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/graphs/contributors) [![GitHub last commit](https://img.shields.io/github/last-commit/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main) [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main) [![GitHub open issues](https://img.shields.io/github/issues/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/issues) [![GitHub open PRs](https://img.shields.io/github/issues-pr/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/pulls) [![Top language](https://img.shields.io/github/languages/top/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer) [![Code size](https://img.shields.io/github/languages/code-size/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer) [![Repo size](https://img.shields.io/github/repo-size/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 Here is the [AI-generated documentation](https://deepwiki.com/DoctorLai/steem-load-balancer/) by Deep-Wiki.
 
@@ -21,6 +23,10 @@ Please note that this can be easily configured to work with other Blockchains su
 
 ## Features
 - Load Balancing: Distributes requests across multiple Steem API servers. The `jussi_num` and `status` are checked before a node is chosen (See below).
+- Pluggable Routing Strategies: Choose how the upstream node is selected — `max_jussi_number`, `latest_version`, `lowest_latency`, `weighted`, `random` or `first` (see [Configuration](#configuration)).
+- Weighted & Sticky Routing: Bias traffic towards higher-capacity nodes with per-node `weights`, or pin all clients to a single upstream node with `sticky` routing.
+- Circuit Breaker: Automatically ejects a node after repeated forwarding failures and re-admits it after a cooldown, with automatic fail-open so routing never stalls.
+- Health, Version & Metrics Endpoints: Lightweight `/health` and `/version` endpoints plus a Prometheus `/metrics` scrape endpoint (see [API Endpoints](#api-endpoints)).
 - Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 300 requests per 60 second window. This can be set in the [config.yaml](./config.yaml).
 - Logging: Provides detailed logs for debugging and monitoring.
 - SSL Support: Configurable SSL certificates for secure HTTPS communication. Reject or Ignore the SSL certificates when forwarding the requests via the field `rejectUnauthorized` in [config.yaml](./config.yaml)
@@ -90,7 +96,16 @@ cache:
   ttl: 3
 debug: false
 firstK: 1
-strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest_version
+strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest_version, lowest_latency, weighted
+sticky: false
+# weights:
+#   "https://api.justyy.com": 3
+#   "https://api2.justyy.com": 1
+weighted_routing: false
+circuitBreaker:
+  enabled: false
+  failureThreshold: 5
+  cooldownMs: 30000
 ```
 
 ### Configuration Options
@@ -116,8 +131,64 @@ strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest
 - cache.ttl: When cache.enabled, how many seconds before cache expires.
 - debug: When set to debug, more messages are set e.g. in the response header.
 - firstK: Choosing the node which has the max Jussi Number from the first `firstK` nodes that respond OK. Default is 1.
-- strategy: The strategy to pick the chosen node. This can be one of: first, random, max_jussi_number (default), latest_version
+- strategy: The strategy to pick the chosen node. This can be one of:
+  - `first`: the first node that responds OK.
+  - `random`: a random node among those that respond OK.
+  - `max_jussi_number` (default): the node with the highest `jussi_num` (most up-to-date block height).
+  - `latest_version`: the node running the newest blockchain version.
+  - `lowest_latency`: the node that responded fastest during the health check.
+  - `weighted`: a random node chosen with probability proportional to its configured `weights` (default 1 each).
+- weights: Optional map of node URL to numeric weight, used by the `weighted` strategy and weighted routing. Higher weight receives more traffic; set a weight to `0` to drain a node.
+- weighted_routing: When `true`, the order nodes are probed is biased by their `weights` even if `strategy` is not `weighted`. This mainly matters when `plimit` is smaller than the number of nodes (otherwise all nodes are probed concurrently and the `weighted` selection strategy does the real biasing). Default `false`; the `weighted` strategy enables it automatically.
+- sticky: When `true`, all clients share the same chosen upstream node for the cache TTL (minimises node churn). When `false` (default) each client IP sticks to its own node.
+- circuitBreaker.enabled: Enable the per-node circuit breaker. Default `false`.
+- circuitBreaker.failureThreshold: Consecutive forwarding failures before a node is ejected. Default `5`.
+- circuitBreaker.cooldownMs: How long (ms) an ejected node stays out before a trial request is allowed. Default `30000`.
 - headers: The headers can be specified to pass to the downstream nodes. When proxying requests, the Load Balancer injects a shared-secret header so downstream nodes can identify trusted traffic and apply elevated (or exempt) rate-limit policies.
+
+## API Endpoints
+| Method | Path | Description |
+| ------ | ---- | ----------- |
+| `GET` / `POST` | `/` | Proxies the request to the chosen Steem RPC node. `GET` responses are augmented with diagnostic fields (`__server__`, `__stats__`, `__config__`, etc.). |
+| `GET` | `/health` | Lightweight health probe. Returns `{ status, version, uptime, uptime_seconds, total_requests, nodes, circuit_breaker, timestamp }`. Not rate limited, so it is safe for orchestrators (Docker/Kubernetes) and uptime monitors. |
+| `GET` | `/version` | Returns the Load Balancer version: `{ version }`. |
+| `GET` | `/metrics` | Prometheus text-format metrics (request totals, per-node access/error counters, RPS windows, circuit-breaker state). Point a Prometheus scrape job at this path. |
+
+Example:
+
+```bash
+curl -s http://127.0.0.1:9091/health | jq
+```
+
+```json
+{
+  "status": "OK",
+  "version": "2026-01-14",
+  "uptime": { "years": 0, "months": 0, "days": 0, "hours": 1, "minutes": 2, "seconds": 3 },
+  "uptime_seconds": 3723,
+  "total_requests": 1024,
+  "nodes": ["https://api2.justyy.com", "https://api.justyy.com", "https://api.steemit.com"],
+  "timestamp": "2026-01-14T11:06:30.781Z"
+}
+```
+
+Prometheus metrics:
+
+```bash
+curl -s http://127.0.0.1:9091/metrics
+```
+
+```text
+# HELP steem_lb_requests_total Total proxied requests.
+# TYPE steem_lb_requests_total counter
+steem_lb_requests_total 1024
+# HELP steem_lb_node_access_total Requests routed to each node.
+# TYPE steem_lb_node_access_total counter
+steem_lb_node_access_total{server="https://api.steemit.com"} 512
+# HELP steem_lb_requests_per_second Requests per second over rolling windows.
+# TYPE steem_lb_requests_per_second gauge
+steem_lb_requests_per_second{window="1min"} 3.2
+```
 
 ## Installation
 Clone the Repository:

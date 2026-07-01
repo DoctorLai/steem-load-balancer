@@ -4,6 +4,9 @@ const {
   strategyRandom,
   strategyMaxJussiNumber,
   strategyLatestVersion,
+  strategyLowestLatency,
+  blockchainVersionOf,
+  makeStrategyWeighted,
   getStrategyByName,
 } = require("../src/choose-node.js");
 
@@ -38,6 +41,67 @@ describe("Node selection strategies", () => {
     global.compareVersion = compareVersion; // make sure it's available
     const result = strategyLatestVersion(nodes);
     expect(result).toEqual(nodes[1]); // version 0.23.0 is latest
+  });
+
+  test("strategyLatestVersion handles real health-check version objects", () => {
+    const versionNodes = [
+      { id: "old", version: { result: { blockchain_version: "0.22.9" } } },
+      { id: "new", version: { result: { blockchain_version: "0.23.1" } } },
+    ];
+    expect(strategyLatestVersion(versionNodes)).toEqual(versionNodes[1]);
+  });
+
+  test("blockchainVersionOf extracts blockchain_version from version responses", () => {
+    expect(
+      blockchainVersionOf({
+        version: { result: { blockchain_version: "0.23.1" } },
+      }),
+    ).toBe("0.23.1");
+    expect(blockchainVersionOf({ version: "0.23.0" })).toBe("0.23.0");
+  });
+
+  test("strategyLowestLatency returns node with the smallest latencyMs", () => {
+    const latencyNodes = [
+      { id: "slow", latencyMs: 300 },
+      { id: "fast", latencyMs: 45 },
+      { id: "mid", latencyMs: 120 },
+    ];
+    expect(strategyLowestLatency(latencyNodes)).toEqual({
+      id: "fast",
+      latencyMs: 45,
+    });
+  });
+
+  test("strategyLowestLatency treats missing latencyMs as slowest", () => {
+    const latencyNodes = [
+      { id: "unknown" },
+      { id: "measured", latencyMs: 200 },
+    ];
+    expect(strategyLowestLatency(latencyNodes)).toEqual({
+      id: "measured",
+      latencyMs: 200,
+    });
+  });
+
+  test("makeStrategyWeighted picks proportionally to node weight", () => {
+    const candidates = [{ server: "a" }, { server: "b" }];
+    // threshold = random() * total(=101). With random()=0.99 -> ~99.99, which
+    // exceeds a's weight (1) so b (weight 100) is selected.
+    const strategy = makeStrategyWeighted({ a: 1, b: 100 }, () => 0.99);
+    expect(strategy(candidates)).toEqual({ server: "b" });
+  });
+
+  test("makeStrategyWeighted selects the first node when threshold is tiny", () => {
+    const candidates = [{ server: "a" }, { server: "b" }];
+    const strategy = makeStrategyWeighted({ a: 1, b: 100 }, () => 0);
+    expect(strategy(candidates)).toEqual({ server: "a" });
+  });
+
+  test("makeStrategyWeighted defaults missing weights to 1", () => {
+    const candidates = [{ server: "a" }, { server: "b" }];
+    const strategy = makeStrategyWeighted({}, () => 0.75);
+    // total = 2, threshold = 1.5 -> a(1) then b.
+    expect(strategy(candidates)).toEqual({ server: "b" });
   });
 });
 
@@ -166,6 +230,13 @@ describe("getStrategyByName()", () => {
     expect(getStrategyByName("random")).toBe(strategyRandom);
     expect(getStrategyByName("max_jussi_number")).toBe(strategyMaxJussiNumber);
     expect(getStrategyByName("latest_version")).toBe(strategyLatestVersion);
+    expect(getStrategyByName("lowest_latency")).toBe(strategyLowestLatency);
+  });
+
+  test("returns a weighted strategy function for the 'weighted' name", () => {
+    const strategy = getStrategyByName("weighted", { weights: { a: 2 } });
+    expect(typeof strategy).toBe("function");
+    expect(strategy([{ server: "a" }])).toEqual({ server: "a" });
   });
 
   test("throws error for unknown strategy name", () => {

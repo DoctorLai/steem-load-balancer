@@ -13,10 +13,10 @@ export default {
   coverageReporters: ["text", "lcov", "json", "json-summary", "html"], // Specify desired coverage reporters
   coverageThreshold: {
     global: {
-      branches: 22.52,
-      functions: 48.52,
-      lines: 29.15,
-      statements: 30.35,
+      branches: 72,
+      functions: 88,
+      lines: 85,
+      statements: 85,
     },
   },
 };

@@ -85,6 +85,24 @@ describe("forwardRequestGET", () => {
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(sleep).toHaveBeenCalledTimes(1);
   });
+
+  test("attempts once even when retry_count is 0", async () => {
+    fetch.mockResolvedValue({
+      status: 200,
+      text: jest.fn().mockResolvedValue("OK"),
+    });
+
+    const result = await forwardRequestGET(apiURL, {
+      agent: false,
+      timeout: 5000,
+      retry_count: 0,
+      user_agent: "jest-agent",
+      headers: {},
+    });
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({ statusCode: 200, data: "OK" });
+  });
 });
 
 describe("forwardRequestPOST", () => {
