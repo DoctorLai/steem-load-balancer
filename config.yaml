@@ -40,4 +40,22 @@ cache:
   ttl: ${CACHE_TTL}
 debug: ${DEBUG}
 firstK: 2
-strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest_version
+strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest_version, lowest_latency, weighted
+# Sticky routing: when true, all clients share the same chosen upstream node for
+# the cache TTL (minimises node churn). When false (default) each client IP
+# sticks to its own node.
+sticky: false
+# Per-node weights used by the `weighted` strategy and weighted routing.
+# Higher weight = more traffic. Set a weight to 0 to drain a node.
+# weights:
+#   "https://api.justyy.com": 3
+#   "https://api2.justyy.com": 1
+# Weighted routing: bias the order nodes are probed by their `weights`, even
+# when `strategy` is not `weighted`. Most effective when `plimit` is lower than
+# the number of nodes. Default false (the `weighted` strategy enables it too).
+weighted_routing: false
+# Circuit breaker: temporarily eject a node after repeated forwarding failures.
+circuitBreaker:
+  enabled: false
+  failureThreshold: 5   # consecutive failures before the node is ejected
+  cooldownMs: 30000     # how long (ms) an ejected node stays out before a trial

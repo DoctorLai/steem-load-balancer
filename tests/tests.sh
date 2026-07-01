@@ -279,6 +279,53 @@ send_request_database_api_get_accounts_with_header() {
 
 export RESULT=true
 
+## This tests the dedicated /health endpoint used by orchestrators and monitors.
+## curl -s http://127.0.0.1:443/health | jq
+send_a_health_request() {
+    resp=$(curl -k -s -m 5 http://127.0.0.1:443/health)
+    echo "Response: $resp"
+
+    resp_status=$(echo $resp | jq -r '.status')
+    resp_uptime_seconds=$(echo $resp | jq -r '.uptime_seconds')
+
+    if [ "$resp_status" != "OK" ] || ! [[ "$resp_uptime_seconds" =~ ^[0-9]+$ ]]; then
+        echo "send_a_health_request failed: $resp"
+        return 1
+    fi
+    echo "send_a_health_request passed!"
+    return 0
+}
+
+## This tests the dedicated /version endpoint.
+## curl -s http://127.0.0.1:443/version | jq
+send_a_version_request() {
+    resp=$(curl -k -s -m 5 http://127.0.0.1:443/version)
+    echo "Response: $resp"
+
+    resp_version=$(echo $resp | jq -r '.version')
+
+    if [ "$resp_version" != "$config_version" ]; then
+        echo "send_a_version_request failed: $resp"
+        return 1
+    fi
+    echo "send_a_version_request passed!"
+    return 0
+}
+
+## This tests the Prometheus /metrics endpoint.
+## curl -s http://127.0.0.1:443/metrics
+send_a_metrics_request() {
+    resp=$(curl -k -s -m 5 http://127.0.0.1:443/metrics)
+    echo "Response: $resp"
+
+    if ! echo "$resp" | grep -q "steem_lb_requests_total"; then
+        echo "send_a_metrics_request failed: $resp"
+        return 1
+    fi
+    echo "send_a_metrics_request passed!"
+    return 0
+}
+
 TEST_CASES=(
     "send_request_database_api_get_accounts"
     "send_request_database_api_get_accounts_with_header"
@@ -286,6 +333,9 @@ TEST_CASES=(
     "send_a_get_request"
     "send_request_condenser_api_get_account_count"
     "send_request_condenser_api_get_account_count_with_header"
+    "send_a_health_request"
+    "send_a_version_request"
+    "send_a_metrics_request"
 )
 
 for test_case in "${TEST_CASES[@]}"; do

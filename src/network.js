@@ -33,7 +33,10 @@ async function forwardRequestGET(
   apiURL,
   { agent, timeout, retry_count, user_agent, headers } = {},
 ) {
-  for (let i = 0; i < retry_count; ++i) {
+  // Always attempt at least once, even if retry_count is 0 or unset, so the
+  // caller never receives an `undefined` result from an empty loop.
+  const attempts = Math.max(1, retry_count ?? 1);
+  for (let i = 0; i < attempts; ++i) {
     try {
       log(`GET: Forwarding to ${apiURL}`);
       const { response: res, latency } = await fetchWithTimeout(
@@ -56,7 +59,7 @@ async function forwardRequestGET(
       log(`Status: ${res.status} Latency: ${latency}ms`);
       return { statusCode: res.status, data };
     } catch (error) {
-      if (i < retry_count - 1) {
+      if (i < attempts - 1) {
         log(`Retrying ${apiURL}, attempt ${i + 1}`);
         await sleep(100);
         continue;
@@ -79,7 +82,9 @@ async function forwardRequestPOST(
     headers,
   } = {},
 ) {
-  for (let i = 0; i < retry_count; ++i) {
+  // Always attempt at least once, even if retry_count is 0 or unset.
+  const attempts = Math.max(1, retry_count ?? 1);
+  for (let i = 0; i < attempts; ++i) {
     try {
       log(
         `POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, logging_max_body_len)}`,
@@ -105,7 +110,7 @@ async function forwardRequestPOST(
       const data = await res.text();
       return { statusCode: res.status, data };
     } catch (error) {
-      if (i < retry_count - 1) {
+      if (i < attempts - 1) {
         log(`Retrying ${apiURL}, attempt ${i + 1}`);
         await sleep(100);
         continue;

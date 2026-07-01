@@ -5,12 +5,15 @@ on:
   push:
     branches: [ main ]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
 
     steps:
       - name: Checkout repository
@@ -28,12 +31,20 @@ jobs:
       - name: Run tests with coverage
         run: npm run coverage
 
-      - name: Report coverage on PR
-        uses: davelosert/vitest-coverage-report-action@v2
-        if: github.event_name == 'pull_request'
-        with:
-          json-summary-path: coverage/coverage-summary.json
-          json-final-path: coverage/coverage-final.json
+      - name: Publish coverage summary
+        if: always()
+        run: |
+          node -e '
+            const fs = require("fs");
+            const path = "coverage/coverage-summary.json";
+            if (!fs.existsSync(path)) { process.exit(0); }
+            const total = JSON.parse(fs.readFileSync(path, "utf8")).total;
+            const rows = ["lines", "statements", "functions", "branches"]
+              .map((k) => `| ${k} | ${total[k].pct}% | ${total[k].covered}/${total[k].total} |`)
+              .join("\n");
+            const md = `## Test Coverage\n\n| Metric | % | Covered/Total |\n| --- | --- | --- |\n${rows}\n`;
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
+          '
 
       - name: Upload coverage report
         if: always()
