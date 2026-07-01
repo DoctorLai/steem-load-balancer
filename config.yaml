@@ -55,7 +55,9 @@ sticky: false
 # the number of nodes. Default false (the `weighted` strategy enables it too).
 weighted_routing: false
 # Circuit breaker: temporarily eject a node after repeated forwarding failures.
+# Enabled by default: it "fails open" (if every node is ejected it re-admits them
+# all), so it can only improve resilience and never stalls routing.
 circuitBreaker:
-  enabled: false
+  enabled: true
   failureThreshold: 5   # consecutive failures before the node is ejected
   cooldownMs: 30000     # how long (ms) an ejected node stays out before a trial

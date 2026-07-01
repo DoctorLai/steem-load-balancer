@@ -28,18 +28,23 @@ fi
 
 echo "Starting the server..."
 
-./run.sh $STEEM_LB_PATH/tests/test_config_empty_list.yaml &
-
-sleep 5
-
-count=$(docker logs steem-load-balancer | grep "No nodes provided in the configuration." | wc -l)
-if [ "$count" -gt 0 ]; then
-    echo "Server started successfully with empty node list"
-    export RESULT=true
-else
+run_output=$(mktemp)
+if RETRY_COUNT=1 ./run.sh $STEEM_LB_PATH/tests/test_config_empty_list.yaml > "$run_output" 2>&1; then
+    cat "$run_output"
     echo "Failed: Server started successfully with empty node list"
     export RESULT=false
+else
+    cat "$run_output"
+    count=$(grep "No nodes provided in the configuration." "$run_output" | wc -l)
+    if [ "$count" -gt 0 ]; then
+        echo "Server rejected empty node list as expected"
+        export RESULT=true
+    else
+        echo "Failed: expected empty-node startup error was not logged"
+        export RESULT=false
+    fi
 fi
+rm -f "$run_output"
 
 popd
 

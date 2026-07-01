@@ -8,7 +8,7 @@ Thank you for considering contributing to this project! We welcome contributions
    - Click the "Fork" button at the top right of the repository page.
 2. **Clone Your Fork:**
    ```bash
-   git clone https://github.com/DoctorLai/steem-load-balancer.git
+   git clone https://github.com/<your-username>/steem-load-balancer.git
    cd steem-load-balancer
    ```
 3. **Install Dependencies:**
@@ -23,16 +23,26 @@ Thank you for considering contributing to this project! We welcome contributions
    git checkout -b feature/your-feature-name
    ```
 2. **Make Your Changes:**
-   - Run format to ensure code style:
-     ```bash
-     npm run format
-     ## Fix automatically the coding style
-     npm run format:fix
-     ```
-   - Run linter to ensure code quality:
+   - Run the linter to ensure code quality:
      ```bash
      npm run lint
-     ``` 
+     ## Auto-fix lint issues where possible
+     npm run lint:fix
+     ```
+   - Check formatting (and auto-fix) with Prettier:
+     ```bash
+     npm run format
+     ## Fix the coding style automatically
+     npm run format:fix
+     ```
+   - Add or update unit tests and make sure they pass:
+     ```bash
+     npm test
+     ```
+   - Or run everything at once (lint + format check + tests), exactly like CI:
+     ```bash
+     npm run check
+     ```
 3. **Commit Your Changes:**
    ```bash
    git add .

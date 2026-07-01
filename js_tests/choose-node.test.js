@@ -192,6 +192,15 @@ describe("chooseNode()", () => {
     expect(result.candidates).toEqual([]);
   });
 
+  test("does not call strategies with an empty candidate list", async () => {
+    const bad = [Promise.reject("fail1"), Promise.reject("fail2")];
+
+    await expect(chooseNode(bad, 2, strategyMaxJussiNumber)).resolves.toEqual({
+      selected: undefined,
+      candidates: [],
+    });
+  });
+
   test("resolves early once k fulfilled", async () => {
     const fast = delay({ id: "fast" }, 50);
     const slow = delay({ id: "slow" }, 200);
