@@ -1,0 +1,30 @@
+# Normalize line endings on checkin: treat files as text and let Git manage EOLs.
+* text=auto eol=lf
+
+# Scripts and config must stay LF even on Windows checkouts (they run in Docker).
+*.sh        text eol=lf
+*.js        text eol=lf
+*.mjs       text eol=lf
+*.cjs       text eol=lf
+*.json      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.md        text eol=lf
+Dockerfile  text eol=lf
+.env*       text eol=lf
+
+# Binary assets: never diff or normalize.
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.pdf       binary
+
+# Keep GitHub language stats focused on the application code.
+js_tests/**   linguist-language=JavaScript
+tests/**      linguist-detectable=false
+tools/**      linguist-detectable=false
+*.sh          linguist-detectable=false
+package-lock.json  linguist-generated=true
+example-response.json  linguist-generated=true

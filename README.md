@@ -1,5 +1,5 @@
 # Steem Load Balancer
-[![Node.js](https://img.shields.io/badge/node-%3E%3D20-43853d?logo=node.js&logoColor=white)](https://nodejs.org/) [![Build and Tests](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml) [![Test Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml) [![Docker Pulls](https://img.shields.io/docker/pulls/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Image Size](https://img.shields.io/docker/image-size/justyy/steem-load-balancer/latest)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Stars](https://img.shields.io/docker/stars/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![GitHub forks](https://img.shields.io/github/forks/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/network/members) [![GitHub watchers](https://img.shields.io/github/watchers/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/watchers) [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main) [![GitHub open issues](https://img.shields.io/github/issues/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/issues) [![GitHub open PRs](https://img.shields.io/github/issues-pr/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/pulls) [![Top language](https://img.shields.io/github/languages/top/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer) [![Repo size](https://img.shields.io/github/repo-size/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D20-43853d?logo=node.js&logoColor=white)](https://nodejs.org/) [![Build and Tests](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml) [![Test Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml) [![Docker Pulls](https://img.shields.io/docker/pulls/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Image Size](https://img.shields.io/docker/image-size/justyy/steem-load-balancer/latest)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Stars](https://img.shields.io/docker/stars/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![GitHub forks](https://img.shields.io/github/forks/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/network/members) [![GitHub watchers](https://img.shields.io/github/watchers/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/watchers) [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main) [![GitHub open issues](https://img.shields.io/github/issues/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/issues) [![GitHub open PRs](https://img.shields.io/github/issues-pr/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/pulls) [![Top language](https://img.shields.io/github/languages/top/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer) [![Repo size](https://img.shields.io/github/repo-size/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md) [![GitHub stars](https://img.shields.io/github/stars/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/stargazers) [![Last commit](https://img.shields.io/github/last-commit/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main) [![Code style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?logo=prettier&logoColor=white)](https://prettier.io) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DoctorLai/steem-load-balancer)
 
 Here is the [AI-generated documentation](https://deepwiki.com/DoctorLai/steem-load-balancer/) by Deep-Wiki.
 
@@ -21,11 +21,11 @@ Please note that this can be easily configured to work with other Blockchains su
 
 ## Features
 - Load Balancing: Distributes requests across multiple Steem API servers. The `jussi_num` and `status` are checked before a node is chosen (See below).
-- Pluggable Routing Strategies: Choose how the upstream node is selected — `max_jussi_number`, `latest_version`, `lowest_latency`, `weighted`, `random` or `first` (see [Configuration](#configuration)).
+- Pluggable Routing Strategies: Choose how the upstream node is selected - `max_jussi_number`, `latest_version`, `lowest_latency`, `weighted`, `random` or `first` (see [Configuration](#configuration)).
 - Weighted & Sticky Routing: Bias traffic towards higher-capacity nodes with per-node `weights`, or pin all clients to a single upstream node with `sticky` routing.
 - Circuit Breaker: Automatically ejects a node after repeated forwarding failures and re-admits it after a cooldown, with automatic fail-open so routing never stalls.
 - Health, Version & Metrics Endpoints: Lightweight `/health` and `/version` endpoints plus a Prometheus `/metrics` scrape endpoint (see [API Endpoints](#api-endpoints)).
-- Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 300 requests per 60 second window. This can be set in the [config.yaml](./config.yaml).
+- Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 600 requests per 10 second window. This can be set in the [config.yaml](./config.yaml).
 - Logging: Provides detailed logs for debugging and monitoring.
 - SSL Support: Configurable SSL certificates for secure HTTPS communication. Reject or Ignore the SSL certificates when forwarding the requests via the field `rejectUnauthorized` in [config.yaml](./config.yaml)
 
@@ -40,7 +40,7 @@ The Steem blockchain ensures idempotency at the transaction level when the signe
 However, this is against the idea of load balancing. Faning out requests will be putting loads on RPC nodes.
 
 ### A Healthy Node
-A Steem RPC node should return the following to indicate the healthy state. The `jussi_num` needs to catch up with the latest block height. If the `jussi_num` is far behind, e.g. the `max_jussi_number_diff` in [config.yaml](./config.yaml), then the node will not be considered. Currently, it is set to 100.
+A Steem RPC node should return the following to indicate the healthy state. The `jussi_num` needs to catch up with the latest block height. If the `jussi_num` is far behind, e.g. the `max_jussi_number_diff` in [config.yaml](./config.yaml), then the node will not be considered. Currently, it is set to 500 (roughly 25 minutes of blocks).
 
 ```json
 {
@@ -67,14 +67,14 @@ nodes:
   # - "https://api.botsteem.com"
   # - "https://api.steememory.com"
 rateLimit:
-  windowMs: 30000
+  windowMs: 10000
   maxRequests: 600
 headers:
   "https://api.justyy.com":
     "X-Edge-Key": "${X_EDGE_KEY}"
   "https://api2.justyy.com":
     "X-Edge-Key": "${X_EDGE_KEY}"
-version: "2026-01-14"
+version: "${STEEM_LB_VERSION}"
 max_age: 3
 logging: true
 max_payload_size: "5mb"
@@ -86,14 +86,14 @@ user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML
 sslCertPath: "${SSL_CERT_PATH}"
 sslKeyPath: "${SSL_KEY_PATH}"
 rejectUnauthorized: false
-timeout: 2500
+timeout: 3000
 plimit: 5
 port: 9091
 cache:
-  enabled: true
-  ttl: 3
-debug: false
-firstK: 1
+  enabled: ${CACHE_ENABLED}
+  ttl: ${CACHE_TTL}
+debug: ${DEBUG}
+firstK: 2
 strategy: "max_jussi_number"  # options: first, random, max_jussi_number, latest_version, lowest_latency, weighted
 sticky: false
 # weights:
@@ -101,10 +101,12 @@ sticky: false
 #   "https://api2.justyy.com": 1
 weighted_routing: false
 circuitBreaker:
-  enabled: false
+  enabled: true
   failureThreshold: 5
   cooldownMs: 30000
 ```
+
+> Values written as `${VAR}` (for example `${STEEM_LB_VERSION}` or `${CACHE_ENABLED}`) are substituted from the matching environment variables when the config is loaded. Unquoted placeholders keep their YAML type, so `enabled: ${CACHE_ENABLED}` with `CACHE_ENABLED=true` becomes a real boolean, while quoted ones such as `version: "${STEEM_LB_VERSION}"` stay strings. See [setup-env.sh](./setup-env.sh) for the defaults.
 
 ### Configuration Options
 - nodes: An array of API server URLs to which requests will be distributed. You can add or remove nodes as needed.
@@ -128,7 +130,7 @@ circuitBreaker:
 - cache.enabled: Should we cache the chosen Node?
 - cache.ttl: When cache.enabled, how many seconds before cache expires.
 - debug: When set to debug, more messages are set e.g. in the response header.
-- firstK: Choosing the node which has the max Jussi Number from the first `firstK` nodes that respond OK. Default is 1.
+- firstK: Choosing the node which has the max Jussi Number from the first `firstK` nodes that respond OK. The shipped config uses `2`; it falls back to `1` when unset.
 - strategy: The strategy to pick the chosen node. This can be one of:
   - `first`: the first node that responds OK.
   - `random`: a random node among those that respond OK.
@@ -139,7 +141,7 @@ circuitBreaker:
 - weights: Optional map of node URL to numeric weight, used by the `weighted` strategy and weighted routing. Higher weight receives more traffic; set a weight to `0` to drain a node.
 - weighted_routing: When `true`, the order nodes are probed is biased by their `weights` even if `strategy` is not `weighted`. This mainly matters when `plimit` is smaller than the number of nodes (otherwise all nodes are probed concurrently and the `weighted` selection strategy does the real biasing). Default `false`; the `weighted` strategy enables it automatically.
 - sticky: When `true`, all clients share the same chosen upstream node for the cache TTL (minimises node churn). When `false` (default) each client IP sticks to its own node.
-- circuitBreaker.enabled: Enable the per-node circuit breaker. Default `false`.
+- circuitBreaker.enabled: Enable the per-node circuit breaker. Enabled by default; it "fails open" (re-admits every node if they would all be ejected) so it never stalls routing.
 - circuitBreaker.failureThreshold: Consecutive forwarding failures before a node is ejected. Default `5`.
 - circuitBreaker.cooldownMs: How long (ms) an ejected node stays out before a trial request is allowed. Default `30000`.
 - headers: The headers can be specified to pass to the downstream nodes. When proxying requests, the Load Balancer injects a shared-secret header so downstream nodes can identify trusted traffic and apply elevated (or exempt) rate-limit policies.
@@ -166,6 +168,7 @@ curl -s http://127.0.0.1:9091/health | jq
   "uptime_seconds": 3723,
   "total_requests": 1024,
   "nodes": ["https://api2.justyy.com", "https://api.justyy.com", "https://api.steemit.com"],
+  "circuit_breaker": {},
   "timestamp": "2026-01-14T11:06:30.781Z"
 }
 ```
@@ -290,7 +293,7 @@ docker-compose restart steem_lb
 ```
 
 ## Tests
-Use the following script i.e. [integration-tests.sh](./tests/integration-tests.sh) to perform a basic integration test — it builds the Docker image, starts the server locally, sends a request, and verifies that the response has a 'status' of 'OK' with a status code of 200.
+Use the following script i.e. [integration-tests.sh](./tests/integration-tests.sh) to perform a basic integration test - it builds the Docker image, starts the server locally, sends a request, and verifies that the response has a 'status' of 'OK' with a status code of 200.
 
 ```bash
 source ./setup-env.sh
@@ -305,7 +308,29 @@ Use [integration-tests-docker-compose.sh](./tests/integration-tests-docker-compo
 Run `npm test` or `npm run test` to run the unit tests on the project.
 
 ## Test Coverage
-Run `npm coverage` to run the tests with coverage report.
+Run `npm run coverage` to run the tests with a coverage report.
+
+## Development
+Install dependencies with `npm install`, then use the scripts below. Run `npm run check` before pushing - it mirrors the CI pipeline.
+
+| Script | Description |
+| ------ | ----------- |
+| `npm start` | Start the load balancer (`node src/index.js`). |
+| `npm run dev` | Start with auto-reload on file changes (`node --watch`). |
+| `npm test` | Run the unit test suite (Jest). |
+| `npm run test:watch` | Run tests in watch mode. |
+| `npm run coverage` | Run tests and produce a coverage report. |
+| `npm run lint` | Lint with ESLint (fails on any warning). |
+| `npm run lint:fix` | Lint and auto-fix. |
+| `npm run format` | Check formatting with Prettier. |
+| `npm run format:fix` | Reformat the code with Prettier. |
+| `npm run check` | Lint + format check + tests. |
+| `npm run ci` | Lint + format check + coverage (CI entrypoint). |
+
+```bash
+npm install
+npm run check
+```
 
 ## Tools
 Tools are placed at [./tools](./tools/) directory.

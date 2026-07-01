@@ -73,7 +73,7 @@ function makeStrategyWeighted(weights = {}, random = Math.random) {
 async function chooseNode(promises, k, strategy) {
   const fulfilled = await firstKFulfilled(promises, k);
   return {
-    selected: strategy(fulfilled),
+    selected: fulfilled.length > 0 ? strategy(fulfilled) : undefined,
     candidates: fulfilled,
   };
 }

@@ -1,6 +1,5 @@
 import { Mutex } from "async-mutex";
 import express from "express";
-import bodyParser from "body-parser";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import https from "https";
@@ -162,7 +161,7 @@ function createApp(config, deps = {}) {
     next();
   });
 
-  app.use(bodyParser.json({ limit: config.max_payload_size }));
+  app.use(express.json({ limit: config.max_payload_size }));
 
   app.use((err, req, res, next) => {
     if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
