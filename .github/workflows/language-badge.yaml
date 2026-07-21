@@ -1,0 +1,56 @@
+name: Update Language Badge
+
+on:
+  schedule:
+    - cron: "23 5 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: language-badge
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Calculate JavaScript percentage
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          curl --fail --silent --show-error \
+            --header "Accept: application/vnd.github+json" \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$REPOSITORY/languages" > /tmp/languages.json
+          node --input-type=module -e '
+            import fs from "node:fs";
+            const languages = JSON.parse(fs.readFileSync("/tmp/languages.json", "utf8"));
+            const total = Object.values(languages).reduce((sum, bytes) => sum + bytes, 0);
+            const percentage = total === 0 ? 0 : ((languages.JavaScript ?? 0) / total) * 100;
+            const badge = {
+              schemaVersion: 1,
+              label: "JavaScript",
+              message: `${percentage.toFixed(2)}%`,
+              color: "f1e05a",
+            };
+            fs.writeFileSync(".github/badges/javascript.json", `${JSON.stringify(badge, null, 2)}\n`);
+          '
+
+      - name: Commit changed badge
+        run: |
+          if git diff --quiet -- .github/badges/javascript.json; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .github/badges/javascript.json
+          git commit -m "Update JavaScript percentage badge [skip ci]"
+          git push

@@ -13,7 +13,7 @@ Thank you for considering contributing to this project! We welcome contributions
    ```
 3. **Install Dependencies:**
    ```bash
-   npm install
+   npm ci
    ```
 
 ## Making Changes
@@ -35,11 +35,12 @@ Thank you for considering contributing to this project! We welcome contributions
      ## Fix the coding style automatically
      npm run format:fix
      ```
-   - Add or update unit tests and make sure they pass:
+    - Add or update focused tests and make sure they pass:
      ```bash
-     npm test
+       npm run coverage
      ```
-   - Or run everything at once (lint + format check + tests), exactly like CI:
+    - Run the complete local validation (lint, format, coverage, build, and
+       dependency audit):
      ```bash
      npm run check
      ```

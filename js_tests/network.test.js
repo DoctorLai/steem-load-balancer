@@ -23,6 +23,19 @@ describe("fetchWithTimeout", () => {
     expect(latency).toBeLessThan(5000);
   });
 
+  it("uses default options and timeout when they are omitted", async () => {
+    const mockResponse = { ok: true };
+    fetch.mockResolvedValue(mockResponse);
+
+    await expect(fetchWithTimeout(TEST_URL)).resolves.toMatchObject({
+      response: mockResponse,
+    });
+    expect(fetch).toHaveBeenCalledWith(
+      TEST_URL,
+      expect.objectContaining({ signal: expect.any(Object) }),
+    );
+  });
+
   it("should throw an error if fetch times out", async () => {
     // Mock fetch to never resolve, but listen to abort signal
     fetch.mockImplementation((url, options) => {

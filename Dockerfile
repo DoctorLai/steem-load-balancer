@@ -1,5 +1,5 @@
-# Pin to the current Node.js LTS on Alpine for small, reproducible images.
-FROM node:lts-alpine
+# Use the current Node.js LTS major on Alpine for a small, stable base.
+FROM node:24-alpine
 
 # Set working directory
 WORKDIR /app

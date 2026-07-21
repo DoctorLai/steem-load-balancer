@@ -1,5 +1,4 @@
 import { performance } from "perf_hooks";
-import { AbortController } from "abort-controller";
 import { limitStringMaxLength, log, sleep } from "./functions.js";
 
 // const fetch = (...args) => import("node-fetch").then((module) => module.default(...args));

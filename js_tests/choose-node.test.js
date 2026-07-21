@@ -103,6 +103,21 @@ describe("Node selection strategies", () => {
     // total = 2, threshold = 1.5 -> a(1) then b.
     expect(strategy(candidates)).toEqual({ server: "b" });
   });
+
+  test("makeStrategyWeighted treats invalid and negative weights as zero", () => {
+    const candidates = [{ server: "invalid" }, { server: "negative" }];
+    const strategy = makeStrategyWeighted(
+      { invalid: "not-a-number", negative: -1 },
+      () => 1,
+    );
+
+    expect(strategy(candidates)).toEqual({ server: "negative" });
+  });
+
+  test("makeStrategyWeighted uses defaults when called without options", () => {
+    const strategy = makeStrategyWeighted();
+    expect(strategy([{ server: "a" }])).toEqual({ server: "a" });
+  });
 });
 
 // === chooseNode Tests ===
@@ -245,6 +260,11 @@ describe("getStrategyByName()", () => {
   test("returns a weighted strategy function for the 'weighted' name", () => {
     const strategy = getStrategyByName("weighted", { weights: { a: 2 } });
     expect(typeof strategy).toBe("function");
+    expect(strategy([{ server: "a" }])).toEqual({ server: "a" });
+  });
+
+  test("uses default weighted options when none are provided", () => {
+    const strategy = getStrategyByName("weighted");
     expect(strategy([{ server: "a" }])).toEqual({ server: "a" });
   });
 

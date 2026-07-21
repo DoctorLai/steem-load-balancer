@@ -29,6 +29,7 @@ function probe(mod, options) {
 }
 
 const healthy =
-  (await probe(https, { rejectUnauthorized: false })) || (await probe(http, {}));
+  (await probe(https, { rejectUnauthorized: false })) ||
+  (await probe(http, {}));
 
 process.exit(healthy ? 0 : 1);

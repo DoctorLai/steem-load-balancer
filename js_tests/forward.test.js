@@ -103,6 +103,19 @@ describe("forwardRequestGET", () => {
     expect(fetch).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ statusCode: 200, data: "OK" });
   });
+
+  test("uses default forwarding options when they are omitted", async () => {
+    fetch.mockResolvedValue({
+      status: 200,
+      text: jest.fn().mockResolvedValue("OK"),
+    });
+
+    await expect(forwardRequestGET(apiURL)).resolves.toEqual({
+      statusCode: 200,
+      data: "OK",
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("forwardRequestPOST", () => {
@@ -159,5 +172,33 @@ describe("forwardRequestPOST", () => {
 
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(sleep).toHaveBeenCalledTimes(1);
+  });
+
+  test("retries and returns a successful response", async () => {
+    fetch
+      .mockRejectedValueOnce(new Error("temporary failure"))
+      .mockResolvedValueOnce({
+        status: 200,
+        text: jest.fn().mockResolvedValue("OK"),
+      });
+
+    await expect(
+      forwardRequestPOST(apiURL, body, { retry_count: 2 }),
+    ).resolves.toEqual({ statusCode: 200, data: "OK" });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledTimes(1);
+  });
+
+  test("uses default forwarding options when they are omitted", async () => {
+    fetch.mockResolvedValue({
+      status: 200,
+      text: jest.fn().mockResolvedValue("OK"),
+    });
+
+    await expect(forwardRequestPOST(apiURL, body)).resolves.toEqual({
+      statusCode: 200,
+      data: "OK",
+    });
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 });

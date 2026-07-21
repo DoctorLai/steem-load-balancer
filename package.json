@@ -1,20 +1,24 @@
 {
   "name": "steem-load-balancer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Load Balancer RPC Node for Steem Blockchain",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
+    "build": "for file in src/*.js tools/*.js *.config.js *.config.mjs; do node --check \"$file\" || exit 1; done",
+    "build:docker": "docker build -t steem-load-balancer .",
     "test": "jest --config jest.config.mjs",
     "test:watch": "jest --config jest.config.mjs --watch",
+    "test:integration": "cd tests && ./run-tests.sh ./integration-tests.sh",
     "coverage": "jest --config jest.config.mjs --coverage",
-    "format": "prettier --check 'src/*.js' 'js_tests/*.js'",
-    "format:fix": "prettier --write 'src/*.js' 'js_tests/*.js'",
-    "lint": "eslint 'src/*.js' 'js_tests/*.js' --max-warnings=0",
-    "lint:fix": "eslint 'src/*.js' 'js_tests/*.js' --fix",
-    "check": "npm run lint && npm run format && npm test",
-    "ci": "npm run lint && npm run format && npm run coverage"
+    "format": "prettier --check 'src/*.js' 'js_tests/*.js' 'tools/*.js' '*.config.js' '*.config.mjs'",
+    "format:fix": "prettier --write 'src/*.js' 'js_tests/*.js' 'tools/*.js' '*.config.js' '*.config.mjs'",
+    "lint": "eslint 'src/*.js' 'js_tests/*.js' 'tools/*.js' '*.config.js' '*.config.mjs' --max-warnings=0",
+    "lint:fix": "eslint 'src/*.js' 'js_tests/*.js' 'tools/*.js' '*.config.js' '*.config.mjs' --fix",
+    "audit": "npm audit --audit-level=high",
+    "check": "npm run lint && npm run format && npm run coverage && npm run build && npm run audit",
+    "ci": "npm run check"
   },
   "repository": {
     "type": "git",
@@ -32,14 +36,13 @@
   "author": "DoctorLai",
   "license": "MIT",
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "bugs": {
     "url": "https://github.com/DoctorLai/steem-load-balancer/issues"
   },
   "homepage": "https://github.com/DoctorLai/steem-load-balancer#readme",
   "dependencies": {
-    "abort-controller": "^3.0.0",
     "async-mutex": "^0.5.0",
     "compression": "^1.8.1",
     "cors": "^2.8.6",
@@ -56,18 +59,11 @@
     "@babel/core": "^7.26.10",
     "@babel/preset-env": "^7.29.7",
     "@eslint/js": "^10.0.1",
-    "babel-jest": "^29.7.0",
+    "babel-jest": "^30.4.1",
     "eslint": "^10.7.0",
     "globals": "^17.7.0",
     "jest": "^30.4.2",
     "prettier": "^3.9.5",
     "supertest": "^7.2.2"
-  },
-  "jest": {
-    "transform": {},
-    "extensionsToTreatAsEsm": [
-      ".js"
-    ],
-    "testEnvironment": "node"
   }
 }
