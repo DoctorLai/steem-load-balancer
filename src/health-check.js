@@ -152,7 +152,7 @@ function createGetServerData({
         log(err_msg);
         await counters.incrementTimedOut(server);
       }
-      throw new Error(err_msg);
+      throw new Error(err_msg, { cause: error });
     }
   };
 }

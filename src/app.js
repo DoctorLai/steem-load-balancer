@@ -274,7 +274,7 @@ function createApp(config, deps = {}) {
       res.setHeader("Cache-Control", "max-age=" + config.max_age);
     }
 
-    let data = {};
+    let data;
     let result;
 
     await counters.incrementTotal();
