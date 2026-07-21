@@ -37,10 +37,10 @@ Thank you for considering contributing to this project! We welcome contributions
      ```
     - Add or update focused tests and make sure they pass:
      ```bash
-       npm run coverage
+     npm run coverage
      ```
     - Run the complete local validation (lint, format, coverage, build, and
-       dependency audit):
+     dependency audit):
      ```bash
      npm run check
      ```

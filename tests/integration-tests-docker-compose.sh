@@ -33,8 +33,8 @@ while :
 do
     echo "Waiting for the server to start..."
     # check $DOCKER_IMAGE status via docker ps
-    status=$(docker ps | grep "$DOCKER_IMAGE" | awk '{print $7}')
-    if [ "$status" == "Up" ]; then
+    status=$(docker ps --filter "name=^/${DOCKER_IMAGE}$" --format '{{.Status}}')
+    if [[ "$status" == Up* ]]; then
         break
     fi
     ## check if timeout
