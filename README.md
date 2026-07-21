@@ -1,5 +1,26 @@
 # Steem Load Balancer
-[![Node.js](https://img.shields.io/badge/node-%3E%3D20-43853d?logo=node.js&logoColor=white)](https://nodejs.org/) [![Build and Tests](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml) [![Test Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml) [![Docker Pulls](https://img.shields.io/docker/pulls/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Image Size](https://img.shields.io/docker/image-size/justyy/steem-load-balancer/latest)](https://hub.docker.com/r/justyy/steem-load-balancer) [![Docker Stars](https://img.shields.io/docker/stars/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![GitHub forks](https://img.shields.io/github/forks/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/network/members) [![GitHub watchers](https://img.shields.io/github/watchers/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/watchers) [![GitHub commit activity](https://img.shields.io/github/commit-activity/m/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main) [![GitHub open issues](https://img.shields.io/github/issues/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/issues) [![GitHub open PRs](https://img.shields.io/github/issues-pr/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/pulls) [![Top language](https://img.shields.io/github/languages/top/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer) [![Repo size](https://img.shields.io/github/repo-size/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md) [![GitHub stars](https://img.shields.io/github/stars/DoctorLai/steem-load-balancer?style=flat&logo=github)](https://github.com/DoctorLai/steem-load-balancer/stargazers) [![Last commit](https://img.shields.io/github/last-commit/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main) [![Code style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?logo=prettier&logoColor=white)](https://prettier.io) [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DoctorLai/steem-load-balancer)
+[![CI](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml)
+[![Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D22-43853d?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
+[![Code style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?logo=prettier&logoColor=white)](https://prettier.io)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DoctorLai/steem-load-balancer)
+
+[![JavaScript](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDoctorLai%2Fsteem-load-balancer%2Fmain%2F.github%2Fbadges%2Fjavascript.json)](https://github.com/DoctorLai/steem-load-balancer)
+[![Top language](https://img.shields.io/github/languages/top/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer)
+[![Repo size](https://img.shields.io/github/repo-size/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer)
+[![Last commit](https://img.shields.io/github/last-commit/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main)
+[![Commit activity](https://img.shields.io/github/commit-activity/m/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main)
+[![Stars](https://img.shields.io/github/stars/DoctorLai/steem-load-balancer?logo=github)](https://github.com/DoctorLai/steem-load-balancer/stargazers)
+[![Watchers](https://img.shields.io/github/watchers/DoctorLai/steem-load-balancer?logo=github)](https://github.com/DoctorLai/steem-load-balancer/watchers)
+[![Forks](https://img.shields.io/github/forks/DoctorLai/steem-load-balancer?logo=github)](https://github.com/DoctorLai/steem-load-balancer/forks)
+[![Open issues](https://img.shields.io/github/issues/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/issues)
+[![Open PRs](https://img.shields.io/github/issues-pr/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/pulls)
+
+[![Docker pulls](https://img.shields.io/docker/pulls/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer)
+[![Docker image size](https://img.shields.io/docker/image-size/justyy/steem-load-balancer/latest)](https://hub.docker.com/r/justyy/steem-load-balancer)
+[![Docker stars](https://img.shields.io/docker/stars/justyy/steem-load-balancer)](https://hub.docker.com/r/justyy/steem-load-balancer)
 
 Here is the [AI-generated documentation](https://deepwiki.com/DoctorLai/steem-load-balancer/) by Deep-Wiki.
 
@@ -265,31 +286,31 @@ docker run \
 ```
 
 ## Docker Compose (Optional)
-You can use the `docker-compose` or `docker compose` to build the load balancer:
+Use Docker Compose to build and run the load balancer:
 
 ```bash
-docker-compose up --build -d
+docker compose up --build -d
 ```
 
 This will build and start the steem load balancer.
 
-To view the logs using docker-compose, run:
+To view the logs, run:
 
 ```bash
-docker-compose logs -f
+docker compose logs -f
 ```
 
-To restart the docker-compose container, run:
+To restart the Compose service, run:
 
 ```bash
-docker-compose down  # Stop the containers
-docker-compose up -d  # Start the containers in detached mode
+docker compose down  # Stop the containers
+docker compose up -d  # Start the containers in detached mode
 ```
 
 Or simply:
 
 ```bash
-docker-compose restart steem_lb
+docker compose restart steem_lb
 ```
 
 ## Tests
@@ -302,7 +323,7 @@ source ./setup-env.sh
 ./tests/integration-tests.sh
 ```
 
-Use [integration-tests-docker-compose.sh](./tests/integration-tests-docker-compose.sh) to test the steem load balancer via [docker-compose](./docker-compose.yml).
+Use [integration-tests-docker-compose.sh](./tests/integration-tests-docker-compose.sh) to test the Steem Load Balancer via [Docker Compose](./docker-compose.yml).
 
 ## Unit Tests
 Run `npm test` or `npm run test` to run the unit tests on the project.
@@ -317,15 +338,19 @@ Install dependencies with `npm install`, then use the scripts below. Run `npm ru
 | ------ | ----------- |
 | `npm start` | Start the load balancer (`node src/index.js`). |
 | `npm run dev` | Start with auto-reload on file changes (`node --watch`). |
+| `npm run build` | Validate syntax for all shipped JavaScript files. |
+| `npm run build:docker` | Build the local `steem-load-balancer` Docker image. |
 | `npm test` | Run the unit test suite (Jest). |
 | `npm run test:watch` | Run tests in watch mode. |
-| `npm run coverage` | Run tests and produce a coverage report. |
+| `npm run test:integration` | Run the primary Docker integration test. |
+| `npm run coverage` | Run tests, produce coverage, and enforce thresholds. |
 | `npm run lint` | Lint with ESLint (fails on any warning). |
 | `npm run lint:fix` | Lint and auto-fix. |
 | `npm run format` | Check formatting with Prettier. |
 | `npm run format:fix` | Reformat the code with Prettier. |
-| `npm run check` | Lint + format check + tests. |
-| `npm run ci` | Lint + format check + coverage (CI entrypoint). |
+| `npm run audit` | Check all dependencies for high-severity vulnerabilities. |
+| `npm run check` | Run lint, formatting, coverage, build, and dependency audit. |
+| `npm run ci` | Run the complete CI validation (`npm run check`). |
 
 ```bash
 npm install
@@ -413,6 +438,10 @@ Setting NODE_ENV to "production" (by default) or "development".
 ## License
 This project is licensed under the [MIT License](./LICENSE).
 
+See the [changelog](./CHANGELOG.md), [security policy](./SECURITY.md),
+[support guide](./SUPPORT.md), and [privacy notice](./PRIVACY.md) for project
+policies and release history.
+
 ## Contributing?
 Contribution are absolutely welcome! Please follow the guidance [here](./CONTRIBUTING.md) and [CODE OF CONDUCT](./CODE_OF_CONDUCT.md)
 
@@ -421,9 +450,9 @@ Contribution are absolutely welcome! Please follow the guidance [here](./CONTRIB
 
 ## Support me
 If you like this and want to support me in continuous development, you can do the following:
-- [Buy me a coffee](https://justyy.com/out/bmc)
+- [Buy me a coffee](https://www.buymeacoffee.com/y0BtG5R)
 - [Sponsor me](https://github.com/sponsors/DoctorLai)
 - [Vote me as a witness](https://steemyy.com/witness-voting/?witness=justyy&action=approve)
 - [Set me a Witness Proxy if you are too lazy to vote](https://steemyy.com/witness-voting/?witness=justyy&action=proxy)
 
-<a rel="nofollow" href="http://steemyy.com/out/buymecoffee" target="_blank"><img src="https://user-images.githubusercontent.com/1764434/161362754-c45a85d3-5c80-4e10-b05c-62af49291d0b.png" alt="Buy me a Coffee"/></a>
+<a rel="nofollow" href="https://www.buymeacoffee.com/y0BtG5R" target="_blank"><img src="https://user-images.githubusercontent.com/1764434/161362754-c45a85d3-5c80-4e10-b05c-62af49291d0b.png" alt="Buy me a Coffee"/></a>

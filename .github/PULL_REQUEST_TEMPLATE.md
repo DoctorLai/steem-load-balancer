@@ -17,7 +17,7 @@
 
 ## Checklist
 
-- [ ] `npm run check` passes (lint, format, tests) locally
+- [ ] `npm run check` passes (lint, format, coverage, build, audit) locally
 - [ ] Added or updated unit tests where appropriate
 - [ ] Updated the documentation (`README.md` / `config.yaml`) if behaviour changed
 - [ ] I did not commit any secrets (`.env`, keys, `X-Edge-Key` values)

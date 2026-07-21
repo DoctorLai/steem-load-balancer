@@ -6,10 +6,10 @@ The Steem Load Balancer is distributed from the `main` branch and the
 [`justyy/steem-load-balancer`](https://hub.docker.com/r/justyy/steem-load-balancer)
 Docker image. Security fixes are always applied to the latest release.
 
-| Version        | Supported          |
-| -------------- | ------------------ |
+| Version           | Supported          |
+| ----------------- | ------------------ |
 | `latest` / `main` | :white_check_mark: |
-| older tags     | :x:                |
+| older tags        | :x:                |
 
 ## Reporting a Vulnerability
 
@@ -28,9 +28,9 @@ Please include:
 - Steps to reproduce (proof of concept, affected endpoints, request payloads).
 - Any suggested remediation.
 
-You can expect an acknowledgement of your report, and we will keep you informed
-as we work on a fix. Once resolved, we are happy to credit you in the release
-notes unless you prefer to remain anonymous.
+We aim to acknowledge reports within five business days and will keep you
+informed as we investigate. Once resolved, we are happy to credit you in the
+release notes unless you prefer to remain anonymous.
 
 ## Scope & Hardening Notes
 

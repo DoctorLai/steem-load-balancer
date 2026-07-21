@@ -1,12 +1,10 @@
-version: '3.8'
-
 services:
   steem_lb:
     container_name: ${DOCKER_IMAGE}
     image: ${DOCKER_IMAGE}
     build:
       context: .
-      dockerfile: Dockerfile    
+      dockerfile: Dockerfile
     restart: on-failure:${RETRY_COUNT}
     ports:
       - "${STEEM_LB_PORT}:9091"
