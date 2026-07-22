@@ -1,5 +1,5 @@
 # Use the current Node.js LTS major on Alpine for a small, stable base.
-FROM node:24-alpine
+FROM node:26-alpine
 
 # Set working directory
 WORKDIR /app
