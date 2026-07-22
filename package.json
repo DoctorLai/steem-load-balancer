@@ -53,7 +53,7 @@
     "js-yaml": "^4.1.0",
     "json2csv": "^6.0.0-alpha.2",
     "node-fetch": "^2.7.0",
-    "p-limit": "^7.3.0"
+    "p-limit": "^7.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.26.10",
