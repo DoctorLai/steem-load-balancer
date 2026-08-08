@@ -4,9 +4,6 @@ FROM node:26-alpine
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies in a single step
-RUN apk add --no-cache jq
-
 # Copy only package files first (for layer caching)
 COPY package*.json ./
 

@@ -1,5 +1,5 @@
 import fs from "fs";
-import yaml from "js-yaml";
+import { load as loadYaml } from "js-yaml";
 
 // Replace every `${ENV_VAR}` placeholder in `text` with the matching value from
 // `env`. Missing environment variables are replaced with an empty string (and a
@@ -81,7 +81,7 @@ function loadConfig(configPath, { validate = true, env = process.env } = {}) {
 
   const rawText = fs.readFileSync(configPath, "utf8");
   const substituted = substituteEnvVars(rawText, env);
-  const config = yaml.load(substituted);
+  const config = loadYaml(substituted);
 
   if (validate) {
     validateConfig(config);
