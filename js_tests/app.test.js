@@ -9,6 +9,10 @@ const passthroughLimit = async () => (fn) => fn();
 
 const noopLog = () => {};
 
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
 function healthyNode(server) {
   return {
     server,
@@ -76,9 +80,12 @@ describe("createApp operational endpoints", () => {
 
 describe("createApp proxying", () => {
   test("GET / forwards and augments the response", async () => {
-    const app = makeApp(baseConfig());
+    const app = makeApp(baseConfig({ max_age: 60 }), {
+      startTime: new Date(Date.now() - 2000),
+    });
     const res = await request(app).get("/");
     expect(res.status).toBe(200);
+    expect(res.headers["cache-control"]).toBe("max-age=60");
     expect(res.body.status).toBe("OK");
     expect(res.body.status_code).toBe(200);
     expect(res.body.__load_balancer_version__).toBe("test-1.0.0");
@@ -89,6 +96,8 @@ describe("createApp proxying", () => {
       strategy: "max_jussi_number",
       circuit_breaker_enabled: false,
     });
+    expect(res.body.__stats__.seconds).toBeGreaterThanOrEqual(1);
+    expect(res.body.__stats__.rps).toBeGreaterThan(0);
   });
 
   test("POST / forwards the JSON-RPC body", async () => {
@@ -100,6 +109,28 @@ describe("createApp proxying", () => {
     });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({ jsonrpc: "2.0", result: 42, id: 1 });
+  });
+
+  test("logging false suppresses request and forwarding logs", async () => {
+    const log = jest.fn();
+    const forwardPOST = jest.fn(async (server, body, options) => {
+      options.logger(`POST ${server} body=${body}`);
+      return {
+        statusCode: 200,
+        data: JSON.stringify({ jsonrpc: "2.0", result: 42, id: 1 }),
+      };
+    });
+    const app = makeApp(baseConfig({ logging: false }), { log, forwardPOST });
+
+    const res = await request(app).post("/").send({
+      jsonrpc: "2.0",
+      method: "condenser_api.get_account_count",
+      id: 1,
+    });
+
+    expect(res.status).toBe(200);
+    expect(forwardPOST).toHaveBeenCalledTimes(1);
+    expect(log).not.toHaveBeenCalled();
   });
 
   test("unsupported methods return 405", async () => {
@@ -132,6 +163,46 @@ describe("createApp proxying", () => {
     expect(res.body).toEqual({ error: "Failed to choose node" });
   });
 
+  test("returns non-JSON upstream responses without discarding the payload", async () => {
+    const app = makeApp(baseConfig(), {
+      forwardGET: async () => ({ statusCode: 202, data: "still processing" }),
+    });
+
+    const res = await request(app).get("/");
+
+    expect(res.status).toBe(202);
+    expect(res.body).toMatchObject({
+      raw: "still processing",
+      warning: "Upstream did not return JSON",
+      status_code: 202,
+    });
+  });
+
+  test("preserves upstream 5xx status and records a breaker failure", async () => {
+    const circuitBreaker = new CircuitBreaker({
+      enabled: true,
+      failureThreshold: 1,
+      cooldownMs: 60000,
+      now: () => 0,
+    });
+    const app = makeApp(baseConfig({ nodes: ["https://only.example"] }), {
+      circuitBreaker,
+      forwardGET: async () => ({
+        statusCode: 503,
+        data: JSON.stringify({ error: "upstream unavailable" }),
+      }),
+    });
+
+    const res = await request(app).get("/");
+
+    expect(res.status).toBe(503);
+    expect(res.body.status_code).toBe(503);
+    expect(circuitBreaker.getState()["https://only.example"]).toEqual({
+      failures: 1,
+      open: true,
+    });
+  });
+
   test("returns 500 when the chosen node is missing required fields", async () => {
     const app = makeApp(baseConfig(), {
       getServerData: async (node) => ({ server: node }), // no version/jussi_number
@@ -139,6 +210,28 @@ describe("createApp proxying", () => {
     const res = await request(app).get("/");
     expect(res.status).toBe(500);
     expect(res.body.error).toMatch(/No valid node found/);
+  });
+
+  test("returns 500 when the forwarding result has no status code", async () => {
+    const circuitBreaker = new CircuitBreaker({
+      enabled: true,
+      failureThreshold: 1,
+      cooldownMs: 60000,
+      now: () => 0,
+    });
+    const app = makeApp(baseConfig(), {
+      circuitBreaker,
+      forwardGET: async () => ({ data: JSON.stringify({ status: "OK" }) }),
+    });
+
+    const res = await request(app).get("/");
+
+    expect(res.status).toBe(500);
+    expect(res.body.status).toBe("OK");
+    expect(circuitBreaker.getState()[res.body.__server__]).toEqual({
+      failures: 1,
+      open: true,
+    });
   });
 });
 
@@ -150,16 +243,20 @@ describe("createApp circuit breaker integration", () => {
       cooldownMs: 60000,
       now: () => 0,
     });
-    const app = makeApp(baseConfig({ nodes: ["https://only.example"] }), {
-      circuitBreaker,
-      forwardGET: async () => {
-        throw new Error("upstream exploded");
+    const app = makeApp(
+      baseConfig({ nodes: ["https://only.example"], debug: true }),
+      {
+        circuitBreaker,
+        forwardGET: async () => {
+          throw new Error("upstream exploded");
+        },
       },
-    });
+    );
 
     const proxied = await request(app).get("/");
     // Single node fails open, so the request still returns (with a 500 payload).
     expect(proxied.body.status_code).toBe(500);
+    expect(proxied.headers.error).toBe("{}");
 
     const health = await request(app).get("/health");
     expect(health.body.circuit_breaker["https://only.example"]).toEqual({
@@ -187,6 +284,7 @@ describe("createApp circuit breaker integration", () => {
   });
 
   test("does not reuse a cached node while its circuit is open", async () => {
+    jest.spyOn(Math, "random").mockReturnValue(0.999);
     const circuitBreaker = new CircuitBreaker({
       enabled: true,
       failureThreshold: 1,
@@ -216,11 +314,25 @@ describe("createApp circuit breaker integration", () => {
 
     expect(res.body.__server__).toBe("https://next.example");
   });
+
+  test("reuses a healthy cached node without probing again", async () => {
+    const getServerData = jest.fn(async (node) => healthyNode(node));
+    const app = makeApp(baseConfig({ cache: { enabled: true, ttl: 60 } }), {
+      getServerData,
+    });
+
+    const first = await request(app).get("/");
+    const probeCount = getServerData.mock.calls.length;
+    const second = await request(app).get("/");
+
+    expect(second.body.__server__).toBe(first.body.__server__);
+    expect(getServerData).toHaveBeenCalledTimes(probeCount);
+  });
 });
 
 describe("createApp weighted routing", () => {
   test("uses the weighted strategy when configured", async () => {
-    const randomSpy = jest.spyOn(Math, "random").mockReturnValue(0);
+    jest.spyOn(Math, "random").mockReturnValue(0);
     const app = makeApp(
       baseConfig({
         nodes: ["https://a.example", "https://b.example"],
@@ -232,6 +344,5 @@ describe("createApp weighted routing", () => {
     const res = await request(app).get("/");
     expect(res.status).toBe(200);
     expect(res.body.__config__.weighted_routing).toBe(true);
-    randomSpy.mockRestore();
   });
 });

@@ -8,7 +8,8 @@ coverage
 .vscode
 js_tests
 tests
-tools
+tools/*
+!tools/healthcheck.js
 *.md
 Dockerfile
 docker-compose.yml

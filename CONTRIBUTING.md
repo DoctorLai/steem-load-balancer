@@ -1,73 +1,46 @@
-# Contributing to This Project
+# Contributing to Steem Load Balancer
 
-Thank you for considering contributing to this project! We welcome contributions of all kinds, including bug fixes, new features, and improvements to the documentation.
+Bug fixes, focused features, tests, and documentation improvements are welcome.
 
-## Getting Started
+## Prerequisites
 
-1. **Fork the Repository:**
-   - Click the "Fork" button at the top right of the repository page.
-2. **Clone Your Fork:**
-   ```bash
-   git clone https://github.com/<your-username>/steem-load-balancer.git
-   cd steem-load-balancer
-   ```
-3. **Install Dependencies:**
-   ```bash
-   npm ci
-   ```
+- Node.js 22 or newer. Node.js 24 is the recommended development version in `.nvmrc`.
+- npm, included with Node.js.
+- Docker and Docker Compose when changing container or integration behavior.
+
+## Local Setup
+
+```bash
+git clone https://github.com/<your-username>/steem-load-balancer.git
+cd steem-load-balancer
+nvm use
+npm ci
+```
+
+Create a focused branch from the latest `main`:
+
+```bash
+git checkout -b fix/short-description
+```
 
 ## Making Changes
 
-1. **Create a Branch:**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-2. **Make Your Changes:**
-   - Run the linter to ensure code quality:
-     ```bash
-     npm run lint
-     ## Auto-fix lint issues where possible
-     npm run lint:fix
-     ```
-   - Check formatting (and auto-fix) with Prettier:
-     ```bash
-     npm run format
-     ## Fix the coding style automatically
-     npm run format:fix
-     ```
-    - Add or update focused tests and make sure they pass:
-     ```bash
-     npm run coverage
-     ```
-    - Run the complete local validation (lint, format, coverage, build, and
-     dependency audit):
-     ```bash
-     npm run check
-     ```
-3. **Commit Your Changes:**
-   ```bash
-   git add .
-   git commit -m "Add your meaningful commit message"
-   ```
-4. **Push to Your Fork:**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
+- Follow the existing ESM and formatting conventions.
+- Add or update focused tests for behavior changes.
+- Update `README.md` and `config.yaml` when configuration or public behavior changes.
+- Do not commit credentials, private headers, certificates, or `.env` files.
 
-## Submitting Your Contribution
+Run the narrowest relevant test while developing, then run the complete local gate before pushing:
 
-1. **Create a Pull Request:**
-   - Go to the original repository and click the "New Pull Request" button.
-   - Select your fork and branch as the source and submit the pull request.
-2. **Review Process:**
-   - The maintainers will review your changes and may request additional changes.
+```bash
+npm test -- js_tests/app.test.js
+npm run check
+```
 
-## Code of Conduct
+Use `npm run test:integration` when changing startup, Docker, networking, or configuration behavior.
 
-By contributing, you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+## Pull Requests
 
-## Questions or Help?
+Keep pull requests scoped and explain the user-visible behavior, motivation, and test evidence. Complete the pull request checklist and link any related issue. CI must pass on all supported Node.js versions before merge.
 
-If you have any questions or need help, feel free to open an issue or reach out in the discussions.
-
-Happy coding! 🚀
+By participating, you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md). Report vulnerabilities privately according to the [Security Policy](SECURITY.md); use GitHub Issues or Discussions for other questions.

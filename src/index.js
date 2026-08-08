@@ -14,7 +14,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const startTime = new Date();
-log(`Current Time: ${startTime.toISOString()}`);
 
 // Read the YAML config file located one level up from the current directory.
 // Validation is intentionally disabled here so the process can emit its own
@@ -22,6 +21,8 @@ log(`Current Time: ${startTime.toISOString()}`);
 // gracefully, matching the documented start-up behaviour.
 const configPath = path.join(__dirname, "../config.yaml");
 const config = loadConfig(configPath, { validate: false });
+const logger = config.logging === false ? () => {} : log;
+logger(`Current Time: ${startTime.toISOString()}`);
 
 // Extract configuration values and fail fast on an empty node list.
 const nodes = config.nodes ?? [];
@@ -32,20 +33,20 @@ if (!Array.isArray(nodes) || nodes.length === 0) {
 
 // Log the effective runtime configuration.
 const PORT = config.port ?? 9091;
-log(`PLimit: ${config.plimit}`);
-log(`Reject Unauthorized: ${config.rejectUnauthorized ?? true}`);
-log(`Timeout: ${config.timeout ?? 3000}`);
-log(`FirstK: ${config.firstK ?? 1}`);
-log(`Node Strategy: ${config.strategy ?? "max_jussi_number"}`);
-log(`Cache Enabled: ${config.cache?.enabled ?? false}`);
-log(
+logger(`PLimit: ${config.plimit}`);
+logger(`Reject Unauthorized: ${config.rejectUnauthorized ?? true}`);
+logger(`Timeout: ${config.timeout ?? 3000}`);
+logger(`FirstK: ${config.firstK ?? 1}`);
+logger(`Node Strategy: ${config.strategy ?? "max_jussi_number"}`);
+logger(`Cache Enabled: ${config.cache?.enabled ?? false}`);
+logger(
   `Sticky Routing: ${config.sticky === true || config.cache?.sticky === true}`,
 );
-log(`Circuit Breaker Enabled: ${config.circuitBreaker?.enabled ?? false}`);
-log(`Max Payload Size = ${config.max_payload_size}`);
-log(`Version: ${config.version ?? "NA"}`);
-log(`Listening on Port: ${PORT}`);
-log(`Nodes: ${config.nodes}`);
+logger(`Circuit Breaker Enabled: ${config.circuitBreaker?.enabled ?? false}`);
+logger(`Max Payload Size = ${config.max_payload_size}`);
+logger(`Version: ${config.version ?? "NA"}`);
+logger(`Listening on Port: ${PORT}`);
+logger(`Nodes: ${config.nodes}`);
 
 const counters = new Counters();
 const circuitBreaker = new CircuitBreaker(config.circuitBreaker ?? {});
@@ -61,8 +62,8 @@ let server;
 // Determine if SSL certificates exist
 const sslCertPath = config.sslCertPath;
 const sslKeyPath = config.sslKeyPath;
-log(`sslCertPath = ${sslCertPath}`);
-log(`sslKeyPath = ${sslKeyPath}`);
+logger(`sslCertPath = ${sslCertPath}`);
+logger(`sslKeyPath = ${sslKeyPath}`);
 
 if (fs.existsSync(sslCertPath) && fs.existsSync(sslKeyPath)) {
   // SSL certificates are available; create HTTPS server

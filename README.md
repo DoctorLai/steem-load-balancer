@@ -1,13 +1,13 @@
 # Steem Load Balancer
 [![CI](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/ci.yaml)
-[![Coverage](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml/badge.svg?branch=main)](https://github.com/DoctorLai/steem-load-balancer/actions/workflows/coverage.yaml)
 [![Node.js](https://img.shields.io/badge/node-%3E%3D22-43853d?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 [![Code style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?logo=prettier&logoColor=white)](https://prettier.io)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Privacy: no telemetry](https://img.shields.io/badge/privacy-no_telemetry-2ea44f.svg)](PRIVACY.md)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DoctorLai/steem-load-balancer)
 
-[![JavaScript](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDoctorLai%2Fsteem-load-balancer%2Fmain%2F.github%2Fbadges%2Fjavascript.json)](https://github.com/DoctorLai/steem-load-balancer)
+[![JavaScript](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FDoctorLai%2Fsteem-load-balancer%2Fbadges%2F.github%2Fbadges%2Fjavascript.json)](https://github.com/DoctorLai/steem-load-balancer)
 [![Top language](https://img.shields.io/github/languages/top/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer)
 [![Repo size](https://img.shields.io/github/repo-size/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer)
 [![Last commit](https://img.shields.io/github/last-commit/DoctorLai/steem-load-balancer)](https://github.com/DoctorLai/steem-load-balancer/commits/main)
@@ -47,7 +47,7 @@ Please note that this can be easily configured to work with other Blockchains su
 - Circuit Breaker: Automatically ejects a node after repeated forwarding failures and re-admits it after a cooldown, with automatic fail-open so routing never stalls.
 - Health, Version & Metrics Endpoints: Lightweight `/health` and `/version` endpoints plus a Prometheus `/metrics` scrape endpoint (see [API Endpoints](#api-endpoints)).
 - Rate Limiting: Protects against abuse by limiting the number of requests. For example, maximum 600 requests per 10 second window. This can be set in the [config.yaml](./config.yaml).
-- Logging: Provides detailed logs for debugging and monitoring.
+- Configurable Logging: Provides detailed operational logs when enabled and can be disabled for privacy-sensitive deployments.
 - SSL Support: Configurable SSL certificates for secure HTTPS communication. Reject or Ignore the SSL certificates when forwarding the requests via the field `rejectUnauthorized` in [config.yaml](./config.yaml)
 
 ## How It Works?
@@ -136,14 +136,14 @@ circuitBreaker:
 - maxRequests: Maximum number of requests allowed in the time window.
 - version: The version of the Steem Load Balancer.
 - max_age: Cache duration for responses in seconds (GET).
-- logging: Boolean value to enable or disable logging.
+- logging: Set to `false` to suppress routine application, health-check, retry, and request-body logs. Fatal startup and server lifecycle messages are still emitted.
 - sslCertPath: Path to the SSL certificate file for HTTPS communication.
 - sslKeyPath: Path to the SSL key file for HTTPS communication.
 - user_agent: User Agent String in the Header to forward.
 - min_blockchain_version: Min blockchain version number e.g. 0.23.0 to decide the validity of a node.
 - max_payload_size: Max payload size.
 - max_jussi_number_diff: The maximum difference of block difference is allowed.
-- logging_max_body_len: truncate the request.body in log.
+- logging_max_body_len: Maximum number of request-body characters included in logs.
 - retry_count: Retry count for GET and POST forward requests. There is a 100ms between retries.
 - rejectUnauthorized: Should we ignore SSL errors? Default true.
 - timeout: Max timeout (milliseconds) for fetch to time out.
@@ -162,7 +162,7 @@ circuitBreaker:
 - weights: Optional map of node URL to numeric weight, used by the `weighted` strategy and weighted routing. Higher weight receives more traffic; set a weight to `0` to drain a node.
 - weighted_routing: When `true`, the order nodes are probed is biased by their `weights` even if `strategy` is not `weighted`. This mainly matters when `plimit` is smaller than the number of nodes (otherwise all nodes are probed concurrently and the `weighted` selection strategy does the real biasing). Default `false`; the `weighted` strategy enables it automatically.
 - sticky: When `true`, all clients share the same chosen upstream node for the cache TTL (minimises node churn). When `false` (default) each client IP sticks to its own node.
-- circuitBreaker.enabled: Enable the per-node circuit breaker. Enabled by default; it "fails open" (re-admits every node if they would all be ejected) so it never stalls routing.
+- circuitBreaker.enabled: Enable the per-node circuit breaker. The code default is `false`; the shipped [config.yaml](./config.yaml) enables it. It "fails open" (re-admits every node if they would all be ejected) so it never stalls routing.
 - circuitBreaker.failureThreshold: Consecutive forwarding failures before a node is ejected. Default `5`.
 - circuitBreaker.cooldownMs: How long (ms) an ejected node stays out before a trial request is allowed. Default `30000`.
 - headers: The headers can be specified to pass to the downstream nodes. When proxying requests, the Load Balancer injects a shared-secret header so downstream nodes can identify trusted traffic and apply elevated (or exempt) rate-limit policies.
@@ -329,10 +329,14 @@ Use [integration-tests-docker-compose.sh](./tests/integration-tests-docker-compo
 Run `npm test` or `npm run test` to run the unit tests on the project.
 
 ## Test Coverage
-Run `npm run coverage` to run the tests with a coverage report.
+Run `npm run coverage` to generate a local report and enforce these global minimums:
+
+| Statements | Branches | Functions | Lines |
+| ---------- | -------- | --------- | ----- |
+| 85% | 80% | 88% | 85% |
 
 ## Development
-Install dependencies with `npm install`, then use the scripts below. Run `npm run check` before pushing - it mirrors the CI pipeline.
+Install dependencies with `npm ci`, then use the scripts below. Run `npm run check` before pushing - it mirrors the CI pipeline.
 
 | Script | Description |
 | ------ | ----------- |
@@ -353,7 +357,7 @@ Install dependencies with `npm install`, then use the scripts below. Run `npm ru
 | `npm run ci` | Run the complete CI validation (`npm run check`). |
 
 ```bash
-npm install
+npm ci
 npm run check
 ```
 
@@ -372,7 +376,7 @@ If you have SSL certificates, provide the paths in the [config.yaml](./config.ya
 The rate limiting configuration prevents abuse by restricting the number of requests a user can make within a given time window. Adjust the rateLimit settings in [config.yaml](./config.yaml) as needed.
 
 ## Logging
-Enable logging by setting "logging": true in [config.yaml](./config.yaml). Logs will be printed to the console and can help with debugging and monitoring.
+Routine logging is enabled unless `logging` is set to `false` in [config.yaml](./config.yaml). When enabled, POST request bodies are truncated to `logging_max_body_len` characters but may still contain sensitive data; disable logging when request content should not be recorded.
 
 ## Statistics
 On the GET requests, the response JSON will show some additional data including statistics (including Uptime, Access Counters, Error Counters, Not Chosen Counters and Jussi Behind Counters):
