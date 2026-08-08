@@ -32,14 +32,14 @@ async function fetchWithTimeout(url, options = {}, timeout = 5000) {
 // Forward GET request to the chosen node
 async function forwardRequestGET(
   apiURL,
-  { agent, timeout, retry_count, user_agent, headers } = {},
+  { agent, timeout, retry_count, user_agent, headers, logger = log } = {},
 ) {
   // Always attempt at least once, even if retry_count is 0 or unset, so the
   // caller never receives an `undefined` result from an empty loop.
   const attempts = Math.max(1, retry_count ?? 1);
   for (let i = 0; i < attempts; ++i) {
     try {
-      log(`GET: Forwarding to ${apiURL}`);
+      logger(`GET: Forwarding to ${apiURL}`);
       const { response: res, latency } = await fetchWithTimeout(
         apiURL,
         {
@@ -57,11 +57,11 @@ async function forwardRequestGET(
         timeout,
       );
       const data = await res.text();
-      log(`Status: ${res.status} Latency: ${latency}ms`);
+      logger(`Status: ${res.status} Latency: ${latency}ms`);
       return { statusCode: res.status, data };
     } catch (error) {
       if (i < attempts - 1) {
-        log(`Retrying ${apiURL}, attempt ${i + 1}`);
+        logger(`Retrying ${apiURL}, attempt ${i + 1}`);
         await sleep(100);
         continue;
       }
@@ -81,13 +81,14 @@ async function forwardRequestPOST(
     user_agent,
     logging_max_body_len,
     headers,
+    logger = log,
   } = {},
 ) {
   // Always attempt at least once, even if retry_count is 0 or unset.
   const attempts = Math.max(1, retry_count ?? 1);
   for (let i = 0; i < attempts; ++i) {
     try {
-      log(
+      logger(
         `POST: Forwarding to ${apiURL}, body=${limitStringMaxLength(body, logging_max_body_len)}`,
       );
       const { response: res, latency } = await fetchWithTimeout(
@@ -107,12 +108,12 @@ async function forwardRequestPOST(
         },
         timeout,
       );
-      log(`Status: ${res.status} Latency: ${latency}ms`);
+      logger(`Status: ${res.status} Latency: ${latency}ms`);
       const data = await res.text();
       return { statusCode: res.status, data };
     } catch (error) {
       if (i < attempts - 1) {
-        log(`Retrying ${apiURL}, attempt ${i + 1}`);
+        logger(`Retrying ${apiURL}, attempt ${i + 1}`);
         await sleep(100);
         continue;
       }

@@ -1,4 +1,4 @@
-# Use the current Node.js LTS major on Alpine for a small, stable base.
+# Use the production Node.js major on Alpine for a small, stable base.
 FROM node:26-alpine
 
 # Set working directory

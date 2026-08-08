@@ -6,6 +6,24 @@ project follows [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+### Added
+
+- Compatibility CI for the Node.js version used by the production image.
+
+### Changed
+
+- Publish the dynamic JavaScript badge from a dedicated `badges` branch.
+- Honor `logging: false` across routine startup, health-check, routing, retry,
+  and request-body logs.
+- Limit coverage workflow artifacts to the JSON data required for pull request
+  comments.
+
+### Fixed
+
+- Include the configured health-check probe in production Docker images.
+- Preserve upstream GET status codes in response metadata and count upstream
+  5xx responses as circuit-breaker failures.
+
 ## 1.1.0 - 2026-07-21
 
 ### Added

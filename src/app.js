@@ -10,7 +10,6 @@ import { StatusCodes } from "http-status-codes";
 import {
   shuffle,
   log as defaultLog,
-  limitStringMaxLength,
   secondsToTimeDict,
   isObjectEmptyOrNullOrUndefined,
 } from "./functions.js";
@@ -51,6 +50,7 @@ function createApp(config, deps = {}) {
     createLimit,
     log = defaultLog,
   } = deps;
+  const logger = config.logging === false ? () => {} : log;
 
   // Derived configuration.
   const timeout = config.timeout ?? 3000;
@@ -95,6 +95,7 @@ function createApp(config, deps = {}) {
       minBlockchainVersion: min_blockchain_version,
       maxJussiNumberDiff: max_jussi_number_diff,
       counters,
+      logger,
     });
 
   const resolvedCreateLimit =
@@ -165,7 +166,7 @@ function createApp(config, deps = {}) {
 
   app.use((err, req, res, next) => {
     if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
-      log(`Invalid JSON received from ${req.ip}`);
+      logger(`Invalid JSON received from ${req.ip}`);
       return res.status(400).json({ error: "Invalid JSON" });
     }
     next(err);
@@ -209,10 +210,10 @@ function createApp(config, deps = {}) {
       const cachedNode = cacheLastNode.get(cacheKey);
       if (Date.now() - cachedNode.timestamp < cacheMaxAge * 1000) {
         if (circuitBreaker.isOpen(cachedNode.server)) {
-          log(`Cached node is circuit-open, skipping: ${cachedNode.server}`);
+          logger(`Cached node is circuit-open, skipping: ${cachedNode.server}`);
           cacheLastNode.delete(cacheKey);
         } else {
-          log(`Using cached node: ${cachedNode.server}`);
+          logger(`Using cached node: ${cachedNode.server}`);
           chosenNode = cachedNode;
         }
       }
@@ -226,7 +227,7 @@ function createApp(config, deps = {}) {
 
       const result = await chooseNodeFn(promises, firstK, strategy).catch(
         (error) => {
-          log(`Error: ${error.message}`);
+          logger(`Error: ${error.message}`);
           return null;
         },
       );
@@ -250,7 +251,7 @@ function createApp(config, deps = {}) {
         });
         return;
       }
-      log(
+      logger(
         `Chosen Node: ${chosenNode.server} with jussi_number ${chosenNode.jussi_number}`,
       );
       chosenNode.timestamp = Date.now();
@@ -261,7 +262,7 @@ function createApp(config, deps = {}) {
       }
     }
 
-    log(`Current Max Jussi: ${counters.maxJussi}`);
+    logger(`Current Max Jussi: ${counters.maxJussi}`);
     res.setHeader("IP", ip);
     res.setHeader("Server", chosenNode.server);
     if (typeof chosenNode.version !== "undefined") {
@@ -291,12 +292,10 @@ function createApp(config, deps = {}) {
           retry_count,
           user_agent,
           headers: config.headers?.[chosenNode.server] || {},
+          logger,
         });
       } else if (method === "POST") {
         const body = JSON.stringify(req.body);
-        log(
-          `Request Body is ${limitStringMaxLength(body, logging_max_body_len)}`,
-        );
         result = await forwardPOST(chosenNode.server, body, {
           agent,
           timeout,
@@ -304,6 +303,7 @@ function createApp(config, deps = {}) {
           user_agent,
           logging_max_body_len,
           headers: config.headers?.[chosenNode.server] || {},
+          logger,
         });
       }
       try {
@@ -315,10 +315,16 @@ function createApp(config, deps = {}) {
         };
       }
       if (method === "GET") {
-        data["status_code"] = 200;
+        data["status_code"] = result.statusCode;
       }
-      // Successful forward: reset the node's circuit breaker.
-      circuitBreaker.recordSuccess(chosenNode.server);
+      if (
+        isObjectEmptyOrNullOrUndefined(result.statusCode) ||
+        result.statusCode >= 500
+      ) {
+        circuitBreaker.recordFailure(chosenNode.server);
+      } else {
+        circuitBreaker.recordSuccess(chosenNode.server);
+      }
     } catch (ex) {
       data = {
         status_code: 500,
@@ -328,7 +334,7 @@ function createApp(config, deps = {}) {
       if (config.debug === true) {
         res.setHeader("Error", JSON.stringify(ex));
       }
-      log(`Error forwarding request to ${chosenNode.server}: ${ex.message}`);
+      logger(`Error forwarding request to ${chosenNode.server}: ${ex.message}`);
       await counters.incrementError(chosenNode.server);
       // Failed forward (after retries): trip the node's circuit breaker.
       circuitBreaker.recordFailure(chosenNode.server);
