@@ -31,7 +31,7 @@ jobs:
           path: coverage
 
       - name: Comment coverage report on pull request
-        uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2
+        uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2
         with:
           vite-config-path: ./coverage.config.mjs
           file-coverage-mode: all
